@@ -866,7 +866,6 @@ public class DaakiaHomeForm extends JFrame {
             return multivaluedMap;
         }
         catch (IOException e) {
-            e.printStackTrace(); // Handle exception properly
             return null;
         }
     }

@@ -1,17 +1,23 @@
 package com.salilvnair.intellij.plugin.daakia.ui.archive.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DaakiaHistory {
     private Integer id;
+    private String uuid;
     private String displayName;
     private String requestType;
     private String url;
     private String headers;
     private String requestBody;
+    private String responseBody;
     private String createdDate;
 
 
@@ -79,6 +85,22 @@ public class DaakiaHistory {
         this.createdDate = createdDate;
     }
 
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String uuid() {
+        return uuid;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
 
     @Override
     public String toString() {

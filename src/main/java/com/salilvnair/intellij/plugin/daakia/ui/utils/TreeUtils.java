@@ -5,6 +5,7 @@ import com.intellij.ui.treeStructure.Tree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import java.awt.event.MouseEvent;
 import java.util.Enumeration;
 
 public final class TreeUtils {
@@ -33,6 +34,19 @@ public final class TreeUtils {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) enumeration.nextElement();
             if (node.getUserObject()!=null && node.getUserObject().equals(date)) {
                 return node;
+            }
+        }
+        return null;
+    }
+
+    public static Object extractSelectedNodeUserObject(Tree tree, MouseEvent e) {
+        TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+        if (path != null) {
+            // Get the node associated with the clicked path
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            if (node != null) {
+                // Perform action based on the clicked node
+                return node.getUserObject();
             }
         }
         return null;

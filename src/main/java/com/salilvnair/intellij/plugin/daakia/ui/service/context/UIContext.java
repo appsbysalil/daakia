@@ -26,7 +26,11 @@ public class UIContext {
     private Map<String, List<DaakiaHistory>> historyData;
     private DefaultMutableTreeNode historyRootNode;
     private DaakiaHistory daakiaHistory;
+    private DaakiaHistory selectedDaakiaHistory;
 
+    //headers panel related components
+    private JPanel headerScrollPanel;
+    private JPanel headersPanel;
 
 
     public Map<String, List<TextInputField>> headerTextFields() {
@@ -112,5 +116,29 @@ public class UIContext {
 
     public void setDaakiaHistory(DaakiaHistory daakiaHistory) {
         this.daakiaHistory = daakiaHistory;
+    }
+
+    public DaakiaHistory selectedDaakiaHistory() {
+        return selectedDaakiaHistory;
+    }
+
+    public void setSelectedDaakiaHistory(DaakiaHistory selectedDaakiaHistory) {
+        this.selectedDaakiaHistory = selectedDaakiaHistory;
+    }
+
+    public JPanel headerScrollPanel() {
+        return headerScrollPanel;
+    }
+
+    public void setHeaderScrollPanel(JPanel headerScrollPanel) {
+        this.headerScrollPanel = headerScrollPanel;
+    }
+
+    public JPanel headersPanel() {
+        return headersPanel;
+    }
+
+    public void setHeadersPanel(JPanel headersPanel) {
+        this.headersPanel = headersPanel;
     }
 }

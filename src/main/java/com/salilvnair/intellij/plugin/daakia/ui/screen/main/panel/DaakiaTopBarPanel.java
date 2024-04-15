@@ -9,6 +9,8 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,6 +48,7 @@ public class DaakiaTopBarPanel extends BaseDaakiaPanel<DaakiaTopBarPanel> {
         debugIfApplicable(this);
         sendButton.setIcon(AllIcons.Actions.Execute);
         saveButton.setIcon(DaakiaIcons.SaveIcon);
+        sendButton.setEnabled(false);
     }
 
     @Override
@@ -59,6 +62,11 @@ public class DaakiaTopBarPanel extends BaseDaakiaPanel<DaakiaTopBarPanel> {
 
     @Override
     public void initListeners() {
+
+        TextFieldUtils.addChangeListener(urlTextField, e -> {
+            sendButton.setEnabled(!urlTextField.getText().isEmpty() && UrlUtils.validateURL(urlTextField.getText()));
+        });
+
         sendButton.addActionListener(e -> {
             eventPublisher().onClickSend();
             DaakiaContext daakiaContext = daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);

@@ -13,11 +13,8 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -76,45 +73,32 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     }
 
     public void initTreeListeners() {
-        historyTree.addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) historyTree.getLastSelectedPathComponent();
-                if (selectedNode != null) {
-                    Object userObject = selectedNode.getUserObject();
-                    if(userObject instanceof DaakiaHistory) {
-                        //loadHistoryDataIntoUI((DaakiaHistory) userObject);
-                    }
-                }
-            }
-        });
 
         historyTree.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    //renameHistoryItem(e, true);
+                    Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
+                    if(userObject instanceof DaakiaHistory) {
+                        eventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
+                    }
                 }
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) { // Single click
-                    TreePath path = historyTree.getPathForLocation(e.getX(), e.getY());
-                    if (path != null) {
-                        // Get the node associated with the clicked path
-                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                        if (node != null) {
-                            Object userObject = node.getUserObject();
-                            if(userObject instanceof DaakiaHistory) {
-                                //loadHistoryDataIntoUI((DaakiaHistory) userObject);
-                            }
-                        }
+                    Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
+                    if(userObject instanceof DaakiaHistory) {
+                        eventPublisher().onClickHistoryDataNode((DaakiaHistory) userObject);
                     }
                 }
                 else if (e.getClickCount() == 2) {
-                    //renameHistoryItem(e, false);
+                    Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
+                    if(userObject instanceof DaakiaHistory) {
+                        eventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
+                    }
                 }
             }
         });

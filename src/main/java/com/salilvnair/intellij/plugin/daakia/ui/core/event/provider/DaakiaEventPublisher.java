@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.provider;
 
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
@@ -38,6 +39,18 @@ public class DaakiaEventPublisher {
 
     public void onAfterHistoryAdded() {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_AFTER_HISTORY_ADDED);
+        publisher.publish(event);
+    }
+
+    public void onClickHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_HISTORY_DATA_NODE);
+        event.setSelectedDaakiaHistory(selectedDaakiaHistory);
+        publisher.publish(event);
+    }
+
+    public void onDoubleClickHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DBL_CLICK_HISTORY_DATA_NODE);
+        event.setSelectedDaakiaHistory(selectedDaakiaHistory);
         publisher.publish(event);
     }
 

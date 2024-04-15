@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -12,15 +13,16 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DateUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
 import org.springframework.util.MultiValueMap;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AppDaakiaService extends BaseDaakiaService {
@@ -32,7 +34,28 @@ public class AppDaakiaService extends BaseDaakiaService {
         else if(AppDaakiaType.ADD_HISTORY.equals(type)) {
             addHistoryData(type, dataContext, objects);
         }
+        else if(AppDaakiaType.ON_CLICK_HISTORY_NODE.equals(type)) {
+            loadApplicableDaakiaUiComponentsOnClickHistoryNode(type, dataContext, objects);
+        }
+        else if(AppDaakiaType.CREATE_HEADER.equals(type)) {
+            createHeader(dataContext, (String) objects[0], (String) objects[1]);
+        }
         return dataContext.daakiaContext();
+    }
+
+    private void loadApplicableDaakiaUiComponentsOnClickHistoryNode(DaakiaTypeBase type, DataContext dataContext, Object[] objects) {
+        DaakiaHistory daakiaHistory = dataContext.uiContext().selectedDaakiaHistory();
+        dataContext.uiContext().requestTextArea().setText(daakiaHistory.getRequestBody());
+        dataContext.uiContext().responseTextArea().setText(daakiaHistory.getResponseBody());
+        dataContext.uiContext().requestTypes().setSelectedItem(daakiaHistory.getRequestType());
+        dataContext.uiContext().urlTextField().setText(daakiaHistory.getUrl());
+        String headersJsonString = daakiaHistory.getHeaders();
+        MultiValueMap<String, String> requestHeaders = JsonUtils.jsonStringToMultivaluedMap(headersJsonString);
+        dataContext.uiContext().headerTextFields().clear();
+        dataContext.uiContext().headersPanel().removeAll();
+        requestHeaders.forEach((key, values) -> {
+            createHeader(dataContext, key, values.get(0));
+        });
     }
 
     private void initHistoryRootNode(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
@@ -73,8 +96,10 @@ public class AppDaakiaService extends BaseDaakiaService {
         String url = dataContext.uiContext().urlTextField().getText();
         String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
         String requestBody = dataContext.uiContext().requestTextArea().getText();
+        String responseBody = dataContext.uiContext().responseTextArea().getText();
         MultiValueMap<String, String> requestHeaders = dataContext.daakiaContext().requestHeaders();
         DaakiaHistory daakiaHistory = new DaakiaHistory();
+        daakiaHistory.setUuid(UUID.randomUUID().toString());
         daakiaHistory.setRequestType(requestType);
         daakiaHistory.setUrl(url);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -86,6 +111,7 @@ public class AppDaakiaService extends BaseDaakiaService {
 
         }
         daakiaHistory.setRequestBody(requestBody);
+        daakiaHistory.setResponseBody(responseBody);
         daakiaHistory.setCreatedDate(DateUtils.todayAsString());
         dataContext.uiContext().setDaakiaHistory(daakiaHistory);
         Map<String, List<DaakiaHistory>> historyData = dataContext.uiContext().historyData();
@@ -129,7 +155,46 @@ public class AppDaakiaService extends BaseDaakiaService {
             root.add(yearNode);
             treeModel.nodesWereInserted(root, new int[]{root.getIndex(yearNode)});
         }
+    }
 
+    private void createHeader(DataContext dataContext, String headerKey, String headerValue) {
+        String rowId = UUID.randomUUID().toString();
 
+        TextInputField headerKeyField = new TextInputField("Header "+(dataContext.uiContext().headerTextFields().size() + 1));
+        headerKeyField.setPreferredSize(new Dimension(350, 25));
+        headerKeyField.setText(headerKey);
+
+        TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().headerTextFields().size() + 1));
+        headerValueField.setPreferredSize(new Dimension(600, 25));
+        headerValueField.setText(headerValue);
+
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        headerPanel.add(headerKeyField);
+        headerPanel.add(headerValueField);
+
+        JButton deleteHeaderButton = new JButton("Delete");
+        headerPanel.add(deleteHeaderButton);
+        JPanel headersPanel = dataContext.uiContext().headersPanel();
+        JPanel headerScrollPanel = dataContext.uiContext().headerScrollPanel();
+        headersPanel.add(headerPanel);
+        headersPanel.revalidate();
+        headersPanel.repaint();
+        List<TextInputField> headerKeyValFields = List.of(headerKeyField, headerValueField);
+        dataContext.uiContext().headerTextFields().put(rowId, headerKeyValFields);
+        headerScrollPanel.setVisible(true);
+
+        // ActionListener for deleting header
+        deleteHeaderButton.addActionListener(e1 -> {
+            headersPanel.remove(headerPanel);
+            dataContext.eventPublisher().onClickDeleteHeaderRow(headerKeyField.getText());
+            dataContext.uiContext().headerTextFields().remove(rowId);
+            headersPanel.revalidate();
+            headersPanel.repaint();
+            headerScrollPanel.revalidate();
+            headerScrollPanel.repaint();
+            if(dataContext.uiContext().headerTextFields().isEmpty()) {
+                headerScrollPanel.setVisible(false);
+            }
+        });
     }
 }
