@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.type;
 
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
 import org.springframework.http.ResponseEntity;
 
 import java.util.EventObject;
@@ -13,7 +14,7 @@ public class DaakiaEvent extends EventObject {
     private String deletedHeaderKey;
     private ResponseEntity<String> responseEntity;
     private DaakiaHistory selectedDaakiaHistory;
-
+    private DaakiaStoreRecord selectedDaakiaStoreRecord;
 
 
     public DaakiaEvent(Object source, DaakiaEventType eventType) {
@@ -52,5 +53,13 @@ public class DaakiaEvent extends EventObject {
 
     public void setSelectedDaakiaHistory(DaakiaHistory selectedDaakiaHistory) {
         this.selectedDaakiaHistory = selectedDaakiaHistory;
+    }
+
+    public DaakiaStoreRecord selectedDaakiaStoreRecord() {
+        return selectedDaakiaStoreRecord;
+    }
+
+    public void setSelectedDaakiaStoreRecord(DaakiaStoreRecord selectedDaakiaStoreRecord) {
+        this.selectedDaakiaStoreRecord = selectedDaakiaStoreRecord;
     }
 }

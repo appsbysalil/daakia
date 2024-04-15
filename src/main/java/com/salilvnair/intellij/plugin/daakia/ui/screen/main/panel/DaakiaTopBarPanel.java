@@ -75,5 +75,21 @@ public class DaakiaTopBarPanel extends BaseDaakiaPanel<DaakiaTopBarPanel> {
             eventPublisher().onAfterHistoryAdded();
             daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
         });
+        saveButton.addActionListener(e -> {
+            String newName = (String) JOptionPane
+                    .showInputDialog(
+                            this,
+                            "Enter a name",
+                            "",
+                            JOptionPane.QUESTION_MESSAGE,
+                            DaakiaIcons.HttpRequestsFiletype48,
+                            null,
+                            null);
+            if(newName!=null && !newName.isEmpty()) {
+                eventPublisher().onClickSend();
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext, newName);
+                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
+            }
+        });
     }
 }

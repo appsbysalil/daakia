@@ -1,9 +1,10 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.ui.treeStructure.Tree;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
@@ -21,8 +22,8 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AppDaakiaService extends BaseDaakiaService {
@@ -31,25 +32,63 @@ public class AppDaakiaService extends BaseDaakiaService {
         if(AppDaakiaType.INIT_HISTORY.equals(type)) {
             initHistoryRootNode(type, dataContext, objects);
         }
+        else if (AppDaakiaType.INIT_STORE_COLLECTIONS.equals(type)) {
+            initStoreCollections(type, dataContext, objects);
+        }
         else if(AppDaakiaType.ADD_HISTORY.equals(type)) {
             addHistoryData(type, dataContext, objects);
         }
         else if(AppDaakiaType.ON_CLICK_HISTORY_NODE.equals(type)) {
             loadApplicableDaakiaUiComponentsOnClickHistoryNode(type, dataContext, objects);
         }
+        else if(AppDaakiaType.ON_CLICK_STORE_COLLECTION_NODE.equals(type)) {
+            loadApplicableDaakiaUiComponentsOnClickStoreCollectionNode(type, dataContext, objects);
+        }
         else if(AppDaakiaType.CREATE_HEADER.equals(type)) {
             createHeader(dataContext, (String) objects[0], (String) objects[1]);
+        }
+        else if(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE.equals(type)) {
+            onSaveRequest(dataContext, objects);
         }
         return dataContext.daakiaContext();
     }
 
+    private void initStoreCollections(DaakiaTypeBase type, DataContext dataContext, Object[] objects) {
+        dataContext.daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.LOAD_STORE_COLLECTIONS, dataContext);
+    }
+
+    private void onSaveRequest(DataContext dataContext, Object... objects) {
+        if(!TreeUtils.selectedNodeIsRootNode(dataContext.uiContext().collectionStoreTree())) {
+            System.out.println("lets add this request to the Tree");
+            String displayName = (String) objects[0];
+            DaakiaStoreRecord daakiaStoreRecord = generateStoreData(dataContext, DaakiaStoreRecord.class);
+            assert daakiaStoreRecord != null;
+            daakiaStoreRecord.setDisplayName(displayName);
+            DefaultMutableTreeNode insertionNode = TreeUtils.parentNode(dataContext.uiContext().collectionStoreTree(), DaakiaStoreRecord.class);
+            insertionNode.add(new DefaultMutableTreeNode(daakiaStoreRecord));
+            dataContext.uiContext().collectionStoreTreeModel().nodesWereInserted(insertionNode, new int[]{insertionNode.getChildCount() - 1});
+        }
+        else {
+            System.out.println("Alert user saying : please select a collection to store the request.");
+        }
+    }
+
     private void loadApplicableDaakiaUiComponentsOnClickHistoryNode(DaakiaTypeBase type, DataContext dataContext, Object[] objects) {
         DaakiaHistory daakiaHistory = dataContext.uiContext().selectedDaakiaHistory();
-        dataContext.uiContext().requestTextArea().setText(daakiaHistory.getRequestBody());
-        dataContext.uiContext().responseTextArea().setText(daakiaHistory.getResponseBody());
-        dataContext.uiContext().requestTypes().setSelectedItem(daakiaHistory.getRequestType());
-        dataContext.uiContext().urlTextField().setText(daakiaHistory.getUrl());
-        String headersJsonString = daakiaHistory.getHeaders();
+        loadApplicableDaakiaUiComponents(dataContext, daakiaHistory);
+    }
+
+    private void loadApplicableDaakiaUiComponentsOnClickStoreCollectionNode(DaakiaTypeBase type, DataContext dataContext, Object[] objects) {
+        DaakiaStoreRecord daakiaStoreRecord = dataContext.uiContext().selectedDaakiaStoreRecord();
+        loadApplicableDaakiaUiComponents(dataContext, daakiaStoreRecord);
+    }
+
+    private void loadApplicableDaakiaUiComponents(DataContext dataContext, DaakiaBaseStoreData baseStoreData) {
+        dataContext.uiContext().requestTextArea().setText(baseStoreData.getRequestBody());
+        dataContext.uiContext().responseTextArea().setText(baseStoreData.getResponseBody());
+        dataContext.uiContext().requestTypes().setSelectedItem(baseStoreData.getRequestType());
+        dataContext.uiContext().urlTextField().setText(baseStoreData.getUrl());
+        String headersJsonString = baseStoreData.getHeaders();
         MultiValueMap<String, String> requestHeaders = JsonUtils.jsonStringToMultivaluedMap(headersJsonString);
         dataContext.uiContext().headerTextFields().clear();
         dataContext.uiContext().headersPanel().removeAll();
@@ -91,30 +130,39 @@ public class AppDaakiaService extends BaseDaakiaService {
         return historyData.keySet().stream().map(DateUtils::yearFromDateString).collect(Collectors.toList());
     }
 
-
-    private void addHistoryData(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+    private <T> T generateStoreData(DataContext dataContext, Class<T> clazz) {
+        DaakiaBaseStoreData daakiaBaseStoreData = new DaakiaBaseStoreData();
         String url = dataContext.uiContext().urlTextField().getText();
         String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
         String requestBody = dataContext.uiContext().requestTextArea().getText();
         String responseBody = dataContext.uiContext().responseTextArea().getText();
         MultiValueMap<String, String> requestHeaders = dataContext.daakiaContext().requestHeaders();
-        DaakiaHistory daakiaHistory = new DaakiaHistory();
-        daakiaHistory.setUuid(UUID.randomUUID().toString());
-        daakiaHistory.setRequestType(requestType);
-        daakiaHistory.setUrl(url);
-        ObjectMapper objectMapper = new ObjectMapper();
+        String headers = null;
         try {
-            String headers = objectMapper.writeValueAsString(requestHeaders);
-            daakiaHistory.setHeaders(headers);
+            ObjectMapper objectMapper = new ObjectMapper();
+            headers = objectMapper.writeValueAsString(requestHeaders);
+            daakiaBaseStoreData.setUuid(UUID.randomUUID().toString());
+            daakiaBaseStoreData.setHeaders(headers);
+            daakiaBaseStoreData.setRequestType(requestType);
+            daakiaBaseStoreData.setUrl(url);
+            daakiaBaseStoreData.setRequestBody(requestBody);
+            daakiaBaseStoreData.setResponseBody(responseBody);
+            daakiaBaseStoreData.setCreatedDate(DateUtils.todayAsString());
+            String storeString = objectMapper.writeValueAsString(daakiaBaseStoreData);
+            return JsonUtils.jsonToPojo(storeString, clazz);
         }
-        catch (JsonProcessingException ex) {
+        catch (Exception e) {
 
         }
-        daakiaHistory.setRequestBody(requestBody);
-        daakiaHistory.setResponseBody(responseBody);
-        daakiaHistory.setCreatedDate(DateUtils.todayAsString());
+        return null;
+    }
+
+
+    private void addHistoryData(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        DaakiaHistory daakiaHistory = generateStoreData(dataContext, DaakiaHistory.class);
         dataContext.uiContext().setDaakiaHistory(daakiaHistory);
         Map<String, List<DaakiaHistory>> historyData = dataContext.uiContext().historyData();
+        assert daakiaHistory != null;
         String date = daakiaHistory.getCreatedDate();
         Tree historyTree = dataContext.uiContext().historyTree();
         if (historyData.containsKey(date)) {

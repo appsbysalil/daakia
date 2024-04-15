@@ -3,6 +3,8 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStore;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
@@ -24,6 +26,7 @@ public class UIContext {
     private Tree historyTree;
     private DefaultTreeModel historyTreeModel;
     private Map<String, List<DaakiaHistory>> historyData;
+    private DaakiaStore daakiaStore;
     private DefaultMutableTreeNode historyRootNode;
     private DaakiaHistory daakiaHistory;
     private DaakiaHistory selectedDaakiaHistory;
@@ -31,6 +34,12 @@ public class UIContext {
     //headers panel related components
     private JPanel headerScrollPanel;
     private JPanel headersPanel;
+
+    //Daakia store related components
+    private Tree collectionStoreTree;
+    private DefaultTreeModel collectionStoreTreeModel;
+    private DefaultMutableTreeNode collectionStoreRootNode;
+    private DaakiaStoreRecord selectedDaakiaStoreRecord;
 
 
     public Map<String, List<TextInputField>> headerTextFields() {
@@ -101,7 +110,7 @@ public class UIContext {
 
     public DefaultMutableTreeNode historyRootNode() {
         if(historyRootNode == null) {
-            historyRootNode = new DefaultMutableTreeNode();
+            historyRootNode = new DefaultMutableTreeNode("History");
         }
         return historyRootNode;
     }
@@ -140,5 +149,48 @@ public class UIContext {
 
     public void setHeadersPanel(JPanel headersPanel) {
         this.headersPanel = headersPanel;
+    }
+
+    public Tree collectionStoreTree() {
+        return collectionStoreTree;
+    }
+
+    public void setCollectionStoreTree(Tree collectionStoreTree) {
+        this.collectionStoreTree = collectionStoreTree;
+    }
+
+    public DefaultTreeModel collectionStoreTreeModel() {
+        return collectionStoreTreeModel;
+    }
+
+    public void setCollectionStoreTreeModel(DefaultTreeModel collectionStoreTreeModel) {
+        this.collectionStoreTreeModel = collectionStoreTreeModel;
+    }
+
+    public DefaultMutableTreeNode collectionStoreRootNode() {
+        if(collectionStoreRootNode == null) {
+            collectionStoreRootNode = new DefaultMutableTreeNode("Collections");
+        }
+        return collectionStoreRootNode;
+    }
+
+    public void setCollectionStoreRootNode(DefaultMutableTreeNode collectionStoreRootNode) {
+        this.collectionStoreRootNode = collectionStoreRootNode;
+    }
+
+    public DaakiaStore daakiaStore() {
+        return daakiaStore;
+    }
+
+    public void setDaakiaStore(DaakiaStore daakiaStore) {
+        this.daakiaStore = daakiaStore;
+    }
+
+    public DaakiaStoreRecord selectedDaakiaStoreRecord() {
+        return selectedDaakiaStoreRecord;
+    }
+
+    public void setSelectedDaakiaStoreRecord(DaakiaStoreRecord selectedDaakiaStoreRecord) {
+        this.selectedDaakiaStoreRecord = selectedDaakiaStoreRecord;
     }
 }

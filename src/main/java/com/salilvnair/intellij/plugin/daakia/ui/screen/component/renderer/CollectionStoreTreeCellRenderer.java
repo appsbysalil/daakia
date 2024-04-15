@@ -1,6 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer;
 
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
 
 import javax.swing.*;
@@ -9,7 +9,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
 
 public class CollectionStoreTreeCellRenderer extends DefaultTreeCellRenderer {
-    private JPopupMenu moreOptionsMenu;
 
     public CollectionStoreTreeCellRenderer() {}
 
@@ -28,7 +27,7 @@ public class CollectionStoreTreeCellRenderer extends DefaultTreeCellRenderer {
             }
             else {
                 Object userObject = node.getUserObject();
-                if(userObject instanceof DaakiaHistory) {
+                if(userObject instanceof DaakiaStoreRecord) {
                     setIcon(DaakiaIcons.HttpRequestsFiletype);
                 }
                 else {

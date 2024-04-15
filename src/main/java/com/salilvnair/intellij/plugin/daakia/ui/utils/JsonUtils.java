@@ -3,13 +3,9 @@ package com.salilvnair.intellij.plugin.daakia.ui.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -68,39 +64,5 @@ public class JsonUtils {
         catch (IOException e) {
             return new LinkedMultiValueMap<>();
         }
-    }
-
-    public static String convertTreeToJSON(DefaultMutableTreeNode rootNode) {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode json = convertTreeToJSON(mapper.createObjectNode(), rootNode, mapper);
-        return json.toString();
-    }
-
-    public static ObjectNode convertTreeToJSON(ObjectNode parentNode, DefaultMutableTreeNode node, ObjectMapper mapper) {
-        // Add the current node's user object as a property
-        parentNode.put("name", node.getUserObject().toString());
-        if(node.isLeaf()) {
-            if(node.getUserObject() instanceof DaakiaStoreRecord daakiaStoreRecord) {
-                try {
-                    String daakiaStoreRecordString = pojoToJson(daakiaStoreRecord);
-                    parentNode.put("record", daakiaStoreRecordString);
-                }
-                catch (IOException e) {}
-            }
-        }
-
-        // Recursively process child nodes
-        if (node.getChildCount() > 0) {
-            ArrayNode children = mapper.createArrayNode();
-            for (int i = 0; i < node.getChildCount(); i++) {
-                DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) node.getChildAt(i);
-                ObjectNode childJson = mapper.createObjectNode();
-                convertTreeToJSON(childJson, childNode, mapper);
-                children.add(childJson);
-            }
-            parentNode.set("children", children);
-        }
-
-        return parentNode;
     }
 }

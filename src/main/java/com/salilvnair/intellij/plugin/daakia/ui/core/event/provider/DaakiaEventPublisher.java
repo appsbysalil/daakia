@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.provider;
 
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
@@ -37,6 +38,11 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+    public void onClickSave() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_SAVE);
+        publisher.publish(event);
+    }
+
     public void onAfterHistoryAdded() {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_AFTER_HISTORY_ADDED);
         publisher.publish(event);
@@ -51,6 +57,28 @@ public class DaakiaEventPublisher {
     public void onDoubleClickHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DBL_CLICK_HISTORY_DATA_NODE);
         event.setSelectedDaakiaHistory(selectedDaakiaHistory);
+        publisher.publish(event);
+    }
+
+    public void onClickStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_STORE_COLLECTION_NODE);
+        event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
+        publisher.publish(event);
+    }
+
+    public void onDoubleClickStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DBL_CLICK_STORE_COLLECTION_NODE);
+        event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
+        publisher.publish(event);
+    }
+
+    public void onClickAddNewCollection() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_ADD_NEW_COLLECTION);
+        publisher.publish(event);
+    }
+
+    public void onClickDeleteCollections() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_DELETE_COLLECTIONS);
         publisher.publish(event);
     }
 

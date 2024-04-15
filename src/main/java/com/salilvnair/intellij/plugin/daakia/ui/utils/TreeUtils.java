@@ -52,4 +52,18 @@ public final class TreeUtils {
         return null;
     }
 
+    public static boolean selectedNodeIsRootNode(Tree tree) {
+        Object rootNode = tree.getModel().getRoot();
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+        return selectedNode == null || selectedNode == rootNode;
+    }
+
+    public static DefaultMutableTreeNode parentNode(Tree tree, Class<?> userObjectClass) {
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+        if(selectedNode.getUserObject().getClass().equals(userObjectClass)) {
+            return (DefaultMutableTreeNode)selectedNode.getParent();
+        }
+        return selectedNode;
+    }
+
 }
