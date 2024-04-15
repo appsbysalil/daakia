@@ -10,4 +10,6 @@ public interface DaakiaIcons {
     Icon RenameHistory48 = DaakiaIconLoader.getIcon("/icons/RenameHistory.svg", DaakiaIcons.class);
     Icon CollectionFolder = DaakiaIconLoader.getIcon("/icons/CollectionFolder.svg", DaakiaIcons.class);
     Icon HttpRequestsFiletype = DaakiaIconLoader.getIcon("/icons/httpRequestsFiletype.svg", "/icons/httpRequestsFiletype_dark.svg", DaakiaIcons.class);
+    Icon DeleteIcon = DaakiaIconLoader.getIcon("/icons/deleteIcon.svg", DaakiaIcons.class);
+    Icon PackageName48 = DaakiaIconLoader.getIcon("/icons/abbreviatePackageNames.svg", "/icons/abbreviatePackageNames_dark.svg", DaakiaIcons.class);
 }

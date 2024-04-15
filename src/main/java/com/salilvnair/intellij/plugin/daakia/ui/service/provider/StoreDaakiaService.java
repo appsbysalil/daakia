@@ -11,6 +11,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.utils.IntellijUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class StoreDaakiaService extends BaseDaakiaService {
             dataContext.uiContext().setHistoryData(historyData);
         }
         catch (IOException e) {
-            throw new RuntimeException(e);
+            dataContext.uiContext().setHistoryData(new LinkedHashMap<>());
         }
     }
 
@@ -48,9 +49,7 @@ public class StoreDaakiaService extends BaseDaakiaService {
             String jsonString = JsonUtils.pojoToJson(dataContext.uiContext().historyData());
             JsonUtils.writeJsonToFile(jsonString, pluginPath+"/daakia-history.json");
         }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        catch (IOException e) {}
     }
 
 }

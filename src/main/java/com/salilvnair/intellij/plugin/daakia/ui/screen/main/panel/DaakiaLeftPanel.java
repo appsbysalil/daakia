@@ -3,6 +3,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 import com.intellij.icons.ExpUiIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.CollectionStorePanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.HistoryPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
@@ -13,6 +14,7 @@ public class DaakiaLeftPanel extends BaseDaakiaPanel<DaakiaLeftPanel> {
 
     private JBTabbedPane tabbedPane;
     private HistoryPanel historyPanel;
+    private CollectionStorePanel collectionStorePanel;
 
     DaakiaLeftPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -34,8 +36,9 @@ public class DaakiaLeftPanel extends BaseDaakiaPanel<DaakiaLeftPanel> {
     public void initComponents() {
         tabbedPane = new JBTabbedPane(JTabbedPane.LEFT, JTabbedPane.WRAP_TAB_LAYOUT);
         historyPanel = new HistoryPanel(rootPane, dataContext);
+        collectionStorePanel = new CollectionStorePanel(rootPane, dataContext);
         tabbedPane.addTab(null, ExpUiIcons.General.History, historyPanel);
-        tabbedPane.addTab(null, DaakiaIcons.CollectionIcon, new JPanel(new BorderLayout()));
+        tabbedPane.addTab(null, DaakiaIcons.CollectionIcon, collectionStorePanel);
         tabbedPane.setToolTipTextAt(0, "History");
         tabbedPane.setToolTipTextAt(1, "Collection");
     }
