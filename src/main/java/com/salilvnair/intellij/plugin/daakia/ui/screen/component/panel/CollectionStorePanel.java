@@ -74,6 +74,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
         // Create menu items with icons
         JMenuItem deleteMenuItem = new JMenuItem(DaakiaIcons.DeleteIcon);
+        deleteMenuItem.setEnabled(false);
         moreOptionsMenu.add(deleteMenuItem);
 
         deleteMenuItem.addActionListener(e -> {
@@ -99,7 +100,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             deleteMenuItem.setEnabled(selectedNode != null && selectedNode != rootNode);
         });
 
-        IconButton moreIconButton = new IconButton(AllIcons.Actions.More);
+        IconButton moreIconButton = new IconButton(AllIcons.Actions.More, new Dimension(40,0));
         buttonPanel.add(addButton, BorderLayout.WEST);
         buttonPanel.add(moreIconButton, BorderLayout.EAST);
         panel.add(buttonPanel, BorderLayout.NORTH);

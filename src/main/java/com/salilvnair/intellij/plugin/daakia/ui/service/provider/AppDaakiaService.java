@@ -5,7 +5,9 @@ import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -220,7 +222,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         headerPanel.add(headerKeyField);
         headerPanel.add(headerValueField);
 
-        JButton deleteHeaderButton = new JButton("Delete");
+        IconButton deleteHeaderButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(30, 25));
         headerPanel.add(deleteHeaderButton);
         JPanel headersPanel = dataContext.uiContext().headersPanel();
         JPanel headerScrollPanel = dataContext.uiContext().headerScrollPanel();

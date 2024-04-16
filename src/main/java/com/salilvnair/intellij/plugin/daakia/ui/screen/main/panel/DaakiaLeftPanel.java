@@ -34,7 +34,6 @@ public class DaakiaLeftPanel extends BaseDaakiaPanel<DaakiaLeftPanel> {
     @Override
     public void initStyle() {
         debugIfApplicable(this);
-        setPreferredSize(new Dimension(250, 0));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import javax.swing.*;
@@ -10,7 +12,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
     private JSplitPane leftCenterSplitPane;
 
     //left panel
-    private DaakiaLeftPanel leftPanel;
+    private DaakiaLeftPanelWithHeader daakiaLeftPanelWithHeader;
 
 
     //center panel
@@ -35,10 +37,11 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
 
     @Override
     public void initComponents() {
-        leftPanel = new DaakiaLeftPanel(rootPane, dataContext);
+        daakiaLeftPanelWithHeader = new DaakiaLeftPanelWithHeader(rootPane, dataContext);
         centerPanel = new DaakiaRightPanel(rootPane, dataContext);
-        leftCenterSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, centerPanel);
+        leftCenterSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, daakiaLeftPanelWithHeader, centerPanel);
         leftCenterSplitPane.setDividerLocation(300);
+        leftCenterSplitPane.setDividerSize(5);
     }
 
     @Override
@@ -48,7 +51,11 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
 
     @Override
     public void initListeners() {
-        super.initListeners();
+        subscriber().subscribe(event -> {
+            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER)) {
+                leftCenterSplitPane.setDividerLocation(leftCenterSplitPane.getDividerLocation() == 42 ? 300 : 42);
+            }
+        });
     }
 
 

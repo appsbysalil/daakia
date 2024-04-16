@@ -1,9 +1,14 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
+import com.intellij.ui.JBColor;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,5 +54,26 @@ public class DaakiaUtils {
             }
         }
         return rootNode;
+    }
+
+    public static void hidePanelWithAnimation(final JPanel panel, boolean visibility) {
+        Timer timer = new Timer(20, new ActionListener() {
+            private float alpha = 1f;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                alpha -= 0.05f;
+                if (alpha <= 0f) {
+                    ((Timer) e.getSource()).stop();
+                    panel.setVisible(visibility);
+                }
+                else {
+                    panel.setOpaque(true);
+                    panel.setBackground(new JBColor(new Color(panel.getBackground().getRed(), panel.getBackground().getGreen(), panel.getBackground().getBlue(), (int) (alpha * 255)), new Color(panel.getBackground().getRed(), panel.getBackground().getGreen(), panel.getBackground().getBlue(), (int) (alpha * 255))));
+                    panel.repaint();
+                }
+            }
+        });
+        timer.start();
     }
 }

@@ -20,7 +20,6 @@ public class BasicButton extends JButton {
         super(icon);
         this.icon = icon;
         setBorderPainted(false);
-        setContentAreaFilled(false);
         setFocusPainted(false);
         setOpaque(false);
     }

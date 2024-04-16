@@ -37,6 +37,7 @@ public class RequestResponseCombinedBodyPanel extends BaseDaakiaPanel<RequestRes
     public void initStyle() {
        debugIfApplicable(this);
        splitPane.setResizeWeight(0.5);
+       splitPane.setDividerSize(5);
     }
 
     @Override

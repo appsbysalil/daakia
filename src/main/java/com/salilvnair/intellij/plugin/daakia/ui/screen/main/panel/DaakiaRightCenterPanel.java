@@ -6,6 +6,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.RequestHeaderPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.RequestResponseCombinedBodyPanel;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseHeaderPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import javax.swing.*;
@@ -52,6 +53,7 @@ public class DaakiaRightCenterPanel extends BaseDaakiaPanel<DaakiaRightCenterPan
         subscriber().subscribe(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
                 tabbedPane.setSelectedIndex(1);
+                tabbedPane.addTab("Response Headers", AllIcons.Actions.Minimap, new ResponseHeaderPanel(rootPane, dataContext));
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_ADD_HEADER)) {
                 tabbedPane.setSelectedIndex(0);
