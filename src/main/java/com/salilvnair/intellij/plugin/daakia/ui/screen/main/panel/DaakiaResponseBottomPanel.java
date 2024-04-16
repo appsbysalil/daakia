@@ -4,21 +4,20 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.RequestHeaderPanel;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.RequestResponseCombinedBodyPanel;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseBodyPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseHeaderPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class DaakiaRightCenterPanel extends BaseDaakiaPanel<DaakiaRightCenterPanel> {
+public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBottomPanel> {
 
     private JBTabbedPane tabbedPane;
-    private RequestHeaderPanel requestHeaderPanel;
-    private RequestResponseCombinedBodyPanel combinedBodyPanel;
+    private ResponseHeaderPanel responseHeaderPanel;
+    private ResponseBodyPanel responseBodyPanel;
 
-    public DaakiaRightCenterPanel(JRootPane rootPane, DataContext dataContext) {
+    public DaakiaResponseBottomPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
     }
@@ -31,8 +30,8 @@ public class DaakiaRightCenterPanel extends BaseDaakiaPanel<DaakiaRightCenterPan
     @Override
     public void initComponents() {
         tabbedPane = new JBTabbedPane();
-        requestHeaderPanel = new RequestHeaderPanel(rootPane, dataContext);
-        combinedBodyPanel = new RequestResponseCombinedBodyPanel(rootPane, dataContext);
+        responseHeaderPanel = new ResponseHeaderPanel(rootPane, dataContext);
+        responseBodyPanel = new ResponseBodyPanel(rootPane, dataContext);
     }
 
     @Override
@@ -43,8 +42,8 @@ public class DaakiaRightCenterPanel extends BaseDaakiaPanel<DaakiaRightCenterPan
 
     @Override
     public void initChildrenLayout() {
-        tabbedPane.addTab("Request Headers", AllIcons.Actions.Minimap, requestHeaderPanel);
-        tabbedPane.addTab("Body", AllIcons.Json.Object, combinedBodyPanel);
+        tabbedPane.addTab("Response Body", AllIcons.Json.Object, responseBodyPanel);
+        tabbedPane.addTab("Response Headers", AllIcons.Actions.Minimap, responseHeaderPanel);
         add(tabbedPane, BorderLayout.CENTER);
     }
 
@@ -52,10 +51,6 @@ public class DaakiaRightCenterPanel extends BaseDaakiaPanel<DaakiaRightCenterPan
     public void initListeners() {
         subscriber().subscribe(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
-                tabbedPane.setSelectedIndex(1);
-                tabbedPane.addTab("Response Headers", AllIcons.Actions.Minimap, new ResponseHeaderPanel(rootPane, dataContext));
-            }
-            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_ADD_HEADER)) {
                 tabbedPane.setSelectedIndex(0);
             }
         });

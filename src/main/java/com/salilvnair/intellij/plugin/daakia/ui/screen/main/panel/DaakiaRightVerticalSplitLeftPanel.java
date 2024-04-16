@@ -1,8 +1,7 @@
-package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
+package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
@@ -10,13 +9,14 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import javax.swing.*;
 import java.awt.*;
 
-public class RequestResponseCombinedBodyPanel extends BaseDaakiaPanel<RequestResponseCombinedBodyPanel> {
+public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRightVerticalSplitLeftPanel> {
 
-    private RequestBodyPanel requestBodyPanel;
-    private ResponseBodyPanel responseBodyPanel;
-    private JSplitPane splitPane;
+    private DaakiaRequestTopPanel requestTopPanel;
+    private DaakiaRequestBottomPanel requestBottomPanel;
 
-    public RequestResponseCombinedBodyPanel(JRootPane rootPane, DataContext dataContext) {
+
+
+    public DaakiaRightVerticalSplitLeftPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
     }
@@ -26,23 +26,23 @@ public class RequestResponseCombinedBodyPanel extends BaseDaakiaPanel<RequestRes
         setLayout(new BorderLayout());
     }
 
+
     @Override
     public void initComponents() {
-        requestBodyPanel = new RequestBodyPanel(rootPane, dataContext);
-        responseBodyPanel = new ResponseBodyPanel(rootPane, dataContext);
-        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, requestBodyPanel, responseBodyPanel);
+        requestTopPanel = new DaakiaRequestTopPanel(rootPane, dataContext);
+        requestBottomPanel = new DaakiaRequestBottomPanel(rootPane, dataContext);
     }
 
     @Override
     public void initStyle() {
-       debugIfApplicable(this);
-       splitPane.setResizeWeight(0.5);
-       splitPane.setDividerSize(5);
+        debugIfApplicable(this);
+        setMinimumSize(new Dimension(700, 0));
     }
 
     @Override
     public void initChildrenLayout() {
-        add(splitPane, BorderLayout.CENTER);
+        add(requestTopPanel, BorderLayout.NORTH);
+        add(requestBottomPanel, BorderLayout.CENTER);
     }
 
     @Override

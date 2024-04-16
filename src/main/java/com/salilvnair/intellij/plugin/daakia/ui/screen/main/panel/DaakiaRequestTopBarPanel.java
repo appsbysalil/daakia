@@ -15,21 +15,21 @@ import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
 import javax.swing.*;
 import java.awt.*;
 
-public class DaakiaTopBarPanel extends BaseDaakiaPanel<DaakiaTopBarPanel> {
+public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBarPanel> {
 
     private ComboBox<String> requestTypes;
     private JTextField urlTextField;
     private JButton saveButton;
     private JButton sendButton;
 
-    public DaakiaTopBarPanel(JRootPane rootPane, DataContext dataContext) {
+    public DaakiaRequestTopBarPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
     }
 
     @Override
     public void initLayout() {
-        setLayout(new FlowLayout(FlowLayout.LEADING, 10, 10));
+        setLayout(new FlowLayout(FlowLayout.TRAILING, 5, 0));
     }
 
     @Override
@@ -57,7 +57,7 @@ public class DaakiaTopBarPanel extends BaseDaakiaPanel<DaakiaTopBarPanel> {
         add(urlTextField);
         add(sendButton);
         add(saveButton);
-        urlTextField.setPreferredSize(new Dimension(600, 25));
+        urlTextField.setPreferredSize(new Dimension(400, 25));
     }
 
     @Override
@@ -76,20 +76,9 @@ public class DaakiaTopBarPanel extends BaseDaakiaPanel<DaakiaTopBarPanel> {
             daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
         });
         saveButton.addActionListener(e -> {
-            String newName = (String) JOptionPane
-                    .showInputDialog(
-                            this,
-                            "Enter a name",
-                            "",
-                            JOptionPane.QUESTION_MESSAGE,
-                            DaakiaIcons.HttpRequestsFiletype48,
-                            null,
-                            null);
-            if(newName!=null && !newName.isEmpty()) {
-                eventPublisher().onClickSend();
-                daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext, newName);
-                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
-            }
+            eventPublisher().onClickSend();
+            daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext);
+            daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
         });
     }
 }

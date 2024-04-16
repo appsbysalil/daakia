@@ -5,14 +5,12 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import javax.swing.*;
 import java.awt.*;
 
-public class DaakiaRightPanel extends BaseDaakiaPanel<DaakiaRightPanel> {
+public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRightVerticalSplitRightPanel> {
 
-    private DaakiaRightTopPanel topPanel;
-    private DaakiaRightCenterPanel centerPanel;
+    private DaakiaResponseTopPanel topPanel;
+    private DaakiaResponseBottomPanel bottomPanel;
 
-
-
-    public DaakiaRightPanel(JRootPane rootPane, DataContext dataContext) {
+    public DaakiaRightVerticalSplitRightPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
     }
@@ -25,20 +23,20 @@ public class DaakiaRightPanel extends BaseDaakiaPanel<DaakiaRightPanel> {
 
     @Override
     public void initComponents() {
-        topPanel = new DaakiaRightTopPanel(rootPane, dataContext);
-        centerPanel = new DaakiaRightCenterPanel(rootPane, dataContext);
+        topPanel = new DaakiaResponseTopPanel(rootPane, dataContext);
+        bottomPanel = new DaakiaResponseBottomPanel(rootPane, dataContext);
     }
 
     @Override
     public void initStyle() {
         debugIfApplicable(this);
-        setMinimumSize(new Dimension(1100, 0));
+
     }
 
     @Override
     public void initChildrenLayout() {
         add(topPanel, BorderLayout.NORTH);
-        add(centerPanel, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.CENTER);
     }
 
     @Override

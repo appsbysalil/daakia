@@ -62,16 +62,27 @@ public class AppDaakiaService extends BaseDaakiaService {
     private void onSaveRequest(DataContext dataContext, Object... objects) {
         if(!TreeUtils.selectedNodeIsRootNode(dataContext.uiContext().collectionStoreTree())) {
             System.out.println("lets add this request to the Tree");
-            String displayName = (String) objects[0];
-            DaakiaStoreRecord daakiaStoreRecord = generateStoreData(dataContext, DaakiaStoreRecord.class);
-            assert daakiaStoreRecord != null;
-            daakiaStoreRecord.setDisplayName(displayName);
-            DefaultMutableTreeNode insertionNode = TreeUtils.parentNode(dataContext.uiContext().collectionStoreTree(), DaakiaStoreRecord.class);
-            insertionNode.add(new DefaultMutableTreeNode(daakiaStoreRecord));
-            dataContext.uiContext().collectionStoreTreeModel().nodesWereInserted(insertionNode, new int[]{insertionNode.getChildCount() - 1});
+            String displayName = (String) JOptionPane
+                    .showInputDialog(
+                            dataContext.uiContext().collectionStoreTreePanel(),
+                            "Enter a name",
+                            "",
+                            JOptionPane.QUESTION_MESSAGE,
+                            DaakiaIcons.HttpRequestsFiletype48,
+                            null,
+                            null);
+            if(displayName!=null && !displayName.isEmpty()) {
+                DaakiaStoreRecord daakiaStoreRecord = generateStoreData(dataContext, DaakiaStoreRecord.class);
+                assert daakiaStoreRecord != null;
+                daakiaStoreRecord.setDisplayName(displayName);
+                DefaultMutableTreeNode insertionNode = TreeUtils.parentNode(dataContext.uiContext().collectionStoreTree(), DaakiaStoreRecord.class);
+                insertionNode.add(new DefaultMutableTreeNode(daakiaStoreRecord));
+                dataContext.uiContext().collectionStoreTreeModel().nodesWereInserted(insertionNode, new int[]{insertionNode.getChildCount() - 1});
+            }
         }
         else {
             System.out.println("Alert user saying : please select a collection to store the request.");
+            JOptionPane.showMessageDialog(dataContext.uiContext().collectionStoreTreePanel(), "Please select a collection to store the request.", "Alert", JOptionPane.ERROR_MESSAGE, DaakiaIcons.ErrorIcon48);
         }
     }
 
@@ -211,11 +222,11 @@ public class AppDaakiaService extends BaseDaakiaService {
         String rowId = UUID.randomUUID().toString();
 
         TextInputField headerKeyField = new TextInputField("Header "+(dataContext.uiContext().headerTextFields().size() + 1));
-        headerKeyField.setPreferredSize(new Dimension(350, 25));
+        headerKeyField.setPreferredSize(new Dimension(300, 25));
         headerKeyField.setText(headerKey);
 
         TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().headerTextFields().size() + 1));
-        headerValueField.setPreferredSize(new Dimension(600, 25));
+        headerValueField.setPreferredSize(new Dimension(320, 25));
         headerValueField.setText(headerValue);
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));

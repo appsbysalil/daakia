@@ -15,13 +15,13 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
 import javax.swing.*;
 import java.awt.*;
 
-public class DaakiaLeftPanel extends BaseDaakiaPanel<DaakiaLeftPanel> {
+public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
 
     private JBTabbedPane tabbedPane;
     private HistoryPanel historyPanel;
     private CollectionStorePanel collectionStorePanel;
 
-    DaakiaLeftPanel(JRootPane rootPane, DataContext dataContext) {
+    DaakiaSideNavPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
     }

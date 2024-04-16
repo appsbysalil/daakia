@@ -36,6 +36,7 @@ public class UIContext {
     private JPanel headersPanel;
 
     //Daakia store related components
+    private JPanel collectionStoreTreePanel;
     private Tree collectionStoreTree;
     private DefaultTreeModel collectionStoreTreeModel;
     private DefaultMutableTreeNode collectionStoreRootNode;
@@ -192,5 +193,13 @@ public class UIContext {
 
     public void setSelectedDaakiaStoreRecord(DaakiaStoreRecord selectedDaakiaStoreRecord) {
         this.selectedDaakiaStoreRecord = selectedDaakiaStoreRecord;
+    }
+
+    public JPanel collectionStoreTreePanel() {
+        return collectionStoreTreePanel;
+    }
+
+    public void setCollectionStoreTreePanel(JPanel collectionStoreTreePanel) {
+        this.collectionStoreTreePanel = collectionStoreTreePanel;
     }
 }

@@ -6,18 +6,18 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import javax.swing.*;
 import java.awt.*;
 
-public class AddHeaderButtonPanel extends BaseDaakiaPanel<AddHeaderButtonPanel> {
+public class DaakiaRequestAddHeaderButtonPanel extends BaseDaakiaPanel<DaakiaRequestAddHeaderButtonPanel> {
 
     private JButton addHeaderButton;
 
-    public AddHeaderButtonPanel(JRootPane rootPane, DataContext dataContext) {
+    public DaakiaRequestAddHeaderButtonPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
     }
 
     @Override
     public void initLayout() {
-       setLayout(new FlowLayout(FlowLayout.TRAILING, 10, 10));
+       setLayout(new FlowLayout(FlowLayout.TRAILING, 5, 10));
     }
 
     @Override
