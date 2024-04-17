@@ -65,6 +65,26 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
                 uiContext().setSelectedDaakiaStoreRecord(daakiaEvent.selectedDaakiaStoreRecord());
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.ON_CLICK_STORE_COLLECTION_NODE, dataContext);
             }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_HISTORY_DATA_NODE)) {
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                uiContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.ON_CLICK_HISTORY_NODE, dataContext);
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_DBL_CLICK_HISTORY_DATA_NODE)) {
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                uiContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.ON_DBL_CLICK_HISTORY_NODE, dataContext);
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RIGHT_CLICK_RENAME_STORE_COLLECTION_NODE)) {
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                uiContext().setSelectedDaakiaStoreRecord(daakiaEvent.selectedDaakiaStoreRecord());
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.ON_RIGHT_CLICK_RENAME_STORE_COLLECTION_NODE, dataContext);
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RIGHT_CLICK_RENAME_HISTORY_NODE)) {
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                uiContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.ON_RIGHT_CLICK_RENAME_HISTORY_NODE, dataContext);
+            }
         });
     }
 

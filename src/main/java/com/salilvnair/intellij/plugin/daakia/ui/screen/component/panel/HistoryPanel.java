@@ -2,9 +2,9 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.HistoryTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -16,6 +16,8 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -74,6 +76,14 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
     public void initTreeListeners() {
 
+        historyTree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) historyTree.getLastSelectedPathComponent();
+            if (selectedNode != null && selectedNode.getUserObject() instanceof DaakiaHistory) {
+                Object userObject = selectedNode.getUserObject();
+                eventPublisher().onClickHistoryDataNode((DaakiaHistory) userObject);
+            }
+        });
+
         historyTree.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -81,7 +91,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
                     if(userObject instanceof DaakiaHistory) {
-                        eventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
+                        showPopupMenu(e.getComponent(), e.getX(), e.getY(), (DaakiaHistory) userObject);
                     }
                 }
             }
@@ -94,13 +104,25 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
                         eventPublisher().onClickHistoryDataNode((DaakiaHistory) userObject);
                     }
                 }
-                else if (e.getClickCount() == 2) {
-                    Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
-                    if(userObject instanceof DaakiaHistory) {
-                        eventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
-                    }
-                }
             }
         });
+    }
+
+
+    private void showPopupMenu(Component component, int x, int y, DaakiaHistory daakiaHistory) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem renameMenuItem = new JMenuItem("Rename");
+        renameMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                renameSelectedTreeItem(daakiaHistory);
+            }
+        });
+        popupMenu.add(renameMenuItem);
+        popupMenu.show(component, x, y);
+    }
+
+    private void renameSelectedTreeItem(DaakiaHistory selectedItem) {
+        eventPublisher().onRightClickRenameHistoryDataNode(selectedItem);
     }
 }

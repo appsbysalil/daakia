@@ -49,6 +49,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         sendButton.setIcon(AllIcons.Actions.Execute);
         saveButton.setIcon(DaakiaIcons.SaveIcon);
         sendButton.setEnabled(false);
+        saveButton.setEnabled(false);
     }
 
     @Override
@@ -65,6 +66,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
 
         TextFieldUtils.addChangeListener(urlTextField, e -> {
             sendButton.setEnabled(!urlTextField.getText().isEmpty() && UrlUtils.validateURL(urlTextField.getText()));
+            saveButton.setEnabled(!urlTextField.getText().isEmpty() && UrlUtils.validateURL(urlTextField.getText()));
         });
 
         sendButton.addActionListener(e -> {

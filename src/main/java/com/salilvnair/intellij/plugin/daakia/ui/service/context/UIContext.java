@@ -2,13 +2,14 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.treeStructure.Tree;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStore;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.util.HashMap;
@@ -16,11 +17,17 @@ import java.util.List;
 import java.util.Map;
 
 public class UIContext {
+    // request response components
     private Map<String, List<TextInputField>> headerTextFields;
     private RSyntaxTextArea requestTextArea;
     private RSyntaxTextArea responseTextArea;
     private ComboBox<String> requestTypes;
     private JTextField urlTextField;
+    private JTable responseHeaderTable;
+    private DefaultTableModel responseHeaderTableModel;
+    private JLabel statusLabel;
+    private JLabel sizeLabel;
+    private JLabel timeLabel;
 
     //history panel related components
     private Tree historyTree;
@@ -201,5 +208,45 @@ public class UIContext {
 
     public void setCollectionStoreTreePanel(JPanel collectionStoreTreePanel) {
         this.collectionStoreTreePanel = collectionStoreTreePanel;
+    }
+
+    public JLabel statusLabel() {
+        return statusLabel;
+    }
+
+    public void setStatusLabel(JLabel statusLabel) {
+        this.statusLabel = statusLabel;
+    }
+
+    public JLabel sizeLabel() {
+        return sizeLabel;
+    }
+
+    public void setSizeLabel(JLabel sizeLabel) {
+        this.sizeLabel = sizeLabel;
+    }
+
+    public JLabel timeLabel() {
+        return timeLabel;
+    }
+
+    public void setTimeLabel(JLabel timeLabel) {
+        this.timeLabel = timeLabel;
+    }
+
+    public JTable responseHeaderTable() {
+        return responseHeaderTable;
+    }
+
+    public void setResponseHeaderTable(JTable responseHeaderTable) {
+        this.responseHeaderTable = responseHeaderTable;
+    }
+
+    public DefaultTableModel responseHeaderTableModel() {
+        return responseHeaderTableModel;
+    }
+
+    public void setResponseHeaderTableModel(DefaultTableModel responseHeaderTableModel) {
+        this.responseHeaderTableModel = responseHeaderTableModel;
     }
 }

@@ -1,4 +1,4 @@
-package com.salilvnair.intellij.plugin.daakia.ui.archive.model;
+package com.salilvnair.intellij.plugin.daakia.ui.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

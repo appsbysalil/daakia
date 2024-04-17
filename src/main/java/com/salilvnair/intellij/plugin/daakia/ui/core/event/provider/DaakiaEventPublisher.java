@@ -1,7 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.provider;
 
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
@@ -60,6 +60,12 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+    public void onRightClickRenameHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RIGHT_CLICK_RENAME_HISTORY_NODE);
+        event.setSelectedDaakiaHistory(selectedDaakiaHistory);
+        publisher.publish(event);
+    }
+
     public void onClickStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
@@ -68,6 +74,12 @@ public class DaakiaEventPublisher {
 
     public void onDoubleClickStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DBL_CLICK_STORE_COLLECTION_NODE);
+        event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
+        publisher.publish(event);
+    }
+
+    public void onRightClickRenameStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RIGHT_CLICK_RENAME_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
         publisher.publish(event);
     }
