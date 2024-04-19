@@ -1,4 +1,4 @@
-package com.salilvnair.intellij.plugin.daakia.ui.archive.util;
+package com.salilvnair.intellij.plugin.daakia.ui.core.icon;
 
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;

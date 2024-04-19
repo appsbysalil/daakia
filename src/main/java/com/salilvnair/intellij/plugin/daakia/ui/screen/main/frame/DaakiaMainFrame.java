@@ -3,6 +3,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.main.frame;
 import com.salilvnair.intellij.plugin.daakia.ui.core.awt.SwingComponent;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.DaakiaMainPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.GlobalContext;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,17 +30,12 @@ public class DaakiaMainFrame extends JFrame implements SwingComponent {
 
     @Override
     public void initComponents() {
-        DataContext dataContext = new DataContext(this);
+        DataContext dataContext = new DataContext(new GlobalContext());
         daakiaMainPanel = new DaakiaMainPanel(getRootPane(), dataContext);
     }
 
     @Override
     public void initChildrenLayout() {
         add(daakiaMainPanel, BorderLayout.CENTER);
-    }
-
-    @Override
-    public void initListeners() {
-
     }
 }

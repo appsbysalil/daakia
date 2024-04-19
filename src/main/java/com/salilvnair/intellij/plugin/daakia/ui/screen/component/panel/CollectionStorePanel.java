@@ -3,8 +3,10 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.BasicButton;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.CollectionStoreTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -59,7 +61,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     public JPanel dynamicTree(Component parentComponent) {
         daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
-        DefaultMutableTreeNode rootNode = uiContext().collectionStoreRootNode();
+        DefaultMutableTreeNode rootNode = sideNavContext().collectionStoreRootNode();
         collectionStoreTreeModel = new DefaultTreeModel(rootNode);
         collectionStoreTree = new Tree(collectionStoreTreeModel);
         collectionStoreTree.setCellRenderer(new CollectionStoreTreeCellRenderer());
@@ -90,7 +92,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                     model.removeNodeFromParent(selectedNode);
                 }
             }
-            eventPublisher().onClickDeleteCollections();
+            globalEventPublisher().onClickDeleteCollections();
 
         });
 
@@ -133,7 +135,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 parentComponent.repaint();
             }
             TreeUtils.expandAllNodes(collectionStoreTree);
-            eventPublisher().onClickAddNewCollection();
+            globalEventPublisher().onClickAddNewCollection();
 
         });
 
@@ -141,8 +143,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             moreOptionsMenu.show(moreIconButton, 0, moreIconButton.getHeight());
         });
 
-        uiContext().setCollectionStoreTree(collectionStoreTree);
-        uiContext().setCollectionStoreTreeModel(collectionStoreTreeModel);
+        sideNavContext().setCollectionStoreTree(collectionStoreTree);
+        sideNavContext().setCollectionStoreTreeModel(collectionStoreTreeModel);
 
         return panel;
     }
@@ -155,7 +157,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
             if (selectedNode != null && selectedNode.getUserObject() instanceof DaakiaStoreRecord) {
                 Object userObject = selectedNode.getUserObject();
-                eventPublisher().onClickStoreCollectionNode((DaakiaStoreRecord) userObject);
+                globalEventPublisher().onSelectStoreCollectionNode((DaakiaStoreRecord) userObject);
             }
         });
 
@@ -173,14 +175,14 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 1) {
-                    if(TreeUtils.extractSelectedNodeUserObject(collectionStoreTree, e) == null) {
-                        Object root = collectionStoreTree.getModel().getRoot();
-                        collectionStoreTree.setSelectionPath(new TreePath(root));
-                    }
+                if(TreeUtils.extractSelectedNodeUserObject(collectionStoreTree, e) == null) {
+                    Object root = collectionStoreTree.getModel().getRoot();
+                    collectionStoreTree.setSelectionPath(new TreePath(root));
+                }
+                if (e.getClickCount() == 2) {
                     Object userObject = TreeUtils.extractSelectedNodeUserObject(collectionStoreTree, e);
                     if(userObject instanceof DaakiaStoreRecord) {
-                        eventPublisher().onClickStoreCollectionNode((DaakiaStoreRecord) userObject);
+                        globalEventPublisher().onDoubleClickStoreCollectionNode((DaakiaStoreRecord) userObject);
                     }
                 }
             }
@@ -196,6 +198,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     }
 
     private void renameSelectedTreeItem(DaakiaStoreRecord daakiaStoreRecord) {
-        eventPublisher().onRightClickRenameStoreCollectionNode(daakiaStoreRecord);
+        globalEventPublisher().onRightClickRenameStoreCollectionNode(daakiaStoreRecord);
     }
 }

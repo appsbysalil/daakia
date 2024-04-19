@@ -6,7 +6,7 @@ public class LabelUtils {
     private LabelUtils() {}
 
     public static String colorText(String prefix, String mainText, String suffix, String hexCode) {
-        return "<html>"+(prefix!=null ? prefix : "")+"<strong><font color='"+hexCode+"'>"+mainText+"</font></strong>"+(suffix != null ? suffix : "")+"</html>";
+        return "<html>"+(prefix!=null ? prefix : "")+" <strong><font color='"+hexCode+"'>"+mainText+"</font></strong> "+(suffix != null ? suffix : "")+"</html>";
     }
 
     public static String colorText(String prefix, String mainText, String suffix, JBColor jbColor) {

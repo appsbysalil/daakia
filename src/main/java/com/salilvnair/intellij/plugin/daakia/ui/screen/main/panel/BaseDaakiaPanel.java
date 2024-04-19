@@ -5,8 +5,10 @@ import com.intellij.ui.components.JBPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.core.awt.SwingComponent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaEventPublisher;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaGlobalEventPublisher;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.SideNavContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.UIContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.core.DaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
@@ -78,6 +80,10 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
         return dataContext.uiContext();
     }
 
+    protected SideNavContext sideNavContext() {
+        return dataContext.sideNavContext();
+    }
+
     protected DaakiaContext daakiaContext() {
         return dataContext.daakiaContext();
     }
@@ -93,6 +99,15 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
 
     public Publisher<EventObject> subscriber() {
         return dataContext.subscriber();
+    }
+
+
+    public DaakiaGlobalEventPublisher globalEventPublisher() {
+        return dataContext.globalEventPublisher();
+    }
+
+    public Publisher<EventObject> globalSubscriber() {
+        return dataContext.globalSubscriber();
     }
 
 

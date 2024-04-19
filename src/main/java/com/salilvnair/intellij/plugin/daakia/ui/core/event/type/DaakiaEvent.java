@@ -2,6 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.core.event.type;
 
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
@@ -16,6 +17,7 @@ public class DaakiaEvent extends EventObject {
     private ResponseEntity<String> responseEntity;
     private DaakiaHistory selectedDaakiaHistory;
     private DaakiaStoreRecord selectedDaakiaStoreRecord;
+    private DataContext dataContext;
 
 
     public DaakiaEvent(Object source, DaakiaEventType eventType) {
@@ -66,5 +68,13 @@ public class DaakiaEvent extends EventObject {
 
     public void setSelectedDaakiaStoreRecord(DaakiaStoreRecord selectedDaakiaStoreRecord) {
         this.selectedDaakiaStoreRecord = selectedDaakiaStoreRecord;
+    }
+
+    public DataContext dataContext() {
+        return dataContext;
+    }
+
+    public void setDataContext(DataContext dataContext) {
+        this.dataContext = dataContext;
     }
 }

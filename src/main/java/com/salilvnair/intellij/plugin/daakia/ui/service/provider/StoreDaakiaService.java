@@ -43,17 +43,17 @@ public class StoreDaakiaService extends BaseDaakiaService {
         try {
             String jsonString = JsonUtils.readJsonFromFile(DaakiaUtils.historyFile());
             Map<String, List<DaakiaHistory>> historyData = JsonUtils.jsonToPojo(jsonString, new TypeReference<>() {});
-            dataContext.uiContext().setHistoryData(historyData);
+            dataContext.sideNavContext().setHistoryData(historyData);
         }
         catch (IOException e) {
-            dataContext.uiContext().setHistoryData(new LinkedHashMap<>());
+            dataContext.sideNavContext().setHistoryData(new LinkedHashMap<>());
         }
     }
 
     private static void saveHistory(DataContext dataContext) {
 
         try {
-            String jsonString = JsonUtils.pojoToJson(dataContext.uiContext().historyData());
+            String jsonString = JsonUtils.pojoToJson(dataContext.sideNavContext().historyData());
             JsonUtils.writeJsonToFile(jsonString, DaakiaUtils.historyFile());
         }
         catch (IOException e) {}
@@ -64,9 +64,9 @@ public class StoreDaakiaService extends BaseDaakiaService {
             String jsonString = JsonUtils.readJsonFromFile(DaakiaUtils.storeFile());
             DaakiaStore daakiaStore = JsonUtils.jsonToPojo(jsonString, DaakiaStore.class);
             if(daakiaStore != null) {
-                dataContext.uiContext().setDaakiaStore(daakiaStore);
-                DefaultMutableTreeNode newRootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, dataContext.uiContext().collectionStoreRootNode());
-                dataContext.uiContext().setCollectionStoreRootNode(newRootNode);
+                dataContext.sideNavContext().setDaakiaStore(daakiaStore);
+                DefaultMutableTreeNode newRootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, dataContext.sideNavContext().collectionStoreRootNode());
+                dataContext.sideNavContext().setCollectionStoreRootNode(newRootNode);
             }
         }
         catch (IOException e) {
@@ -77,7 +77,7 @@ public class StoreDaakiaService extends BaseDaakiaService {
 
     private void saveRequest(DataContext dataContext) {
         try {
-            DefaultMutableTreeNode rootNode = dataContext.uiContext().collectionStoreRootNode();
+            DefaultMutableTreeNode rootNode = dataContext.sideNavContext().collectionStoreRootNode();
             String jsonString = JsonUtils.pojoToJson(DaakiaUtils.convertTreeToCollectionStore(rootNode));
             JsonUtils.writeJsonToFile(jsonString, DaakiaUtils.storeFile());
         }
