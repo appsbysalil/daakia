@@ -1,7 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.intellij.icons.AllIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.IconButton;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import javax.swing.*;
@@ -44,7 +44,7 @@ public class DaakiaSideNavPanelContainer extends BaseDaakiaPanel<DaakiaSideNavPa
     @Override
     public void initListeners() {
         hideShowButton.addActionListener(e -> {
-            eventPublisher().onClickSideNavVisibilityToggler();
+            globalEventPublisher().onClickSideNavVisibilityToggler();
         });
     }
 }

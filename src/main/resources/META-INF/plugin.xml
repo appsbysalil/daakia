@@ -28,10 +28,4 @@
                     anchor="bottom"
                     factoryClass="com.salilvnair.intellij.plugin.daakia.MainViewFactory"/>
     </extensions>
-    <actions>
-        <group id="MyPlugin.GreetingMenu" text="Greeting" description="Greeting menu">
-            <add-to-group group-id="MainMenu" anchor="last"/>
-            <action id="com.salilvnair.intellij.plugin.daakia.HelloAction" class="com.salilvnair.intellij.plugin.daakia.HelloAction" text="Hello" description="Says hello"/>
-        </group>
-    </actions>
 </idea-plugin>

@@ -56,7 +56,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     @Override
     public void initListeners() {
         initTreeListeners();
-        subscriber().subscribe(event -> {
+        globalSubscriber().subscribe(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_AFTER_HISTORY_ADDED)) {
                 TreeUtils.expandAllNodes(historyTree);
             }
@@ -65,13 +65,13 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
     private void initTreeNode() {
         daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_HISTORY, dataContext);
-        DefaultMutableTreeNode root = dataContext.uiContext().historyRootNode();
+        DefaultMutableTreeNode root = dataContext.sideNavContext().historyRootNode();
         historyTreeModel = new DefaultTreeModel(root);
         historyTree = new Tree(historyTreeModel);
         historyTree.setRootVisible(false);
         TreeUtils.expandAllNodes(historyTree);
-        uiContext().setHistoryTree(historyTree);
-        uiContext().setHistoryTreeModel(historyTreeModel);
+        sideNavContext().setHistoryTree(historyTree);
+        sideNavContext().setHistoryTreeModel(historyTreeModel);
     }
 
     public void initTreeListeners() {
@@ -80,7 +80,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) historyTree.getLastSelectedPathComponent();
             if (selectedNode != null && selectedNode.getUserObject() instanceof DaakiaHistory) {
                 Object userObject = selectedNode.getUserObject();
-                eventPublisher().onClickHistoryDataNode((DaakiaHistory) userObject);
+                globalEventPublisher().onSelectHistoryDataNode((DaakiaHistory) userObject);
             }
         });
 
@@ -98,10 +98,10 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 1) { // Single click
+                if (e.getClickCount() == 2) { // Single click
                     Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
                     if(userObject instanceof DaakiaHistory) {
-                        eventPublisher().onClickHistoryDataNode((DaakiaHistory) userObject);
+                        globalEventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
                     }
                 }
             }
@@ -123,6 +123,6 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     }
 
     private void renameSelectedTreeItem(DaakiaHistory selectedItem) {
-        eventPublisher().onRightClickRenameHistoryDataNode(selectedItem);
+        globalEventPublisher().onRightClickRenameHistoryDataNode(selectedItem);
     }
 }

@@ -1,8 +1,9 @@
-package com.salilvnair.intellij.plugin.daakia.ui.archive.util;
+package com.salilvnair.intellij.plugin.daakia.ui.core.icon;
 import javax.swing.*;
 
 public interface DaakiaIcons {
     Icon DaakiaIcon = DaakiaIconLoader.getIcon("/icons/DaakiaIcon.svg", DaakiaIcons.class);
+    Icon DaakiaIcon48 = DaakiaIconLoader.getIcon("/icons/DaakiaIcon48.svg", DaakiaIcons.class);
     Icon CollectionIcon = DaakiaIconLoader.getIcon("/icons/collection.svg", "/icons/collection_dark.svg", DaakiaIcons.class);
     Icon HistoryIcon = DaakiaIconLoader.getIcon("/icons/History.svg", DaakiaIcons.class);
     Icon SaveIcon = DaakiaIconLoader.getIcon("/icons/Save.svg", DaakiaIcons.class);

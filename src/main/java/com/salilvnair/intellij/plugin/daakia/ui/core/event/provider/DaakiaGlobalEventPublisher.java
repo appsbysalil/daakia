@@ -1,18 +1,19 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.provider;
 
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import org.springframework.http.ResponseEntity;
 
 import java.util.EventObject;
 
-public class DaakiaEventPublisher {
+public class DaakiaGlobalEventPublisher {
     private final Publisher<EventObject> publisher;
 
-    public DaakiaEventPublisher(Publisher<EventObject> publisher) {
+    public DaakiaGlobalEventPublisher(Publisher<EventObject> publisher) {
         this.publisher = publisher;
     }
 
@@ -48,7 +49,7 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
-    public void onClickHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
+    public void onSelectHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_SELECT_HISTORY_DATA_NODE);
         event.setSelectedDaakiaHistory(selectedDaakiaHistory);
         publisher.publish(event);
@@ -60,13 +61,28 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+
+    public void onLoadSelectedHistoryData(DataContext dataContext, DaakiaHistory selectedDaakiaHistory) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA);
+        event.setDataContext(dataContext);
+        event.setSelectedDaakiaHistory(selectedDaakiaHistory);
+        publisher.publish(event);
+    }
+
+    public void onLoadSelectedStoreCollectionData(DataContext dataContext, DaakiaStoreRecord selectedStoreRecord) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_LOAD_SELECTED_STORE_COLLECTION_DATA);
+        event.setDataContext(dataContext);
+        event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
+        publisher.publish(event);
+    }
+
     public void onRightClickRenameHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RIGHT_CLICK_RENAME_HISTORY_NODE);
         event.setSelectedDaakiaHistory(selectedDaakiaHistory);
         publisher.publish(event);
     }
 
-    public void onClickStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
+    public void onSelectStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_SELECT_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
         publisher.publish(event);

@@ -6,19 +6,20 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.frame.DaakiaMainFrame
+import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils
 
 
 class MainViewFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val form = DaakiaMainFrame();
-//        toolWindow.setIcon(); // Set your tab icon if needed
-        val openAsTabAction: AnAction = object : AnAction("Open as Tab") {
+        val openAsTabAction: AnAction = object : AnAction("About Daakia") {
             override fun actionPerformed(e: AnActionEvent) {
-                println("Opened Tab")
+                DaakiaUtils.showAboutDaakia(form)
             }
         }
+        openAsTabAction.templatePresentation.icon = DaakiaIcons.DaakiaIcon
         val actionList: List<AnAction> = listOf(openAsTabAction)
         toolWindow.setTitleActions(actionList)
         val contentManager = toolWindow.contentManager

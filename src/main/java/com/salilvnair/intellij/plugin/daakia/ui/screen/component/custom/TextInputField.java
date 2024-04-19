@@ -1,4 +1,4 @@
-package com.salilvnair.intellij.plugin.daakia.ui.archive.util;
+package com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom;
 
 import com.intellij.ui.JBColor;
 

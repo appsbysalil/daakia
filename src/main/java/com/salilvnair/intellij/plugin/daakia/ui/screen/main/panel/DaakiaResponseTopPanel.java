@@ -2,7 +2,6 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.layout.CustomFlowLayout;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
@@ -30,10 +29,10 @@ public class DaakiaResponseTopPanel extends BaseDaakiaPanel<DaakiaResponseTopPan
     @Override
     public void initComponents() {
         responseMetaDataPanel = new JPanel();
-        responseMetaDataPanel.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 30, 20));
-        statusLabel = new JLabel("Status:");
-        sizeLabel = new JLabel("Size:");
-        timeLabel = new JLabel("Time:");
+        responseMetaDataPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 20));
+        statusLabel = new JLabel("<html>&nbsp;&nbsp;Status:</html>");
+        sizeLabel = new JLabel("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size:</html>");
+        timeLabel = new JLabel("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time:</html>");
         uiContext().setStatusLabel(statusLabel);
         uiContext().setSizeLabel(sizeLabel);
         uiContext().setTimeLabel(timeLabel);

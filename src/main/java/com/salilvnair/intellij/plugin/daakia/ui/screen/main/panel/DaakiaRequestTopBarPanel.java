@@ -2,7 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
@@ -74,11 +74,11 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
             DaakiaContext daakiaContext = daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
             eventPublisher().onReceivingResponse(daakiaContext.responseEntity());
             daakiaService(DaakiaType.APP).execute(AppDaakiaType.ADD_HISTORY, dataContext);
-            eventPublisher().onAfterHistoryAdded();
+            globalEventPublisher().onAfterHistoryAdded();
             daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
         });
         saveButton.addActionListener(e -> {
-            eventPublisher().onClickSend();
+            eventPublisher().onClickSave();
             daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext);
             daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
         });

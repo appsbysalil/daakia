@@ -2,6 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.LabelUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -135,6 +136,6 @@ public class DaakiaBaseStoreData {
             hexCode ="#eab208";
         }
         String displayText = displayName == null ? url: displayName;
-        return "<html><strong><font color='"+hexCode+"'>"+requestType+"</font></strong>&nbsp; "+displayText+"</html>";
+        return LabelUtils.colorText(null, requestType, "&nbsp;"+displayText, hexCode);
     }
 }

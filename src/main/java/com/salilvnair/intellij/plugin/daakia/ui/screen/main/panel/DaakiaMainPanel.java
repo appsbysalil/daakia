@@ -16,7 +16,8 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
 
 
     //center panel
-    private DaakiaRightVerticalSplitPanel rightVerticalSplitPanel;
+    private DaakiaTabbedMainPanel tabbedMainPanel;
+
 
     public DaakiaMainPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -38,9 +39,9 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
     @Override
     public void initComponents() {
         leftSideNavPanelContainer = new DaakiaSideNavPanelContainer(rootPane, dataContext);
-        rightVerticalSplitPanel = new DaakiaRightVerticalSplitPanel(rootPane, dataContext);
-        leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSideNavPanelContainer, rightVerticalSplitPanel);
-        leftRightSplitPane.setDividerLocation(42);
+        tabbedMainPanel = new DaakiaTabbedMainPanel(rootPane, dataContext);
+        leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSideNavPanelContainer, tabbedMainPanel);
+        leftRightSplitPane.setDividerLocation(300);
         leftRightSplitPane.setDividerSize(5);
     }
 
@@ -51,7 +52,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event -> {
+        globalSubscriber().subscribe(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER)) {
                 leftRightSplitPane.setDividerLocation(leftRightSplitPane.getDividerLocation() == 42 ? 300 : 42);
             }
