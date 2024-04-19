@@ -45,6 +45,27 @@ public class JsonUtils {
         }
     }
 
+    public static void writeJsonToFile(String json, File file) throws IOException {
+        Files.write(file.toPath(), json.getBytes());
+    }
+
+    public static String readJsonFromFile(File file) throws IOException {
+        File parentDir = file.getParentFile();
+
+        // Create parent directories recursively if they don't exist
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+        if (!file.exists()) {
+            File cFile = new File(file.getAbsolutePath());
+            cFile.createNewFile();
+            return "{}"; // Return empty JSON object if file didn't exist
+        }
+        else {
+            return new String(Files.readAllBytes(file.toPath()));
+        }
+    }
+
     public static MultiValueMap<String, String> jsonStringToMultivaluedMap(String jsonString) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {

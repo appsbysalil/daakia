@@ -31,6 +31,7 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
         responseTextArea = new RSyntaxTextArea();
         responseTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
         responseTextArea.setCodeFoldingEnabled(true);
+        responseTextArea.setEditable(false);
         dataContext.uiContext().setResponseTextArea(responseTextArea);
         scrollPane = new RTextScrollPane(responseTextArea);
         scrollPane.setIconRowHeaderEnabled(true); // Enable icon row header for folding icons

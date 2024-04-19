@@ -1,7 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer;
 
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
