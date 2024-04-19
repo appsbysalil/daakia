@@ -5,14 +5,14 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import javax.swing.*;
 import java.awt.*;
 
-public class DaakiaRightPanel extends BaseDaakiaPanel<DaakiaRightPanel> {
+public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRightVerticalSplitLeftPanel> {
 
-    private DaakiaRightTopPanel topPanel;
-    private DaakiaRightCenterPanel centerPanel;
+    private DaakiaRequestTopPanel requestTopPanel;
+    private DaakiaRequestBottomPanel requestBottomPanel;
 
 
 
-    public DaakiaRightPanel(JRootPane rootPane, DataContext dataContext) {
+    public DaakiaRightVerticalSplitLeftPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
     }
@@ -25,20 +25,20 @@ public class DaakiaRightPanel extends BaseDaakiaPanel<DaakiaRightPanel> {
 
     @Override
     public void initComponents() {
-        topPanel = new DaakiaRightTopPanel(rootPane, dataContext);
-        centerPanel = new DaakiaRightCenterPanel(rootPane, dataContext);
+        requestTopPanel = new DaakiaRequestTopPanel(rootPane, dataContext);
+        requestBottomPanel = new DaakiaRequestBottomPanel(rootPane, dataContext);
     }
 
     @Override
     public void initStyle() {
         debugIfApplicable(this);
-        setMinimumSize(new Dimension(1100, 0));
+        setMinimumSize(new Dimension(700, 0));
     }
 
     @Override
     public void initChildrenLayout() {
-        add(topPanel, BorderLayout.NORTH);
-        add(centerPanel, BorderLayout.CENTER);
+        add(requestTopPanel, BorderLayout.NORTH);
+        add(requestBottomPanel, BorderLayout.CENTER);
     }
 
     @Override

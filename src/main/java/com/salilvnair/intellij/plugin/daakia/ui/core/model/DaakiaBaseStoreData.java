@@ -1,4 +1,4 @@
-package com.salilvnair.intellij.plugin.daakia.ui.archive.model;
+package com.salilvnair.intellij.plugin.daakia.ui.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,9 +16,13 @@ public class DaakiaBaseStoreData {
     protected String requestType;
     protected String url;
     protected String headers;
+    protected String responseHeaders;
     protected String requestBody;
     protected String responseBody;
     protected String createdDate;
+    protected String sizeText;
+    protected String timeTaken;
+    protected int statusCode;
 
 
     public String getUuid() {
@@ -91,6 +95,38 @@ public class DaakiaBaseStoreData {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    public void setResponseHeaders(String responseHeaders) {
+        this.responseHeaders = responseHeaders;
+    }
+
+    public String getSizeText() {
+        return sizeText;
+    }
+
+    public void setSizeText(String sizeText) {
+        this.sizeText = sizeText;
+    }
+
+    public String getTimeTaken() {
+        return timeTaken;
+    }
+
+    public void setTimeTaken(String timeTaken) {
+        this.timeTaken = timeTaken;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String render() {

@@ -5,6 +5,7 @@ import com.intellij.ui.components.JBPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.core.awt.SwingComponent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaEventPublisher;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.UIContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.core.DaakiaService;
@@ -75,6 +76,10 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
 
     protected UIContext uiContext() {
         return dataContext.uiContext();
+    }
+
+    protected DaakiaContext daakiaContext() {
+        return dataContext.daakiaContext();
     }
 
     protected DaakiaService daakiaService(DaakiaType daakiaType) {

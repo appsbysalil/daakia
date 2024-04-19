@@ -1,6 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer;
 
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
 
 import javax.swing.*;

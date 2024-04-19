@@ -13,4 +13,5 @@ public interface DaakiaIcons {
     Icon HttpRequestsFiletype48 = DaakiaIconLoader.getIcon("/icons/httpRequestsFiletype48.svg", "/icons/httpRequestsFiletype48_dark.svg", DaakiaIcons.class);
     Icon DeleteIcon = DaakiaIconLoader.getIcon("/icons/deleteIcon.svg", DaakiaIcons.class);
     Icon PackageName48 = DaakiaIconLoader.getIcon("/icons/abbreviatePackageNames.svg", "/icons/abbreviatePackageNames_dark.svg", DaakiaIcons.class);
+    Icon ErrorIcon48 = DaakiaIconLoader.getIcon("/icons/notificationError48.svg", "/icons/notificationError48_dark.svg", DaakiaIcons.class);
 }

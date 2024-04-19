@@ -43,4 +43,8 @@ public class FileUtils {
 
         return data;
     }
+
+    public static String userHomePath() {
+        return System.getProperty("user.home");
+    }
 }

@@ -1,14 +1,15 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
 import com.intellij.ui.JBColor;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStore;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,5 +76,15 @@ public class DaakiaUtils {
             }
         });
         timer.start();
+    }
+
+    public static File storeFile() {
+        String userHomePath = FileUtils.userHomePath();
+        return new File(userHomePath + File.separator + ".salilvnair" + File.separator + "daakia"+ File.separator + "daakia-store.json");
+    }
+
+    public static File historyFile() {
+        String userHomePath = FileUtils.userHomePath();
+        return new File(userHomePath + File.separator + ".salilvnair" + File.separator + "daakia"+ File.separator + "daakia-history.json");
     }
 }

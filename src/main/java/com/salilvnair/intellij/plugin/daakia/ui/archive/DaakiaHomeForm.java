@@ -13,7 +13,7 @@ import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.treeStructure.Tree;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
