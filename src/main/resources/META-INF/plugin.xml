@@ -20,6 +20,9 @@
 
     <change-notes><![CDATA[
         v1.0.0 released
+
+        <br>
+        v1.0.1 released with bug fixes , 401 when in post was not working
     ]]>
     </change-notes>
 

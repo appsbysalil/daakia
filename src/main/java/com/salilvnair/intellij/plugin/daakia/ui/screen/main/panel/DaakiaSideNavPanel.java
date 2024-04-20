@@ -40,8 +40,8 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
         tabbedPane = new JBTabbedPane(JTabbedPane.LEFT, JTabbedPane.WRAP_TAB_LAYOUT);
         historyPanel = new HistoryPanel(rootPane, dataContext);
         collectionStorePanel = new CollectionStorePanel(rootPane, dataContext);
-        tabbedPane.addTab(null, DaakiaIcons.HistoryIcon, historyPanel);
-        tabbedPane.addTab(null, DaakiaIcons.CollectionIcon, collectionStorePanel);
+        tabbedPane.addTab("  ", DaakiaIcons.HistoryIcon, historyPanel);
+        tabbedPane.addTab("  ", DaakiaIcons.CollectionIcon, collectionStorePanel);
         tabbedPane.setToolTipTextAt(0, "History");
         tabbedPane.setToolTipTextAt(1, "Collection");
     }

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.salilvnair.jb.plugin"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -13,10 +13,11 @@ repositories {
 
 dependencies {
     implementation("org.springframework:spring-web:6.1.5")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1") {
+        exclude("org.slf4j", "slf4j-api")
+    }
     implementation("com.fifesoft:rsyntaxtextarea:3.4.0")
     compileOnly("org.projectlombok:lombok:0.11.0")
-
-
 }
 
 // Configure Gradle IntelliJ Plugin

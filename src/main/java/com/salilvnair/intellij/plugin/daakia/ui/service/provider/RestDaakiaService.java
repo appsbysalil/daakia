@@ -8,6 +8,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +31,7 @@ public class RestDaakiaService extends BaseDaakiaService {
         long startTime = System.currentTimeMillis();
         RestResponseErrorHandler errorHandler = new RestResponseErrorHandler();
         restTemplate.setErrorHandler(errorHandler);
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.valueOf(requestType != null ? requestType : "GET"), entity, String.class);
         String body = response.getBody();
         HttpHeaders headers = response.getHeaders();
