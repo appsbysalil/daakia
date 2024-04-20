@@ -26,6 +26,7 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Daakia"
+                    icon="AllIcons.Javaee.WebServiceClient"
                     anchor="bottom"
                     factoryClass="com.salilvnair.intellij.plugin.daakia.MainViewFactory"/>
     </extensions>
