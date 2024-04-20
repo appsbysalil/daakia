@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,12 +29,14 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
         leftPanel = new DaakiaRightVerticalSplitLeftPanel(rootPane, dataContext);
         rightPanel = new DaakiaRightVerticalSplitRightPanel(rootPane, dataContext);
         leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
-        leftRightSplitPane.setDividerSize(5);
+        leftRightSplitPane.setDividerSize(3);
     }
 
     @Override
     public void initStyle() {
         debugIfApplicable(this);
+        leftRightSplitPane.setUI(DaakiaUtils.thinDivider());
+        leftRightSplitPane.setBorder(null);
     }
 
     @Override

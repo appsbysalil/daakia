@@ -37,6 +37,7 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
         scrollPane.setIconRowHeaderEnabled(true); // Enable icon row header for folding icons
         scrollPane.setFoldIndicatorEnabled(true); // Enable fold indicators
         scrollPane.setViewportView(responseTextArea);
+        scrollPane.setBorder(null);
     }
 
     @Override

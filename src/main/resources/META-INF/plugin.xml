@@ -18,6 +18,11 @@
         all without leaving your development environment.
   ]]></description>
 
+    <change-notes><![CDATA[
+        v1.0.0 released
+    ]]>
+    </change-notes>
+
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>

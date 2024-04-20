@@ -1,11 +1,16 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
+import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -102,4 +107,22 @@ public class DaakiaUtils {
                 """;
         JOptionPane.showMessageDialog(component, message, "About Daakia", JOptionPane.ERROR_MESSAGE, DaakiaIcons.DaakiaIcon48);
     }
+
+    public static @NotNull BasicSplitPaneUI thinDivider() {
+        return new BasicSplitPaneUI() {
+            public BasicSplitPaneDivider createDefaultDivider() {
+                return new BasicSplitPaneDivider(this) {
+                    public void setBorder(Border b) {}
+
+                    @Override
+                    public void paint(Graphics g) {
+                        g.setColor(new JBColor(Gray._213, Gray._50)); // Set the color of the divider
+                        g.fillRect(0, 0, getSize().width, getSize().height);
+                        super.paint(g);
+                    }
+                };
+            }
+        };
+    }
+
 }

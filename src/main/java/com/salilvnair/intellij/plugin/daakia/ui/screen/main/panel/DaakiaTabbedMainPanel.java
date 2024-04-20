@@ -21,7 +21,6 @@ import java.util.EventObject;
 
 public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel> {
     private JTabbedPane dynamicDaakiaTabbedPane;
-    private DaakiaRightVerticalSplitPanel tabContent;
 
     public DaakiaTabbedMainPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);

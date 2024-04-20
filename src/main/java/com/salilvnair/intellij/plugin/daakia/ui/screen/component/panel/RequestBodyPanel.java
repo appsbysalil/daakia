@@ -33,6 +33,7 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
         scrollPane.setIconRowHeaderEnabled(true); // Enable icon row header for folding icons
         scrollPane.setFoldIndicatorEnabled(true); // Enable fold indicators
         scrollPane.setViewportView(requestTextArea);
+        scrollPane.setBorder(null);
     }
 
     @Override
