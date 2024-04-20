@@ -1,12 +1,11 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.salilvnair.intellij.plugin.daakia</id>
+    <id>com.salilvnair.jb.plugin.daakia</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
     <name>Daakia</name>
-
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="support@salilvnair.com" url="https://www.salilvnair.com">SalilVNair</vendor>
 
@@ -14,7 +13,9 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-        Daakia is a postman kind of rest client directly built into the ide
+        An IntelliJ plugin designed to streamline API development directly within the IntelliJ IDE.
+        It offers a comprehensive set of features to manage and test the rest APIs seamlessly,
+        all without leaving your development environment.
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
