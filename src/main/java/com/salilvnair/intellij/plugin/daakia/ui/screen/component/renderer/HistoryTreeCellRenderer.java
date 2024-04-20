@@ -1,6 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer;
 
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

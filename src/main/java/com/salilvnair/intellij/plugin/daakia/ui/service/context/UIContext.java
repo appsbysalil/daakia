@@ -1,45 +1,33 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.treeStructure.Tree;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStore;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
+import javax.swing.table.DefaultTableModel;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class UIContext {
+    // request response components
     private Map<String, List<TextInputField>> headerTextFields;
     private RSyntaxTextArea requestTextArea;
     private RSyntaxTextArea responseTextArea;
     private ComboBox<String> requestTypes;
     private JTextField urlTextField;
-
-    //history panel related components
-    private Tree historyTree;
-    private DefaultTreeModel historyTreeModel;
-    private Map<String, List<DaakiaHistory>> historyData;
-    private DaakiaStore daakiaStore;
-    private DefaultMutableTreeNode historyRootNode;
-    private DaakiaHistory daakiaHistory;
-    private DaakiaHistory selectedDaakiaHistory;
+    private JTable responseHeaderTable;
+    private DefaultTableModel responseHeaderTableModel;
+    private JLabel statusLabel;
+    private JLabel sizeLabel;
+    private JLabel timeLabel;
 
     //headers panel related components
     private JPanel headerScrollPanel;
     private JPanel headersPanel;
 
-    //Daakia store related components
-    private Tree collectionStoreTree;
-    private DefaultTreeModel collectionStoreTreeModel;
-    private DefaultMutableTreeNode collectionStoreRootNode;
-    private DaakiaStoreRecord selectedDaakiaStoreRecord;
+
 
 
     public Map<String, List<TextInputField>> headerTextFields() {
@@ -81,60 +69,6 @@ public class UIContext {
         this.urlTextField = urlTextField;
     }
 
-    public Tree historyTree() {
-        return historyTree;
-    }
-
-    public void setHistoryTree(Tree historyTree) {
-        this.historyTree = historyTree;
-    }
-
-    public DefaultTreeModel historyTreeModel() {
-        return historyTreeModel;
-    }
-
-    public void setHistoryTreeModel(DefaultTreeModel historyTreeModel) {
-        this.historyTreeModel = historyTreeModel;
-    }
-
-    public Map<String, List<DaakiaHistory>> historyData() {
-        if (historyData == null) {
-            historyData = new HashMap<>();
-        }
-        return historyData;
-    }
-
-    public void setHistoryData(Map<String, List<DaakiaHistory>> historyData) {
-        this.historyData = historyData;
-    }
-
-    public DefaultMutableTreeNode historyRootNode() {
-        if(historyRootNode == null) {
-            historyRootNode = new DefaultMutableTreeNode("History");
-        }
-        return historyRootNode;
-    }
-
-    public void setHistoryRootNode(DefaultMutableTreeNode historyRootNode) {
-        this.historyRootNode = historyRootNode;
-    }
-
-    public DaakiaHistory daakiaHistory() {
-        return daakiaHistory;
-    }
-
-    public void setDaakiaHistory(DaakiaHistory daakiaHistory) {
-        this.daakiaHistory = daakiaHistory;
-    }
-
-    public DaakiaHistory selectedDaakiaHistory() {
-        return selectedDaakiaHistory;
-    }
-
-    public void setSelectedDaakiaHistory(DaakiaHistory selectedDaakiaHistory) {
-        this.selectedDaakiaHistory = selectedDaakiaHistory;
-    }
-
     public JPanel headerScrollPanel() {
         return headerScrollPanel;
     }
@@ -151,46 +85,43 @@ public class UIContext {
         this.headersPanel = headersPanel;
     }
 
-    public Tree collectionStoreTree() {
-        return collectionStoreTree;
+    public JLabel statusLabel() {
+        return statusLabel;
     }
 
-    public void setCollectionStoreTree(Tree collectionStoreTree) {
-        this.collectionStoreTree = collectionStoreTree;
+    public void setStatusLabel(JLabel statusLabel) {
+        this.statusLabel = statusLabel;
     }
 
-    public DefaultTreeModel collectionStoreTreeModel() {
-        return collectionStoreTreeModel;
+    public JLabel sizeLabel() {
+        return sizeLabel;
     }
 
-    public void setCollectionStoreTreeModel(DefaultTreeModel collectionStoreTreeModel) {
-        this.collectionStoreTreeModel = collectionStoreTreeModel;
+    public void setSizeLabel(JLabel sizeLabel) {
+        this.sizeLabel = sizeLabel;
     }
 
-    public DefaultMutableTreeNode collectionStoreRootNode() {
-        if(collectionStoreRootNode == null) {
-            collectionStoreRootNode = new DefaultMutableTreeNode("Collections");
-        }
-        return collectionStoreRootNode;
+    public JLabel timeLabel() {
+        return timeLabel;
     }
 
-    public void setCollectionStoreRootNode(DefaultMutableTreeNode collectionStoreRootNode) {
-        this.collectionStoreRootNode = collectionStoreRootNode;
+    public void setTimeLabel(JLabel timeLabel) {
+        this.timeLabel = timeLabel;
     }
 
-    public DaakiaStore daakiaStore() {
-        return daakiaStore;
+    public JTable responseHeaderTable() {
+        return responseHeaderTable;
     }
 
-    public void setDaakiaStore(DaakiaStore daakiaStore) {
-        this.daakiaStore = daakiaStore;
+    public void setResponseHeaderTable(JTable responseHeaderTable) {
+        this.responseHeaderTable = responseHeaderTable;
     }
 
-    public DaakiaStoreRecord selectedDaakiaStoreRecord() {
-        return selectedDaakiaStoreRecord;
+    public DefaultTableModel responseHeaderTableModel() {
+        return responseHeaderTableModel;
     }
 
-    public void setSelectedDaakiaStoreRecord(DaakiaStoreRecord selectedDaakiaStoreRecord) {
-        this.selectedDaakiaStoreRecord = selectedDaakiaStoreRecord;
+    public void setResponseHeaderTableModel(DefaultTableModel responseHeaderTableModel) {
+        this.responseHeaderTableModel = responseHeaderTableModel;
     }
 }

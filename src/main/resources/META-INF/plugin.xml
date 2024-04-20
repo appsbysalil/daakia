@@ -1,21 +1,27 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.salilvnair.intellij.plugin.daakia</id>
+    <id>com.salilvnair.jb.plugin.daakia</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
     <name>Daakia</name>
-
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="support@salilvnair.com" url="https://www.salilvnair.com">SalilVNair</vendor>
+    <vendor email="support@salilvnair.com" url="https://www.salilvnair.com">Salil V Nair</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-        Daakia is a postman kind of rest client directly built into the ide
+        An IntelliJ plugin designed to streamline API development directly within the IntelliJ IDE.
+        It offers a comprehensive set of features to manage and test the rest APIs seamlessly,
+        all without leaving your development environment.
   ]]></description>
+
+    <change-notes><![CDATA[
+        v1.0.0 released
+    ]]>
+    </change-notes>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
@@ -25,13 +31,8 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Daakia"
+                    icon="AllIcons.Javaee.WebServiceClient"
                     anchor="bottom"
                     factoryClass="com.salilvnair.intellij.plugin.daakia.MainViewFactory"/>
     </extensions>
-    <actions>
-        <group id="MyPlugin.GreetingMenu" text="Greeting" description="Greeting menu">
-            <add-to-group group-id="MainMenu" anchor="last"/>
-            <action id="com.salilvnair.intellij.plugin.daakia.HelloAction" class="com.salilvnair.intellij.plugin.daakia.HelloAction" text="Hello" description="Says hello"/>
-        </group>
-    </actions>
 </idea-plugin>

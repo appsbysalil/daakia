@@ -1,9 +1,11 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.type;
 
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
 import java.util.EventObject;
 
 /**
@@ -15,6 +17,7 @@ public class DaakiaEvent extends EventObject {
     private ResponseEntity<String> responseEntity;
     private DaakiaHistory selectedDaakiaHistory;
     private DaakiaStoreRecord selectedDaakiaStoreRecord;
+    private DataContext dataContext;
 
 
     public DaakiaEvent(Object source, DaakiaEventType eventType) {
@@ -32,6 +35,10 @@ public class DaakiaEvent extends EventObject {
 
     public static boolean ofType(EventObject event, DaakiaEventType eventType) {
         return event instanceof DaakiaEvent && ((DaakiaEvent)event).eventType == eventType;
+    }
+
+    public static boolean ofAnyType(EventObject event, DaakiaEventType... eventTypes) {
+        return event instanceof DaakiaEvent && Arrays.stream(eventTypes).anyMatch(e -> e == ((DaakiaEvent) event).eventType);
     }
 
     public static DaakiaEvent extract(EventObject event) {
@@ -61,5 +68,13 @@ public class DaakiaEvent extends EventObject {
 
     public void setSelectedDaakiaStoreRecord(DaakiaStoreRecord selectedDaakiaStoreRecord) {
         this.selectedDaakiaStoreRecord = selectedDaakiaStoreRecord;
+    }
+
+    public DataContext dataContext() {
+        return dataContext;
+    }
+
+    public void setDataContext(DataContext dataContext) {
+        this.dataContext = dataContext;
     }
 }

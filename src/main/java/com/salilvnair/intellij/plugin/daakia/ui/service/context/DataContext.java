@@ -2,7 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaEventPublisher;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.main.frame.DaakiaMainFrame;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaGlobalEventPublisher;
 import com.salilvnair.intellij.plugin.daakia.ui.service.core.DaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.factory.DaakiaFactory;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
@@ -10,15 +10,14 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import java.util.EventObject;
 
 public class DataContext {
-    private final DaakiaMainFrame daakiaMainFrame;
+    private final GlobalContext globalContext;
     private DaakiaContext daakiaContext;
     private UIContext uiContext;
     private Publisher<EventObject> publisher;
     private DaakiaEventPublisher eventPublisher;
 
-
-    public DataContext(DaakiaMainFrame daakiaMainFrame) {
-        this.daakiaMainFrame = daakiaMainFrame;
+    public DataContext(GlobalContext globalContext) {
+        this.globalContext = globalContext;
         this.daakiaContext = new DaakiaContext();
         this.uiContext = new UIContext();
         this.publisher = new Publisher<>();
@@ -37,6 +36,18 @@ public class DataContext {
         return publisher;
     }
 
+    public Publisher<EventObject> globalPublisher() {
+        return this.globalContext.globalPublisher();
+    }
+
+    public DaakiaGlobalEventPublisher globalEventPublisher() {
+        return this.globalContext.globalEventPublisher();
+    }
+
+    public Publisher<EventObject> globalSubscriber() {
+        return this.globalContext.globalSubscriber();
+    }
+
     public DaakiaContext daakiaContext() {
         return daakiaContext;
     }
@@ -44,9 +55,15 @@ public class DataContext {
     public UIContext uiContext() {
         return uiContext;
     }
+    public SideNavContext sideNavContext() {
+        return globalContext().sideNavContext();
+    }
 
     public DaakiaService daakiaService(DaakiaType daakiaType) {
         return DaakiaFactory.generate(daakiaType);
     }
 
+    public GlobalContext globalContext() {
+        return globalContext;
+    }
 }

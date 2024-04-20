@@ -2,12 +2,13 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.ui.treeStructure.Tree;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaBaseStoreData;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaHistory;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.model.DaakiaStoreRecord;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.util.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.archive.util.TextInputField;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.IconButton;
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -17,10 +18,13 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DateUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.LabelUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
@@ -43,11 +47,25 @@ public class AppDaakiaService extends BaseDaakiaService {
         else if(AppDaakiaType.ON_CLICK_HISTORY_NODE.equals(type)) {
             loadApplicableDaakiaUiComponentsOnClickHistoryNode(type, dataContext, objects);
         }
+        else if(AppDaakiaType.ON_DBL_CLICK_HISTORY_NODE.equals(type)
+            || AppDaakiaType.ON_RIGHT_CLICK_RENAME_HISTORY_NODE.equals(type)) {
+            renameHistoryDisplayName(type, dataContext, objects);
+        }
+        else if(AppDaakiaType.ON_DBL_CLICK_STORE_COLLECTION_NODE.equals(type)
+            || AppDaakiaType.ON_RIGHT_CLICK_RENAME_STORE_COLLECTION_NODE.equals(type)) {
+            renameCollectionDisplayName(type, dataContext, objects);
+        }
         else if(AppDaakiaType.ON_CLICK_STORE_COLLECTION_NODE.equals(type)) {
             loadApplicableDaakiaUiComponentsOnClickStoreCollectionNode(type, dataContext, objects);
         }
-        else if(AppDaakiaType.CREATE_HEADER.equals(type)) {
+        else if(AppDaakiaType.CREATE_REQUEST_HEADER.equals(type)) {
             createHeader(dataContext, (String) objects[0], (String) objects[1]);
+        }
+        else if (AppDaakiaType.CREATE_RESPONSE_HEADERS.equals(type)) {
+            createResponseHeaders(dataContext, objects);
+        }
+        else if (AppDaakiaType.CREATE_RESPONSE_STATUS.equals(type)) {
+            createResponseStatus(dataContext, objects);
         }
         else if(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE.equals(type)) {
             onSaveRequest(dataContext, objects);
@@ -55,45 +73,117 @@ public class AppDaakiaService extends BaseDaakiaService {
         return dataContext.daakiaContext();
     }
 
-    private void initStoreCollections(DaakiaTypeBase type, DataContext dataContext, Object[] objects) {
+    private void createResponseStatus(DataContext dataContext, Object... objects) {
+        ResponseMetadata responseMetadata = dataContext.daakiaContext().responseMetadata();
+        HttpStatus httpStatus = dataContext.daakiaContext().httpStatus();
+        String statusColor = "#10b97e";
+        if(httpStatus.isError()) {
+            statusColor = "#ef4444";
+        }
+
+        dataContext.uiContext().statusLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;Status: ", httpStatus.value() + " " + httpStatus.getReasonPhrase(), null, statusColor));
+        dataContext.uiContext().sizeLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size: ", responseMetadata.getSizeText(), null, statusColor));
+        dataContext.uiContext().timeLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time: ", responseMetadata.getTimeTaken(), null, statusColor));
+    }
+
+    private void createResponseHeaders(DataContext dataContext, Object... objects) {
+        DefaultTableModel responseHeaderTableModel = dataContext.uiContext().responseHeaderTableModel();
+        responseHeaderTableModel.setRowCount(0);
+        dataContext.daakiaContext().responseHeaders().forEach((key, value) -> {
+            responseHeaderTableModel.addRow(new Object[]{key, value!=null ? String.join(";", value) : null});
+        });
+        responseHeaderTableModel.fireTableDataChanged();
+    }
+
+    private void renameHistoryDisplayName(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        String displayName = (String) JOptionPane
+                .showInputDialog(
+                        dataContext.sideNavContext().collectionStoreTreePanel(),
+                        "Enter a name",
+                        "",
+                        JOptionPane.QUESTION_MESSAGE,
+                        DaakiaIcons.HttpRequestsFiletype48,
+                        null,
+                        null);
+        dataContext.sideNavContext().selectedDaakiaHistory().setDisplayName(displayName);
+    }
+
+    private void renameCollectionDisplayName(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        String displayName = (String) JOptionPane
+                .showInputDialog(
+                        dataContext.sideNavContext().collectionStoreTreePanel(),
+                        "Enter a name",
+                        "",
+                        JOptionPane.QUESTION_MESSAGE,
+                        DaakiaIcons.HttpRequestsFiletype48,
+                        null,
+                        null);
+        dataContext.sideNavContext().selectedDaakiaStoreRecord().setDisplayName(displayName);
+    }
+
+    private void initStoreCollections(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         dataContext.daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.LOAD_STORE_COLLECTIONS, dataContext);
     }
 
     private void onSaveRequest(DataContext dataContext, Object... objects) {
-        if(!TreeUtils.selectedNodeIsRootNode(dataContext.uiContext().collectionStoreTree())) {
+        if(!TreeUtils.selectedNodeIsRootNode(dataContext.sideNavContext().collectionStoreTree())) {
             System.out.println("lets add this request to the Tree");
-            String displayName = (String) objects[0];
-            DaakiaStoreRecord daakiaStoreRecord = generateStoreData(dataContext, DaakiaStoreRecord.class);
-            assert daakiaStoreRecord != null;
-            daakiaStoreRecord.setDisplayName(displayName);
-            DefaultMutableTreeNode insertionNode = TreeUtils.parentNode(dataContext.uiContext().collectionStoreTree(), DaakiaStoreRecord.class);
-            insertionNode.add(new DefaultMutableTreeNode(daakiaStoreRecord));
-            dataContext.uiContext().collectionStoreTreeModel().nodesWereInserted(insertionNode, new int[]{insertionNode.getChildCount() - 1});
+            String displayName = (String) JOptionPane
+                    .showInputDialog(
+                            dataContext.sideNavContext().collectionStoreTreePanel(),
+                            "Enter a name",
+                            "",
+                            JOptionPane.QUESTION_MESSAGE,
+                            DaakiaIcons.HttpRequestsFiletype48,
+                            null,
+                            null);
+            if(displayName!=null && !displayName.isEmpty()) {
+                DaakiaStoreRecord daakiaStoreRecord = generateStoreData(dataContext, DaakiaStoreRecord.class);
+                assert daakiaStoreRecord != null;
+                daakiaStoreRecord.setDisplayName(displayName);
+                DefaultMutableTreeNode insertionNode = TreeUtils.parentNode(dataContext.sideNavContext().collectionStoreTree(), DaakiaStoreRecord.class);
+                insertionNode.add(new DefaultMutableTreeNode(daakiaStoreRecord));
+                dataContext.sideNavContext().collectionStoreTreeModel().nodesWereInserted(insertionNode, new int[]{insertionNode.getChildCount() - 1});
+            }
         }
         else {
             System.out.println("Alert user saying : please select a collection to store the request.");
+            JOptionPane.showMessageDialog(dataContext.sideNavContext().collectionStoreTreePanel(), "Please select a collection to store the request.", "Alert", JOptionPane.ERROR_MESSAGE, DaakiaIcons.ErrorIcon48);
         }
     }
 
-    private void loadApplicableDaakiaUiComponentsOnClickHistoryNode(DaakiaTypeBase type, DataContext dataContext, Object[] objects) {
-        DaakiaHistory daakiaHistory = dataContext.uiContext().selectedDaakiaHistory();
-        loadApplicableDaakiaUiComponents(dataContext, daakiaHistory);
+    private void loadApplicableDaakiaUiComponentsOnClickHistoryNode(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        DaakiaHistory daakiaHistory = dataContext.sideNavContext().selectedDaakiaHistory();
+        loadApplicableDaakiaUiComponents(dataContext, daakiaHistory, objects);
     }
 
-    private void loadApplicableDaakiaUiComponentsOnClickStoreCollectionNode(DaakiaTypeBase type, DataContext dataContext, Object[] objects) {
-        DaakiaStoreRecord daakiaStoreRecord = dataContext.uiContext().selectedDaakiaStoreRecord();
-        loadApplicableDaakiaUiComponents(dataContext, daakiaStoreRecord);
+    private void loadApplicableDaakiaUiComponentsOnClickStoreCollectionNode(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        DaakiaStoreRecord daakiaStoreRecord = dataContext.sideNavContext().selectedDaakiaStoreRecord();
+        loadApplicableDaakiaUiComponents(dataContext, daakiaStoreRecord, objects);
     }
 
-    private void loadApplicableDaakiaUiComponents(DataContext dataContext, DaakiaBaseStoreData baseStoreData) {
+    private void loadApplicableDaakiaUiComponents(DataContext dataContext, DaakiaBaseStoreData baseStoreData, Object... objects) {
         dataContext.uiContext().requestTextArea().setText(baseStoreData.getRequestBody());
         dataContext.uiContext().responseTextArea().setText(baseStoreData.getResponseBody());
         dataContext.uiContext().requestTypes().setSelectedItem(baseStoreData.getRequestType());
         dataContext.uiContext().urlTextField().setText(baseStoreData.getUrl());
         String headersJsonString = baseStoreData.getHeaders();
+        String responseHeadersJsonString = baseStoreData.getResponseHeaders();
         MultiValueMap<String, String> requestHeaders = JsonUtils.jsonStringToMultivaluedMap(headersJsonString);
+        MultiValueMap<String, String> responseHeaders = JsonUtils.jsonStringToMultivaluedMap(responseHeadersJsonString);
+        dataContext.daakiaContext().setRequestHeaders(requestHeaders);
+        dataContext.daakiaContext().setResponseHeaders(responseHeaders);
+        dataContext.daakiaContext().setHttpStatus(HttpStatus.valueOf(baseStoreData.getStatusCode()));
+        dataContext.daakiaContext().setResponseMetadata(new ResponseMetadata(baseStoreData.getStatusCode(), baseStoreData.getTimeTaken(), baseStoreData.getSizeText()));
         dataContext.uiContext().headerTextFields().clear();
         dataContext.uiContext().headersPanel().removeAll();
+        createRequestHeaders(dataContext, objects);
+        createResponseHeaders(dataContext, objects);
+        createResponseStatus(dataContext, objects);
+    }
+
+    private void createRequestHeaders(DataContext dataContext, Object... objects) {
+        MultiValueMap<String, String> requestHeaders = dataContext.daakiaContext().requestHeaders();
         requestHeaders.forEach((key, values) -> {
             createHeader(dataContext, key, values.get(0));
         });
@@ -102,7 +192,7 @@ public class AppDaakiaService extends BaseDaakiaService {
     private void initHistoryRootNode(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode();
         dataContext.daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.LOAD_HISTORY, dataContext);
-        Map<String, List<DaakiaHistory>> historyData = dataContext.uiContext().historyData();
+        Map<String, List<DaakiaHistory>> historyData = dataContext.sideNavContext().historyData();
         List<String> historyYears = initHistoryYears(historyData);
         Map<String, DefaultMutableTreeNode> yearNodes = new LinkedHashMap<>();
         for (String historyYear : historyYears) {
@@ -122,7 +212,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         for (String year : yearNodes.keySet()) {
             rootNode.add(yearNodes.get(year));
         }
-        dataContext.uiContext().setHistoryRootNode(rootNode);
+        dataContext.sideNavContext().setHistoryRootNode(rootNode);
     }
 
     private List<String> initHistoryYears(Map<String, List<DaakiaHistory>> historyData) {
@@ -139,17 +229,23 @@ public class AppDaakiaService extends BaseDaakiaService {
         String requestBody = dataContext.uiContext().requestTextArea().getText();
         String responseBody = dataContext.uiContext().responseTextArea().getText();
         MultiValueMap<String, String> requestHeaders = dataContext.daakiaContext().requestHeaders();
-        String headers = null;
+        MultiValueMap<String, String> responseHeaders = dataContext.daakiaContext().responseHeaders();
+        ResponseMetadata responseMetadata = dataContext.daakiaContext().responseMetadata();
+        String headers;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             headers = objectMapper.writeValueAsString(requestHeaders);
             daakiaBaseStoreData.setUuid(UUID.randomUUID().toString());
             daakiaBaseStoreData.setHeaders(headers);
+            daakiaBaseStoreData.setResponseHeaders(objectMapper.writeValueAsString(responseHeaders));
             daakiaBaseStoreData.setRequestType(requestType);
             daakiaBaseStoreData.setUrl(url);
             daakiaBaseStoreData.setRequestBody(requestBody);
             daakiaBaseStoreData.setResponseBody(responseBody);
             daakiaBaseStoreData.setCreatedDate(DateUtils.todayAsString());
+            daakiaBaseStoreData.setStatusCode(responseMetadata.getStatusCode());
+            daakiaBaseStoreData.setTimeTaken(responseMetadata.getTimeTaken());
+            daakiaBaseStoreData.setSizeText(responseMetadata.getSizeText());
             String storeString = objectMapper.writeValueAsString(daakiaBaseStoreData);
             return JsonUtils.jsonToPojo(storeString, clazz);
         }
@@ -162,11 +258,11 @@ public class AppDaakiaService extends BaseDaakiaService {
 
     private void addHistoryData(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         DaakiaHistory daakiaHistory = generateStoreData(dataContext, DaakiaHistory.class);
-        dataContext.uiContext().setDaakiaHistory(daakiaHistory);
-        Map<String, List<DaakiaHistory>> historyData = dataContext.uiContext().historyData();
+        dataContext.sideNavContext().setDaakiaHistory(daakiaHistory);
+        Map<String, List<DaakiaHistory>> historyData = dataContext.sideNavContext().historyData();
         assert daakiaHistory != null;
         String date = daakiaHistory.getCreatedDate();
-        Tree historyTree = dataContext.uiContext().historyTree();
+        Tree historyTree = dataContext.sideNavContext().historyTree();
         if (historyData.containsKey(date)) {
             // If the date exists, add the new entry to the corresponding list of entries
             List<DaakiaHistory> entries = historyData.get(date);
@@ -211,11 +307,11 @@ public class AppDaakiaService extends BaseDaakiaService {
         String rowId = UUID.randomUUID().toString();
 
         TextInputField headerKeyField = new TextInputField("Header "+(dataContext.uiContext().headerTextFields().size() + 1));
-        headerKeyField.setPreferredSize(new Dimension(350, 25));
+        headerKeyField.setPreferredSize(new Dimension(300, 25));
         headerKeyField.setText(headerKey);
 
         TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().headerTextFields().size() + 1));
-        headerValueField.setPreferredSize(new Dimension(600, 25));
+        headerValueField.setPreferredSize(new Dimension(320, 25));
         headerValueField.setText(headerValue);
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));

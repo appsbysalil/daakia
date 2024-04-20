@@ -3,20 +3,22 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 
 import javax.swing.*;
 import java.awt.*;
 
 
 public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
-    private JSplitPane leftCenterSplitPane;
+    private JSplitPane leftRightSplitPane;
 
     //left panel
-    private DaakiaLeftPanelWithHeader daakiaLeftPanelWithHeader;
+    private DaakiaSideNavPanelContainer leftSideNavPanelContainer;
 
 
     //center panel
-    private DaakiaRightPanel centerPanel;
+    private DaakiaTabbedMainPanel tabbedMainPanel;
+
 
     public DaakiaMainPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -30,30 +32,32 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
     }
 
     @Override
-    public void initStyle() {
-        debugIfApplicable(this);
-        setSize(1200, 600);
+    public void initComponents() {
+        leftSideNavPanelContainer = new DaakiaSideNavPanelContainer(rootPane, dataContext);
+        tabbedMainPanel = new DaakiaTabbedMainPanel(rootPane, dataContext);
+        leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSideNavPanelContainer, tabbedMainPanel);
+        leftRightSplitPane.setDividerLocation(300);
+        leftRightSplitPane.setDividerSize(3);
     }
 
     @Override
-    public void initComponents() {
-        daakiaLeftPanelWithHeader = new DaakiaLeftPanelWithHeader(rootPane, dataContext);
-        centerPanel = new DaakiaRightPanel(rootPane, dataContext);
-        leftCenterSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, daakiaLeftPanelWithHeader, centerPanel);
-        leftCenterSplitPane.setDividerLocation(300);
-        leftCenterSplitPane.setDividerSize(5);
+    public void initStyle() {
+        debugIfApplicable(this);
+        setSize(1200, 600);
+        leftRightSplitPane.setUI(DaakiaUtils.thinDivider());
+        leftRightSplitPane.setBorder(null);
     }
 
     @Override
     public void initChildrenLayout() {
-        add(leftCenterSplitPane, BorderLayout.CENTER);
+        add(leftRightSplitPane, BorderLayout.CENTER);
     }
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event -> {
+        globalSubscriber().subscribe(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER)) {
-                leftCenterSplitPane.setDividerLocation(leftCenterSplitPane.getDividerLocation() == 42 ? 300 : 42);
+                leftRightSplitPane.setDividerLocation(leftRightSplitPane.getDividerLocation() == 42 ? 300 : 42);
             }
         });
     }
