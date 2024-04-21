@@ -23,6 +23,10 @@
 
         <br>
         v1.0.1 released with bug fixes , 401 when in post was not working
+
+        <br>
+        v1.0.2 released with below changes :
+            Added support for json linter and format json in request and response body added
     ]]>
     </change-notes>
 
