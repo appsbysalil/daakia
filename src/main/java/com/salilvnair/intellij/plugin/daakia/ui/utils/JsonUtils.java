@@ -3,6 +3,8 @@ package com.salilvnair.intellij.plugin.daakia.ui.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -84,6 +86,16 @@ public class JsonUtils {
         }
         catch (IOException e) {
             return new LinkedMultiValueMap<>();
+        }
+    }
+
+    public static String format(String jsonString) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            return jsonObject.toString(2); // 2 is the indentation level
+        }
+        catch (JSONException ex) {
+            return jsonString;
         }
     }
 }

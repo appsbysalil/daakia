@@ -4,6 +4,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -58,6 +59,12 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
                 ResponseEntity<String> responseEntity = daakiaEvent.responseEntity();
                 if(responseEntity != null) {
                     responseTextArea.setText(responseEntity.getBody());
+                }
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN)) {
+                if(responseTextArea.getText() != null && !responseTextArea.getText().isEmpty()) {
+                    String formattedText = JsonUtils.format(responseTextArea.getText());
+                    responseTextArea.setText(formattedText);
                 }
             }
         });

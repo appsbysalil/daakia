@@ -1,7 +1,11 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.linter.JsonLintParser;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -28,6 +32,8 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
         requestTextArea = new RSyntaxTextArea();
         requestTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
         requestTextArea.setCodeFoldingEnabled(true);
+        JsonLintParser jsonLintParser = new JsonLintParser();
+        requestTextArea.addParser(jsonLintParser);
         dataContext.uiContext().setRequestTextArea(requestTextArea);
         scrollPane = new RTextScrollPane(requestTextArea);
         scrollPane.setIconRowHeaderEnabled(true); // Enable icon row header for folding icons
@@ -48,6 +54,13 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
 
     @Override
     public void initListeners() {
-        super.initListeners();
+        subscriber().subscribe(e -> {
+            if(DaakiaEvent.ofType(e, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN)) {
+                if(requestTextArea.getText() != null && !requestTextArea.getText().isEmpty()) {
+                    String formattedText = JsonUtils.format(requestTextArea.getText());
+                    requestTextArea.setText(formattedText);
+                }
+            }
+        });
     }
 }

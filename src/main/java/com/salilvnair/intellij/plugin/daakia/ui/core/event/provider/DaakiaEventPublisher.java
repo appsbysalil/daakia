@@ -99,4 +99,14 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+    public void onClickRequestBodyFormatter() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN);
+        publisher.publish(event);
+    }
+
+    public void onClickResponseBodyFormatter() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_RESPONSE_BODY_FORMATTER_BTN);
+        publisher.publish(event);
+    }
+
 }

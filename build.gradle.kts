@@ -17,6 +17,7 @@ dependencies {
         exclude("org.slf4j", "slf4j-api")
     }
     implementation("com.fifesoft:rsyntaxtextarea:3.4.0")
+    implementation("org.json:json:20240303")
     compileOnly("org.projectlombok:lombok:0.11.0")
 }
 

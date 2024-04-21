@@ -4,7 +4,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseBodyPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseHeaderPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
@@ -15,7 +14,7 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
 
     private JBTabbedPane tabbedPane;
     private ResponseHeaderPanel responseHeaderPanel;
-    private ResponseBodyPanel responseBodyPanel;
+    private ResponseBodyContainer responseBodyContainer;
 
     public DaakiaResponseBottomPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -31,7 +30,7 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
     public void initComponents() {
         tabbedPane = new JBTabbedPane();
         responseHeaderPanel = new ResponseHeaderPanel(rootPane, dataContext);
-        responseBodyPanel = new ResponseBodyPanel(rootPane, dataContext);
+        responseBodyContainer = new ResponseBodyContainer(rootPane, dataContext);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
 
     @Override
     public void initChildrenLayout() {
-        tabbedPane.addTab("Response Body", AllIcons.Json.Object, responseBodyPanel);
+        tabbedPane.addTab("Response Body", AllIcons.Json.Object, responseBodyContainer);
         tabbedPane.addTab("Response Headers", AllIcons.Actions.Minimap, responseHeaderPanel);
         add(tabbedPane, BorderLayout.CENTER);
     }

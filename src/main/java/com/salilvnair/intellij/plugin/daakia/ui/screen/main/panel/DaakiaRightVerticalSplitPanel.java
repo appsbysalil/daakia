@@ -29,7 +29,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
         leftPanel = new DaakiaRightVerticalSplitLeftPanel(rootPane, dataContext);
         rightPanel = new DaakiaRightVerticalSplitRightPanel(rootPane, dataContext);
         leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
-        leftRightSplitPane.setDividerSize(3);
+        leftRightSplitPane.setDividerSize(2);
     }
 
     @Override
