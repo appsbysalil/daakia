@@ -27,6 +27,10 @@
         <br>
         v1.0.2 released with below changes :
             Added support for json linter and format json in request and response body added
+        <br>
+        v1.0.3 released with below updates:
+            calling pool thread while invoking api to see if the localhost projects debugger working fine or not
+            for unknown errors showing 503 service unavailable with error message.
     ]]>
     </change-notes>
 

@@ -2,8 +2,9 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
@@ -71,16 +72,21 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
 
         sendButton.addActionListener(e -> {
             eventPublisher().onClickSend();
-            DaakiaContext daakiaContext = daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
-            eventPublisher().onReceivingResponse(daakiaContext.responseEntity());
-            daakiaService(DaakiaType.APP).execute(AppDaakiaType.ADD_HISTORY, dataContext);
-            globalEventPublisher().onAfterHistoryAdded();
-            daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
+            daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
         });
         saveButton.addActionListener(e -> {
             eventPublisher().onClickSave();
             daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext);
             daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
+        });
+        subscriber().subscribe(event -> {
+            if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                eventPublisher().onReceivingResponse(daakiaEvent.daakiaContext(), daakiaEvent.daakiaContext().responseEntity());
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.ADD_HISTORY, dataContext);
+                globalEventPublisher().onAfterHistoryAdded();
+                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
+            }
         });
     }
 }

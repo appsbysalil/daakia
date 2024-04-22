@@ -5,6 +5,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import org.springframework.http.ResponseEntity;
 
 import java.util.EventObject;
@@ -27,9 +28,16 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
-    public void onReceivingResponse(ResponseEntity<String> responseEntity) {
+    public void afterRestApiExchange(DaakiaContext daakiaContext) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.AFTER_REST_EXCHANGE);
+        event.setDaakiaContext(daakiaContext);
+        publisher.publish(event);
+    }
+
+    public void onReceivingResponse(DaakiaContext daakiaContext, ResponseEntity<String> responseEntity) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RECEIVING_RESPONSE);
         event.setResponseEntity(responseEntity);
+        event.setDaakiaContext(daakiaContext);
         publisher.publish(event);
     }
 

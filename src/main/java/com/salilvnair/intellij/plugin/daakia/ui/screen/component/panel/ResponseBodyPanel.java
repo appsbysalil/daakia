@@ -60,6 +60,9 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
                 if(responseEntity != null) {
                     responseTextArea.setText(responseEntity.getBody());
                 }
+                else if(daakiaEvent.daakiaContext() != null && daakiaEvent.daakiaContext().errorMessage() != null) {
+                    responseTextArea.setText(daakiaEvent.daakiaContext().errorMessage());
+                }
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN)) {
                 if(responseTextArea.getText() != null && !responseTextArea.getText().isEmpty()) {

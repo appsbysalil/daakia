@@ -54,7 +54,10 @@ public class ResponseHeaderPanel extends BaseDaakiaPanel<ResponseHeaderPanel> {
     public void initListeners() {
         subscriber().subscribe(event ->{
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RECEIVING_RESPONSE)) {
-                daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_RESPONSE_HEADERS, dataContext);
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                if(daakiaEvent.responseEntity() != null) {
+                    daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_RESPONSE_HEADERS, dataContext);
+                }
             }
         });
     }

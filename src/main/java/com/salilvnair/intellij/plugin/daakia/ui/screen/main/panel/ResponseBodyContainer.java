@@ -38,7 +38,7 @@ public class ResponseBodyContainer extends BaseDaakiaPanel<ResponseBodyContainer
 
     @Override
     public void initChildrenLayout() {
-        add(responseBodyActionContainer, BorderLayout.NORTH);
+//        add(responseBodyActionContainer, BorderLayout.NORTH);
         add(responseBodyPanel, BorderLayout.CENTER);
     }
 

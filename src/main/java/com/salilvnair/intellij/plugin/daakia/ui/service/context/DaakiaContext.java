@@ -7,6 +7,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 public class DaakiaContext {
+    private String errorMessage;
     private MultiValueMap<String, String> requestHeaders;
     private ResponseEntity<String> responseEntity;
     private HttpStatus httpStatus;
@@ -57,5 +58,13 @@ public class DaakiaContext {
 
     public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
+    }
+
+    public String errorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }
