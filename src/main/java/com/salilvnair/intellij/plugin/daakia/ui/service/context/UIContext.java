@@ -27,6 +27,11 @@ public class UIContext {
     private JPanel headerScrollPanel;
     private JPanel headersPanel;
 
+    private ComboBox<String> authTypes;
+    private TextInputField userNameTextField;
+    private TextInputField passwordTextField;
+    private TextInputField bearerTokenTextField;
+
 
 
 
@@ -123,5 +128,37 @@ public class UIContext {
 
     public void setResponseHeaderTableModel(DefaultTableModel responseHeaderTableModel) {
         this.responseHeaderTableModel = responseHeaderTableModel;
+    }
+
+    public ComboBox<String> authTypes() {
+        return authTypes;
+    }
+
+    public void setAuthTypes(ComboBox<String> authTypes) {
+        this.authTypes = authTypes;
+    }
+
+    public TextInputField userNameTextField() {
+        return userNameTextField;
+    }
+
+    public void setUserNameTextField(TextInputField userNameTextField) {
+        this.userNameTextField = userNameTextField;
+    }
+
+    public TextInputField passwordTextField() {
+        return passwordTextField;
+    }
+
+    public void setPasswordTextField(TextInputField passwordTextField) {
+        this.passwordTextField = passwordTextField;
+    }
+
+    public TextInputField bearerTokenTextField() {
+        return bearerTokenTextField;
+    }
+
+    public void setBearerTokenTextField(TextInputField bearerTokenTextField) {
+        this.bearerTokenTextField = bearerTokenTextField;
     }
 }

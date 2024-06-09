@@ -85,11 +85,32 @@ public class RestDaakiaService extends BaseDaakiaService {
     }
 
     private MultiValueMap<String, String> prepareRequestHeaders(DataContext dataContext) {
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        HttpHeaders headers = new HttpHeaders();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
             headers.add(v.get(0).getText(), v.get(1).getText());
         });
+        HttpHeaders authHeaders = addAuthorizationHeaderIfPresent(dataContext);
+        if(!authHeaders.isEmpty()) {
+            headers.addAll(authHeaders);
+        }
         dataContext.daakiaContext().setRequestHeaders(headers);
         return headers;
+    }
+
+    private HttpHeaders addAuthorizationHeaderIfPresent(DataContext dataContext) {
+        HttpHeaders authHeaders = new HttpHeaders();
+        if(dataContext.uiContext().authTypes() != null) {
+            String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
+            if("Bearer Token".equals(selectedAuthType)) {
+                String bearerToken = dataContext.uiContext().bearerTokenTextField().getText();
+                authHeaders.setBearerAuth(bearerToken);
+            }
+            else if("Basic Auth".equals(selectedAuthType)) {
+                String userName = dataContext.uiContext().userNameTextField().getText();
+                String password = dataContext.uiContext().passwordTextField().getText();
+                authHeaders.setBasicAuth(userName, password);
+            }
+        }
+        return authHeaders;
     }
 }

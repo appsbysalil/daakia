@@ -1,6 +1,8 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom;
 
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.JBColor;
+import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +25,9 @@ public class TextInputField extends JTextField {
             public void focusGained(FocusEvent e) {
                 if (getText().equals(placeholder)) {
                     setText(""); // Clear placeholder text when field is focused
+                    boolean isDarkTheme = UIUtil.isUnderDarcula() || (SystemInfo.isMac && UIUtil.isUnderIntelliJLaF());
+                    setForeground(isDarkTheme ? JBColor.BLACK : JBColor.WHITE);
+                    setFont(getFont().deriveFont(Font.PLAIN));
                 }
             }
 

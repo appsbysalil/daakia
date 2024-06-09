@@ -64,7 +64,7 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
                     responseTextArea.setText(daakiaEvent.daakiaContext().errorMessage());
                 }
             }
-            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN)) {
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_RESPONSE_BODY_FORMATTER_BTN)) {
                 if(responseTextArea.getText() != null && !responseTextArea.getText().isEmpty()) {
                     String formattedText = JsonUtils.format(responseTextArea.getText());
                     responseTextArea.setText(formattedText);

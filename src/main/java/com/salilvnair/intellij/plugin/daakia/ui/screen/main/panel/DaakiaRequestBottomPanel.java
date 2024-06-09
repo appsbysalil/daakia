@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.RequestAuthorizationPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.RequestHeaderPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
@@ -14,6 +15,7 @@ public class DaakiaRequestBottomPanel extends BaseDaakiaPanel<DaakiaRequestBotto
 
     private JBTabbedPane tabbedPane;
     private RequestHeaderPanel requestHeaderPanel;
+    private RequestAuthorizationPanel requestAuthorizationPanel;
     private RequestBodyContainer requestBodyContainer;
 
     public DaakiaRequestBottomPanel(JRootPane rootPane, DataContext dataContext) {
@@ -30,6 +32,7 @@ public class DaakiaRequestBottomPanel extends BaseDaakiaPanel<DaakiaRequestBotto
     public void initComponents() {
         tabbedPane = new JBTabbedPane();
         requestHeaderPanel = new RequestHeaderPanel(rootPane, dataContext);
+        requestAuthorizationPanel = new RequestAuthorizationPanel(rootPane, dataContext);
         requestBodyContainer = new RequestBodyContainer(rootPane, dataContext);
     }
 
@@ -43,6 +46,8 @@ public class DaakiaRequestBottomPanel extends BaseDaakiaPanel<DaakiaRequestBotto
     public void initChildrenLayout() {
         tabbedPane.addTab("Request Headers", AllIcons.Actions.Minimap, requestHeaderPanel);
         tabbedPane.addTab("Request Body", AllIcons.Json.Object, requestBodyContainer);
+        tabbedPane.addTab("Authorization", AllIcons.Actions.InlaySecuredShield, requestAuthorizationPanel);
+        tabbedPane.setSelectedIndex(1);
         add(tabbedPane, BorderLayout.CENTER);
     }
 
