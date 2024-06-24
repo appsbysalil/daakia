@@ -103,7 +103,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         return new DaakiaRightVerticalSplitPanel(getRootPane(), dataContext);
     }
 
-    private JPanel tabPanel(String requestType, String tabTitle) {
+    private JPanel tabPanel(String requestType, String tabTitle, DaakiaRightVerticalSplitPanel contentPanel) {
         JPanel pnlTab = new JPanel();
         pnlTab.setLayout(new BoxLayout(pnlTab, BoxLayout.X_AXIS));
         pnlTab.setOpaque(false);
@@ -117,23 +117,80 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         pnlTab.add(lblTitle);
         pnlTab.add(Box.createHorizontalStrut(15));
         pnlTab.add(btnClose);
+        pnlTab.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                selectTabByPanel(contentPanel);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    showPopupMenu(e.getComponent(), e.getX(), e.getY(), contentPanel);
+                }
+            }
+        });
         return pnlTab;
+    }
+
+    private void selectTabByPanel(JPanel panel) {
+        for (int i = 0; i < dynamicDaakiaTabbedPane.getTabCount(); i++) {
+            if (dynamicDaakiaTabbedPane.getComponentAt(i) == panel) {
+                dynamicDaakiaTabbedPane.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     private @NotNull IconButton initTabCloseButton() {
         IconButton btnClose = new IconButton(AllIcons.Actions.Close);
         btnClose.addActionListener(e -> {
             JButton button = (JButton)e.getSource();
-            for(int i = 0; i < dynamicDaakiaTabbedPane.getTabCount(); i++) {
-                if(SwingUtilities.isDescendingFrom(button, dynamicDaakiaTabbedPane.getTabComponentAt(i))) {
-                    dynamicDaakiaTabbedPane.remove(i);
-                    int newTabIndex = dynamicDaakiaTabbedPane.getSelectedIndex() == i ? i == 0 ? 0 : i - 1 : dynamicDaakiaTabbedPane.getSelectedIndex();
-                    dynamicDaakiaTabbedPane.setSelectedIndex(newTabIndex);
+            closeCurrentTabbedPaneAndRearrange(button);
+        });
+        return btnClose;
+    }
+
+    private void closeCurrentTabbedPaneAndRearrange(JButton button) {
+        for(int i = 0; i < dynamicDaakiaTabbedPane.getTabCount(); i++) {
+            if(SwingUtilities.isDescendingFrom(button, dynamicDaakiaTabbedPane.getTabComponentAt(i))) {
+                dynamicDaakiaTabbedPane.remove(i);
+                int newTabIndex = dynamicDaakiaTabbedPane.getSelectedIndex() == i ? i == 0 ? 0 : i - 1 : dynamicDaakiaTabbedPane.getSelectedIndex();
+                dynamicDaakiaTabbedPane.setSelectedIndex(newTabIndex);
+                break;
+            }
+        }
+    }
+
+    private void showPopupMenu(Component component, int x, int y, DaakiaRightVerticalSplitPanel contentPanel) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem menuItem1 = new JMenuItem("Close All Tabs");
+        JMenuItem menuItem2 = new JMenuItem("Close Others");
+        menuItem1.addActionListener(e -> {
+            while (dynamicDaakiaTabbedPane.getTabCount() > 1) {
+                dynamicDaakiaTabbedPane.removeTabAt(0);
+            }
+        });
+        menuItem2.addActionListener(e ->  {
+            int clickedTabIndex = -1;
+            for (int i = 0; i < dynamicDaakiaTabbedPane.getTabCount(); i++) {
+                if (dynamicDaakiaTabbedPane.getComponentAt(i) == contentPanel) {
+                    clickedTabIndex = i;
                     break;
                 }
             }
+            if (clickedTabIndex != -1) {
+                for (int i = dynamicDaakiaTabbedPane.getTabCount() - 2; i >= 0; i--) {
+                    if (i != clickedTabIndex) {
+                        dynamicDaakiaTabbedPane.removeTabAt(i);
+                    }
+                }
+                dynamicDaakiaTabbedPane.setSelectedIndex(0);
+            }
         });
-        return btnClose;
+        popupMenu.add(menuItem1);
+        popupMenu.add(menuItem2);
+        popupMenu.show(component, x, y);
     }
 
     public void addNewTab(DataContext dataContext, String requestType, String tabTitle, boolean onSideNavAction) {
@@ -146,7 +203,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         }
         int index = dynamicDaakiaTabbedPane.getTabCount() - 1;
         tabTitle = tabTitle == null ? "Untitled" : tabTitle;
-        JPanel pnlTab = tabPanel(requestType, tabTitle);
+        JPanel pnlTab = tabPanel(requestType, tabTitle, tabC);
         dynamicDaakiaTabbedPane.insertTab(tabTitle, null, tabC, null, index);
         dynamicDaakiaTabbedPane.setSelectedIndex(index);
         dynamicDaakiaTabbedPane.setTabComponentAt(index, pnlTab);
