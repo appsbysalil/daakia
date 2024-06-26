@@ -31,6 +31,12 @@
         v1.0.3 released with below updates:
             calling pool thread while invoking api to see if the localhost projects debugger working fine or not
             for unknown errors showing 503 service unavailable with error message.
+        <br>
+        v1.0.4 released with below updates:
+            added context menu on the tabs as Close other tabs and Close all tabs and minor improvements.
+        <br>
+        v1.0.5 released with below updates:
+            added progress view on click of send and added default request headers, as of now its hardcoded will make it configurable in future releases.
     ]]>
     </change-notes>
 

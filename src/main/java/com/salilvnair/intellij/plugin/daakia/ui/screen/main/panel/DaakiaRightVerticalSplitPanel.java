@@ -1,7 +1,11 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
+import org.springframework.http.ResponseEntity;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +15,8 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     private DaakiaRightVerticalSplitLeftPanel leftPanel;
     private DaakiaRightVerticalSplitRightPanel rightPanel;
     private JSplitPane leftRightSplitPane;
+    private JPanel rightPanelContainer;
+    private JProgressBar progressBar;
 
 
     public DaakiaRightVerticalSplitPanel(JRootPane rootPane, DataContext dataContext) {
@@ -28,8 +34,17 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     public void initComponents() {
         leftPanel = new DaakiaRightVerticalSplitLeftPanel(rootPane, dataContext);
         rightPanel = new DaakiaRightVerticalSplitRightPanel(rootPane, dataContext);
-        leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+        rightPanelContainer = new JPanel();
+        rightPanelContainer.setLayout(new BoxLayout(rightPanelContainer, BoxLayout.Y_AXIS));
+        progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setVisible(false);
+        rightPanel.setVisible(false);
+        rightPanelContainer.add(progressBar);
+        rightPanelContainer.add(rightPanel);
+        leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanelContainer);
         leftRightSplitPane.setDividerSize(2);
+        uiContext().setProgressBar(progressBar);
     }
 
     @Override
@@ -46,6 +61,15 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
 
     @Override
     public void initListeners() {
-        super.initListeners();
+        subscriber().subscribe(event ->{
+            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
+                rightPanel.setVisible(false);
+                progressBar.setVisible(true);
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RECEIVING_RESPONSE)) {
+                rightPanel.setVisible(true);
+                progressBar.setVisible(false);
+            }
+        });
     }
 }

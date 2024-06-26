@@ -25,8 +25,7 @@ public class TextInputField extends JTextField {
             public void focusGained(FocusEvent e) {
                 if (getText().equals(placeholder)) {
                     setText(""); // Clear placeholder text when field is focused
-                    boolean isDarkTheme = UIUtil.isUnderDarcula() || (SystemInfo.isMac && UIUtil.isUnderIntelliJLaF());
-                    setForeground(isDarkTheme ? JBColor.BLACK : JBColor.WHITE);
+                    setForeground(JBColor.BLACK);
                     setFont(getFont().deriveFont(Font.PLAIN));
                 }
             }

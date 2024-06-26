@@ -34,10 +34,16 @@ public class RequestHeaderPanel extends BaseDaakiaPanel<RequestHeaderPanel> {
         headerScrollPane = new JBScrollPane(headerScrollPanel);
         uiContext().setHeadersPanel(headersPanel);
         uiContext().setHeaderScrollPanel(headerScrollPanel);
+        initDefaultHeaders();
+    }
+
+    private void initDefaultHeaders() {
+        daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_REQUEST_HEADER, dataContext, "Content-Type", "application/json");
     }
 
     @Override
     public void initStyle() {
+        debugIfApplicable(this);
     }
 
     @Override

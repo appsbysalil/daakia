@@ -37,11 +37,10 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
     public void initComponents() {
         requestTypes = new ComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE"});
         urlTextField = new JTextField();
-        dataContext.uiContext().setRequestTypes(requestTypes);
-        dataContext.uiContext().setUrlTextField(urlTextField);
         sendButton = new JButton("Send");
         saveButton = new JButton("Save");
-
+        dataContext.uiContext().setRequestTypes(requestTypes);
+        dataContext.uiContext().setUrlTextField(urlTextField);
     }
 
     @Override
@@ -71,6 +70,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         });
 
         sendButton.addActionListener(e -> {
+            sendButton.setEnabled(false);
             eventPublisher().onClickSend();
             daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
         });
@@ -81,6 +81,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         });
         subscriber().subscribe(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
+                sendButton.setEnabled(true);
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
                 eventPublisher().onReceivingResponse(daakiaEvent.daakiaContext(), daakiaEvent.daakiaContext().responseEntity());
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.ADD_HISTORY, dataContext);

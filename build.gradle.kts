@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.salilvnair.jb.plugin"
-version = "1.0.3"
+version = "1.0.5"
 
 repositories {
     mavenCentral()

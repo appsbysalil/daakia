@@ -39,7 +39,6 @@ public class DaakiaRequestAddHeaderButtonPanel extends BaseDaakiaPanel<DaakiaReq
     @Override
     public void initListeners() {
         addHeaderButton.addActionListener(e -> {
-//            dataContext.publisher().publish(new DaakiaEvent(this, DaakiaEventType.ON_CLICK_ADD_HEADER));
             eventPublisher().onClickAddHeader();
         });
     }

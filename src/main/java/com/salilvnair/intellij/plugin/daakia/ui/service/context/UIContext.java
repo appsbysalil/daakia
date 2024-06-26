@@ -32,6 +32,8 @@ public class UIContext {
     private TextInputField passwordTextField;
     private TextInputField bearerTokenTextField;
 
+    private JProgressBar progressBar;
+
 
 
 
@@ -160,5 +162,13 @@ public class UIContext {
 
     public void setBearerTokenTextField(TextInputField bearerTokenTextField) {
         this.bearerTokenTextField = bearerTokenTextField;
+    }
+
+    public JProgressBar progressBar() {
+        return progressBar;
+    }
+
+    public void setProgressBar(JProgressBar progressBar) {
+        this.progressBar = progressBar;
     }
 }

@@ -58,16 +58,11 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
                 ResponseEntity<String> responseEntity = daakiaEvent.responseEntity();
                 if(responseEntity != null) {
-                    responseTextArea.setText(responseEntity.getBody());
+                    String formattedText = JsonUtils.format(responseEntity.getBody());
+                    responseTextArea.setText(formattedText);
                 }
                 else if(daakiaEvent.daakiaContext() != null && daakiaEvent.daakiaContext().errorMessage() != null) {
                     responseTextArea.setText(daakiaEvent.daakiaContext().errorMessage());
-                }
-            }
-            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_RESPONSE_BODY_FORMATTER_BTN)) {
-                if(responseTextArea.getText() != null && !responseTextArea.getText().isEmpty()) {
-                    String formattedText = JsonUtils.format(responseTextArea.getText());
-                    responseTextArea.setText(formattedText);
                 }
             }
         });
