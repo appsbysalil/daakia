@@ -37,6 +37,10 @@
         <br>
         v1.0.5 released with below updates:
             added progress view on click of send and added default request headers, as of now its hardcoded will make it configurable in future releases.
+        <br>
+        v1.0.6 released with below updates:
+            fixed some minor bugs and polished some rough edges.
+
     ]]>
     </change-notes>
 

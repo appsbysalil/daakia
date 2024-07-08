@@ -39,7 +39,6 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setVisible(false);
-        rightPanel.setVisible(false);
         rightPanelContainer.add(progressBar);
         rightPanelContainer.add(rightPanel);
         leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanelContainer);
