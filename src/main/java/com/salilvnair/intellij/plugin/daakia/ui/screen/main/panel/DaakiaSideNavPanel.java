@@ -1,11 +1,13 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.CollectionStorePanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.HistoryPanel;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ImportExportPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
@@ -19,6 +21,7 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
     private JBTabbedPane tabbedPane;
     private HistoryPanel historyPanel;
     private CollectionStorePanel collectionStorePanel;
+    private ImportExportPanel importExportPanel;
 
     DaakiaSideNavPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -40,10 +43,13 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
         tabbedPane = new JBTabbedPane(JTabbedPane.LEFT, JTabbedPane.WRAP_TAB_LAYOUT);
         historyPanel = new HistoryPanel(rootPane, dataContext);
         collectionStorePanel = new CollectionStorePanel(rootPane, dataContext);
+        importExportPanel = new ImportExportPanel(rootPane, dataContext);
         tabbedPane.addTab("  ", DaakiaIcons.HistoryIcon, historyPanel);
         tabbedPane.addTab("  ", DaakiaIcons.CollectionIcon, collectionStorePanel);
+        tabbedPane.addTab("  ", DaakiaIcons.ImportExportIcon, importExportPanel);
         tabbedPane.setToolTipTextAt(0, "History");
         tabbedPane.setToolTipTextAt(1, "Collection");
+        tabbedPane.setToolTipTextAt(2, "Import / Export");
     }
 
     @Override
