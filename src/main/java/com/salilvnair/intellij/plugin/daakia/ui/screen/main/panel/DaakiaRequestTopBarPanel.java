@@ -15,6 +15,8 @@ import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBarPanel> {
 
@@ -38,9 +40,39 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         requestTypes = new ComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE"});
         urlTextField = new JTextField();
         sendButton = new JButton("Send");
+        sendButton = new JButton("Send");
+        JPopupMenu dropdownMenu = new JPopupMenu();
+
+        JMenuItem sendMenuItem = new JMenuItem("Send");
+        sendMenuItem.addActionListener(e -> sendAction());
+
+        JMenuItem sendAndDownloadMenuItem = new JMenuItem("Send and Download");
+        sendAndDownloadMenuItem.addActionListener(e -> sendAndDownloadAction());
+
+        dropdownMenu.add(sendMenuItem);
+        dropdownMenu.add(sendAndDownloadMenuItem);
+
+        sendButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    dropdownMenu.show(sendButton, e.getX(), e.getY());
+                }
+            }
+        });
         saveButton = new JButton("Save");
         dataContext.uiContext().setRequestTypes(requestTypes);
         dataContext.uiContext().setUrlTextField(urlTextField);
+    }
+
+    private void sendAction() {
+        sendButton.setEnabled(false);
+        eventPublisher().onClickSend();
+        daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
+    }
+
+    private void sendAndDownloadAction() {
+        JOptionPane.showMessageDialog(null, "Feature coming soon..!", "Coming soon...", JOptionPane.INFORMATION_MESSAGE,DaakiaIcons.DaakiaIcon48);
     }
 
     @Override
@@ -70,9 +102,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         });
 
         sendButton.addActionListener(e -> {
-            sendButton.setEnabled(false);
-            eventPublisher().onClickSend();
-            daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
+            sendAction();
         });
         saveButton.addActionListener(e -> {
             eventPublisher().onClickSave();

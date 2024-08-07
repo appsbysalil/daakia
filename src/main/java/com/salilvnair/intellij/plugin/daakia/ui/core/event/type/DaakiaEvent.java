@@ -15,6 +15,7 @@ import java.util.EventObject;
 public class DaakiaEvent extends EventObject {
     private final DaakiaEventType eventType;
     private String deletedHeaderKey;
+    private String deletedFormDataKey;
     private ResponseEntity<String> responseEntity;
     private DaakiaHistory selectedDaakiaHistory;
     private DaakiaStoreRecord selectedDaakiaStoreRecord;
@@ -86,5 +87,13 @@ public class DaakiaEvent extends EventObject {
 
     public void setDaakiaContext(DaakiaContext daakiaContext) {
         this.daakiaContext = daakiaContext;
+    }
+
+    public String deletedFormDataKey() {
+        return deletedFormDataKey;
+    }
+
+    public void setDeletedFormDataKey(String deletedFormDataKey) {
+        this.deletedFormDataKey = deletedFormDataKey;
     }
 }

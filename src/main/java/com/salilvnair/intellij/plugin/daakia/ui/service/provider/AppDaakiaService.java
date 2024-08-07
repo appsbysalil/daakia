@@ -1,14 +1,16 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -24,10 +26,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,6 +64,9 @@ public class AppDaakiaService extends BaseDaakiaService {
         }
         else if(AppDaakiaType.CREATE_REQUEST_HEADER.equals(type)) {
             createHeader(dataContext, (String) objects[0], (String) objects[1]);
+        }
+        else if(AppDaakiaType.CREATE_FORM_DATA.equals(type)) {
+            createFormData(dataContext, (String) objects[0], (String) objects[1]);
         }
         else if (AppDaakiaType.CREATE_RESPONSE_HEADERS.equals(type)) {
             createResponseHeaders(dataContext, objects);
@@ -342,5 +349,97 @@ public class AppDaakiaService extends BaseDaakiaService {
                 headerScrollPanel.setVisible(false);
             }
         });
+    }
+
+    private void createFormData(DataContext dataContext, String headerKey, String headerValue) {
+        String rowId = UUID.randomUUID().toString();
+
+        TextInputField headerKeyField = new TextInputField("Key "+(dataContext.uiContext().formDataTextFields().size() + 1));
+        headerKeyField.setPreferredSize(new Dimension(200, 25));
+        headerKeyField.setText(headerKey);
+
+        JPanel valuePanel = new JPanel();
+
+        TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().formDataTextFields().size() + 1));
+        headerValueField.setPreferredSize(new Dimension(200, 25));
+        headerValueField.setText(headerValue);
+        valuePanel.add(headerValueField);
+
+        JPanel uploadFileBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 10, 0));
+        JButton uploadFile = new JButton("Choose File");
+        JTextField filePathField = new JTextField("");
+        filePathField.setPreferredSize(new Dimension(150, 25));
+        uploadFileBtnPanel.add(uploadFile);
+        uploadFileBtnPanel.add(filePathField);
+        valuePanel.add(uploadFileBtnPanel);
+
+        uploadFile.addActionListener(e1 -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int returnValue = fileChooser.showOpenDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                filePathField.setText(selectedFile.getName());
+                dataContext.uiContext().formDataFileFields().put(headerKey, selectedFile);
+            }
+        });
+
+        JPanel formDataRowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel formDataKeyWithTypePanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        formDataKeyWithTypePanel.add(headerKeyField);
+        ComboBox<String> formDataTypes = new ComboBox<>(new String[]{"File", "Text"});
+        formDataTypes.setSelectedIndex(0);
+        formDataKeyWithTypePanel.add(formDataTypes);
+        Border lineBorder = BorderFactory.createLineBorder(JBColor.BLACK, 1);
+        formDataKeyWithTypePanel.setBorder(lineBorder);
+        valuePanel.setBorder(lineBorder);
+        formDataRowPanel.add(formDataKeyWithTypePanel);
+        formDataRowPanel.add(valuePanel);
+
+        String formDataType = (String) formDataTypes.getSelectedItem();
+
+        showHideTextFieldFileUpload(formDataType, headerValueField, uploadFileBtnPanel);
+
+        formDataTypes.addActionListener(e -> {
+            String formDataType1 = (String) formDataTypes.getSelectedItem();
+            showHideTextFieldFileUpload(formDataType1, headerValueField, uploadFileBtnPanel);
+        });
+
+
+
+        IconButton deleteFormDataKeyButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(30, 25));
+        formDataRowPanel.add(deleteFormDataKeyButton);
+        JPanel formDataKeyValuesPanel = dataContext.uiContext().formDataKeyValuesPanel();
+        JPanel formDataScrollPanel = dataContext.uiContext().formDataScrollPanel();
+        formDataKeyValuesPanel.add(formDataRowPanel);
+        formDataKeyValuesPanel.revalidate();
+        formDataKeyValuesPanel.repaint();
+        List<TextInputField> headerKeyValFields = List.of(headerKeyField, headerValueField);
+        dataContext.uiContext().formDataTextFields().put(rowId, headerKeyValFields);
+        formDataScrollPanel.setVisible(true);
+
+        // ActionListener for deleting header
+        deleteFormDataKeyButton.addActionListener(e1 -> {
+            formDataKeyValuesPanel.remove(formDataRowPanel);
+            dataContext.eventPublisher().onClickDeleteFormDataKeyValueRow(headerKeyField.getText());
+            dataContext.uiContext().formDataTextFields().remove(rowId);
+            formDataKeyValuesPanel.revalidate();
+            formDataKeyValuesPanel.repaint();
+            formDataScrollPanel.revalidate();
+            formDataScrollPanel.repaint();
+            if(dataContext.uiContext().formDataTextFields().isEmpty()) {
+                formDataScrollPanel.setVisible(false);
+            }
+        });
+    }
+
+    private void showHideTextFieldFileUpload(String formDataType, TextInputField headerValueField, JPanel uploadFileBtnPanel) {
+        if(formDataType !=null && formDataType.equals("File")) {
+            headerValueField.setVisible(false);
+            uploadFileBtnPanel.setVisible(true);
+        }
+        if(formDataType !=null && formDataType.equals("Text")) {
+            headerValueField.setVisible(true);
+            uploadFileBtnPanel.setVisible(false);
+        }
     }
 }

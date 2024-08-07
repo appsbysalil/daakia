@@ -22,9 +22,20 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+    public void onClickFormData() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_FORM_DATA_ADD);
+        publisher.publish(event);
+    }
+
     public void onClickDeleteHeaderRow(String headerKey) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_DELETE_HEADER_ROW);
         event.setDeletedHeaderKey(headerKey);
+        publisher.publish(event);
+    }
+
+    public void onClickDeleteFormDataKeyValueRow(String key) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_DELETE_FORM_DATA_ROW);
+        event.setDeletedFormDataKey(key);
         publisher.publish(event);
     }
 

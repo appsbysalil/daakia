@@ -6,6 +6,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,11 @@ import java.util.Map;
 public class UIContext {
     // request response components
     private Map<String, List<TextInputField>> headerTextFields;
+    private Map<String, List<TextInputField>> formDataTextFields;
+    private Map<String, File> formDataFileFields;
     private RSyntaxTextArea requestTextArea;
     private RSyntaxTextArea responseTextArea;
+    private String requestContentType = "1";
     private ComboBox<String> requestTypes;
     private JTextField urlTextField;
     private JTable responseHeaderTable;
@@ -26,6 +30,10 @@ public class UIContext {
     //headers panel related components
     private JPanel headerScrollPanel;
     private JPanel headersPanel;
+
+    //form data panel related components
+    private JPanel formDataScrollPanel;
+    private JPanel formDataKeyValuesPanel;
 
     private ComboBox<String> authTypes;
     private TextInputField userNameTextField;
@@ -170,5 +178,51 @@ public class UIContext {
 
     public void setProgressBar(JProgressBar progressBar) {
         this.progressBar = progressBar;
+    }
+
+    public JPanel formDataKeyValuesPanel() {
+        return formDataKeyValuesPanel;
+    }
+
+    public void setFormDataKeyValuesPanel(JPanel formDataKeyValuesPanel) {
+        this.formDataKeyValuesPanel = formDataKeyValuesPanel;
+    }
+
+    public JPanel formDataScrollPanel() {
+        return formDataScrollPanel;
+    }
+
+    public void setFormDataScrollPanel(JPanel formDataScrollPanel) {
+        this.formDataScrollPanel = formDataScrollPanel;
+    }
+
+    public void setFormDataTextFields(Map<String, List<TextInputField>> formDataTextFields) {
+        this.formDataTextFields = formDataTextFields;
+    }
+
+    public Map<String, List<TextInputField>> formDataTextFields() {
+        if (formDataTextFields == null) {
+            formDataTextFields =  new HashMap<>();
+        }
+        return formDataTextFields;
+    }
+
+    public Map<String, File> formDataFileFields() {
+        if (formDataFileFields == null) {
+            formDataFileFields =  new HashMap<>();
+        }
+        return formDataFileFields;
+    }
+
+    public void setFormDataFileFields(Map<String, File> formDataFileFields) {
+        this.formDataFileFields = formDataFileFields;
+    }
+
+    public String requestContentType() {
+        return requestContentType;
+    }
+
+    public void setRequestContentType(String requestContentType) {
+        this.requestContentType = requestContentType;
     }
 }
