@@ -1,17 +1,18 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
-import com.intellij.icons.AllIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.RequestBodyPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> {
-    private JPanel requestBodyActionContainer;
-    private RequestBodyPanel requestBodyPanel;
-    private IconButton formatJsonBtn;
+    private JPanel requestBodyTypeContainer;
+    private JRadioButton rawRequestBody;
+    private JRadioButton formDataRequestBody;
+    private String selectedOption;
+    private JPanel requestBodyContainer;
+    private RequestRawBodyContainer requestRawBodyContainer;
+    private RequestFormDataBodyContainer requestFormDataBodyContainer;
 
     public RequestBodyContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -25,11 +26,20 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
 
     @Override
     public void initComponents() {
-        requestBodyActionContainer = new JPanel(new FlowLayout(FlowLayout.TRAILING, 10, 10));
-        formatJsonBtn = new IconButton(AllIcons.Diff.MagicResolve, new Dimension(30, 30));
-        formatJsonBtn.setToolTipText("Format JSON");
-        requestBodyActionContainer.add(formatJsonBtn);
-        requestBodyPanel = new RequestBodyPanel(rootPane, dataContext);
+        requestRawBodyContainer = new RequestRawBodyContainer(rootPane, dataContext);
+        requestFormDataBodyContainer = new RequestFormDataBodyContainer(rootPane, dataContext);
+        requestBodyContainer = new JPanel();
+        requestBodyContainer.setLayout(new BoxLayout(requestBodyContainer, BoxLayout.X_AXIS));
+        requestBodyTypeContainer = new JPanel(new FlowLayout(FlowLayout.LEADING, 10, 0));
+        rawRequestBody = new JRadioButton("raw");
+        formDataRequestBody = new JRadioButton("form-data");
+        rawRequestBody.setSelected(true);
+        // Group the radio buttons
+        ButtonGroup group = new ButtonGroup();
+        group.add(rawRequestBody);
+        group.add(formDataRequestBody);
+        requestBodyTypeContainer.add(rawRequestBody);
+        requestBodyTypeContainer.add(formDataRequestBody);
     }
 
     @Override
@@ -38,14 +48,25 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
 
     @Override
     public void initChildrenLayout() {
-        add(requestBodyActionContainer, BorderLayout.NORTH);
-        add(requestBodyPanel, BorderLayout.CENTER);
+        requestFormDataBodyContainer.setVisible(false);
+        requestBodyContainer.add(requestRawBodyContainer);
+        requestBodyContainer.add(requestFormDataBodyContainer);
+        add(requestBodyTypeContainer, BorderLayout.NORTH);
+        add(requestBodyContainer, BorderLayout.CENTER);
     }
 
     @Override
     public void initListeners() {
-        formatJsonBtn.addActionListener(e -> {
-            eventPublisher().onClickRequestBodyFormatter();
+        // Add ActionListeners to radio buttons
+        rawRequestBody.addActionListener(e -> {
+            dataContext.uiContext().setRequestContentType("1");
+            requestRawBodyContainer.setVisible(true);
+            requestFormDataBodyContainer.setVisible(false);
+        });
+        formDataRequestBody.addActionListener(e -> {
+            dataContext.uiContext().setRequestContentType("2");
+            requestRawBodyContainer.setVisible(false);
+            requestFormDataBodyContainer.setVisible(true);
         });
     }
 }
