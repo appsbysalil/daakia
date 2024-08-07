@@ -40,7 +40,6 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         requestTypes = new ComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE"});
         urlTextField = new JTextField();
         sendButton = new JButton("Send");
-        sendButton = new JButton("Send");
         JPopupMenu dropdownMenu = new JPopupMenu();
 
         JMenuItem sendMenuItem = new JMenuItem("Send");
@@ -55,7 +54,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         sendButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
+                if (SwingUtilities.isRightMouseButton(e) && sendButton.isEnabled()) {
                     dropdownMenu.show(sendButton, e.getX(), e.getY());
                 }
             }

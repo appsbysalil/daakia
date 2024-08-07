@@ -361,14 +361,14 @@ public class AppDaakiaService extends BaseDaakiaService {
         JPanel valuePanel = new JPanel();
 
         TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().formDataTextFields().size() + 1));
-        headerValueField.setPreferredSize(new Dimension(200, 25));
+        headerValueField.setPreferredSize(new Dimension(315, 25));
         headerValueField.setText(headerValue);
         valuePanel.add(headerValueField);
 
         JPanel uploadFileBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 10, 0));
         JButton uploadFile = new JButton("Choose File");
         JTextField filePathField = new JTextField("");
-        filePathField.setPreferredSize(new Dimension(150, 25));
+        filePathField.setPreferredSize(new Dimension(180, 25));
         uploadFileBtnPanel.add(uploadFile);
         uploadFileBtnPanel.add(filePathField);
         valuePanel.add(uploadFileBtnPanel);
