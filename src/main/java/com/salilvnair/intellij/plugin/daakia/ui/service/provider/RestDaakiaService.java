@@ -8,6 +8,8 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
@@ -31,7 +33,7 @@ public class RestDaakiaService extends BaseDaakiaService {
         String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<?> entity = new HttpEntity<>(dataContext.uiContext().requestTextArea().getText(), prepareRequestHeaders(dataContext));
+        HttpEntity<?> entity = prepareRequestEntity(dataContext);
         long startTime = System.currentTimeMillis();
         RestResponseErrorHandler errorHandler = new RestResponseErrorHandler();
         restTemplate.setErrorHandler(errorHandler);
@@ -49,6 +51,25 @@ public class RestDaakiaService extends BaseDaakiaService {
         ApplicationManager.getApplication().invokeLater(() -> {
             updateDaakiaContext(startTime, dataContext, finalResponse, finalErrorMessage);
         });
+    }
+
+    private @NotNull HttpEntity<?> prepareRequestEntity(DataContext dataContext) {
+        HttpHeaders headers = prepareRequestHeaders(dataContext);
+        if("2".equals(dataContext.uiContext().requestContentType())) {
+            return formDataRequestEntity(dataContext, headers);
+        }
+        return new HttpEntity<>(dataContext.uiContext().requestTextArea().getText(), headers);
+    }
+
+    private HttpEntity<?> formDataRequestEntity(DataContext dataContext, HttpHeaders headers) {
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        for (String key : dataContext.uiContext().formDataFileFields().keySet()) {
+            body.add(key, new FileSystemResource(dataContext.uiContext().formDataFileFields().get(key)));
+        }
+        dataContext.uiContext().formDataTextFields().forEach((k, v) -> {
+            body.add(v.get(0).getText(), v.get(1).getText());
+        });
+        return new HttpEntity<>(body, headers);
     }
 
     private void updateDaakiaContext(long startTime, DataContext dataContext, ResponseEntity<String> response, String finalErrorMessage) {
@@ -84,7 +105,7 @@ public class RestDaakiaService extends BaseDaakiaService {
         dataContext.eventPublisher().afterRestApiExchange(dataContext.daakiaContext());
     }
 
-    private MultiValueMap<String, String> prepareRequestHeaders(DataContext dataContext) {
+    private HttpHeaders prepareRequestHeaders(DataContext dataContext) {
         HttpHeaders headers = new HttpHeaders();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
             headers.add(v.get(0).getText(), v.get(1).getText());
@@ -93,8 +114,15 @@ public class RestDaakiaService extends BaseDaakiaService {
         if(!authHeaders.isEmpty()) {
             headers.addAll(authHeaders);
         }
+        addApplicableContentType(dataContext, headers);
         dataContext.daakiaContext().setRequestHeaders(headers);
         return headers;
+    }
+
+    private void addApplicableContentType(DataContext dataContext, HttpHeaders headers) {
+        if("2".equals(dataContext.uiContext().requestContentType())) {
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        }
     }
 
     private HttpHeaders addAuthorizationHeaderIfPresent(DataContext dataContext) {

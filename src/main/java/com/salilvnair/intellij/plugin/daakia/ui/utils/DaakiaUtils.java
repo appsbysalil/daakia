@@ -96,7 +96,7 @@ public class DaakiaUtils {
 
     public static void showAboutDaakia(Component component) {
         String message = """
-                <html><font size="5"><b>Daakia 1.0.6 (Build DK-1.0.6)</b></font>
+                <html><font size="5"><b>Daakia 1.0.7 (Build DK-1.0.7)</b></font>
                
                 <html>Website: <a href="www.salilvnair.com">www.salilvnair.com</a></html>
                 <html>Support: <a href="mailto:support@salilvnair.com">support@salilvnair.com</a></html>
