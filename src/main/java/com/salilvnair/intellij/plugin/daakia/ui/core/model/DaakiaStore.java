@@ -11,6 +11,7 @@ public class DaakiaStore {
     private String name;
     private DaakiaStoreRecord record;
     private boolean collection;
+    private boolean emptyCollection;
     private List<DaakiaStore> children;
 
     public String getName() {
@@ -37,11 +38,19 @@ public class DaakiaStore {
         this.children = children;
     }
 
-    public boolean getCollection() {
+    public boolean isCollection() {
         return collection;
     }
 
     public void setCollection(boolean collection) {
         this.collection = collection;
+    }
+
+    public boolean isEmptyCollection() {
+        return emptyCollection;
+    }
+
+    public void setEmptyCollection(boolean emptyCollection) {
+        this.emptyCollection = emptyCollection;
     }
 }

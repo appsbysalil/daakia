@@ -1,8 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom;
 
-import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.JBColor;
-import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,4 +58,13 @@ public class TextInputField extends JTextField {
             g.drawString(placeholder, x, y);
         }
     }
+
+    public String placeholder() {
+        return placeholder;
+    }
+
+    public boolean containsText() {
+        return !getText().equals(placeholder);
+    }
+
 }

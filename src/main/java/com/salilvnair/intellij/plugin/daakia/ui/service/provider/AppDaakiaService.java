@@ -5,10 +5,7 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.*;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
@@ -18,10 +15,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.DateUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.LabelUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 
@@ -32,6 +26,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +36,12 @@ public class AppDaakiaService extends BaseDaakiaService {
     public DaakiaContext execute(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         if(AppDaakiaType.INIT_HISTORY.equals(type)) {
             initHistoryRootNode(type, dataContext, objects);
+        }
+        else if(AppDaakiaType.SEARCH_HISTORY.equals(type)) {
+            initHistoryRootNodeFromSearchText(type, dataContext, objects);
+        }
+        else if(AppDaakiaType.SEARCH_COLLECTION.equals(type)) {
+            initStoreCollectionsFromSearchText(type, dataContext, objects);
         }
         else if (AppDaakiaType.INIT_STORE_COLLECTIONS.equals(type)) {
             initStoreCollections(type, dataContext, objects);
@@ -196,10 +197,69 @@ public class AppDaakiaService extends BaseDaakiaService {
         });
     }
 
+    private void initStoreCollectionsFromSearchText(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        try {
+            String searchText = (String) objects[0];
+            String jsonString = JsonUtils.readJsonFromFile(DaakiaUtils.storeFile());
+            DaakiaStore daakiaStore = JsonUtils.jsonToPojo(jsonString, DaakiaStore.class);
+            if(daakiaStore != null) {
+                DefaultMutableTreeNode rootNode;
+                DefaultMutableTreeNode collectionStoreRootNode = new DefaultMutableTreeNode("Collections");
+                if(searchText == null || searchText.isEmpty()) {
+                    rootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, collectionStoreRootNode);
+                }
+                else {
+                    rootNode = DaakiaUtils.convertCollectionStoreToTreeNodeFilterBySearchText(daakiaStore, collectionStoreRootNode, searchText);
+                }
+                Tree collectionStoreTree = dataContext.sideNavContext().collectionStoreTree();
+                // Update the tree model with new data
+                DefaultTreeModel treeModel = (DefaultTreeModel) collectionStoreTree.getModel();
+                treeModel.setRoot(rootNode);
+                treeModel.reload();
+            }
+        }
+        catch (IOException ignore) {}
+    }
+
+    private void initHistoryRootNodeFromSearchText(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        Map<String, List<DaakiaHistory>> historyData = dataContext.sideNavContext().historyData();
+        String searchText = (String) objects[0];
+        Map<String, List<DaakiaHistory>> filteredHistoryData = new HashMap<>();
+        historyData.forEach( (yr, hDataList) -> {
+            List<DaakiaHistory> filteredList = hDataList
+                                                .stream()
+                                                .filter(hData -> hData.getDisplayName() !=null && hData.getDisplayName().contains(searchText)
+                                                        || hData.getUrl() !=null && hData.getUrl().contains(searchText)
+                                                )
+                                                .toList();
+            if(!filteredList.isEmpty()) {
+                filteredHistoryData.put(yr, filteredList);
+            }
+        });
+        DefaultMutableTreeNode rootNode;
+        if(searchText == null || searchText.isEmpty()) {
+            rootNode = generateRootNodeFromHistoryData(historyData);
+        }
+        else {
+            rootNode = generateRootNodeFromHistoryData(filteredHistoryData);
+        }
+        Tree historyTree = dataContext.sideNavContext().historyTree();
+        // Update the tree model with new data
+        DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
+        treeModel.setRoot(rootNode);
+        treeModel.reload();
+    }
+
+
     private void initHistoryRootNode(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode();
         dataContext.daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.LOAD_HISTORY, dataContext);
         Map<String, List<DaakiaHistory>> historyData = dataContext.sideNavContext().historyData();
+        DefaultMutableTreeNode rootNode = generateRootNodeFromHistoryData(historyData);
+        dataContext.sideNavContext().setHistoryRootNode(rootNode);
+    }
+
+    private DefaultMutableTreeNode generateRootNodeFromHistoryData(Map<String, List<DaakiaHistory>> historyData) {
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode();
         List<String> historyYears = initHistoryYears(historyData);
         Map<String, DefaultMutableTreeNode> yearNodes = new LinkedHashMap<>();
         for (String historyYear : historyYears) {
@@ -219,7 +279,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         for (String year : yearNodes.keySet()) {
             rootNode.add(yearNodes.get(year));
         }
-        dataContext.sideNavContext().setHistoryRootNode(rootNode);
+        return rootNode;
     }
 
     private List<String> initHistoryYears(Map<String, List<DaakiaHistory>> historyData) {

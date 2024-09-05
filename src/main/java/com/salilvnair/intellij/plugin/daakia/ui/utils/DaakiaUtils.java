@@ -63,6 +63,24 @@ public class DaakiaUtils {
         return rootNode;
     }
 
+    public static DefaultMutableTreeNode convertCollectionStoreToTreeNodeFilterBySearchText(DaakiaStore daakiaStore, DefaultMutableTreeNode collectionStoreRootNode, String searchText) {
+        if(daakiaStore.getChildren()!=null && !daakiaStore.getChildren().isEmpty()) {
+            for (DaakiaStore childDaakiaStore : daakiaStore.getChildren()) {
+                if((childDaakiaStore.getRecord() == null)
+                    || (childDaakiaStore.getRecord()!=null &&
+                        (childDaakiaStore.getRecord().getUrl()!=null && childDaakiaStore.getRecord().getUrl().contains(searchText) || childDaakiaStore.getRecord().getDisplayName()!=null && childDaakiaStore.getRecord().getDisplayName().contains(searchText)))
+                ) {
+                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDaakiaStore.getRecord() == null ? childDaakiaStore.getName() : childDaakiaStore.getRecord());
+                    convertCollectionStoreToTreeNodeFilterBySearchText(childDaakiaStore, childNode, searchText);
+                    if(childNode.getChildCount() > 0 || (childNode.getUserObject() !=null && childNode.getUserObject() instanceof DaakiaStoreRecord)) {
+                        collectionStoreRootNode.add(childNode);
+                    }
+                }
+            }
+        }
+        return collectionStoreRootNode;
+    }
+
     public static void hidePanelWithAnimation(final JPanel panel, boolean visibility) {
         Timer timer = new Timer(20, new ActionListener() {
             private float alpha = 1f;

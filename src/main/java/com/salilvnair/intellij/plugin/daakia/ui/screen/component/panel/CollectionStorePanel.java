@@ -7,11 +7,13 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.BasicButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.CollectionStoreTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
 
 import javax.swing.*;
@@ -27,6 +29,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     private JPanel collectionStoreTreePanel;
     private Tree collectionStoreTree;
     private DefaultTreeModel collectionStoreTreeModel;
+    private JPanel searchPanel;
+    TextInputField searchTextField;
 
     public CollectionStorePanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -42,6 +46,9 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     public void initComponents() {
         collectionStoreTreePanel = dynamicTree(this);
         scrollPane = new JBScrollPane(collectionStoreTreePanel);
+        searchPanel = new JPanel(new BorderLayout());
+        searchTextField = new TextInputField("Search");
+        searchPanel.add(searchTextField, BorderLayout.CENTER);
     }
 
     @Override
@@ -51,12 +58,20 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     @Override
     public void initChildrenLayout() {
+        add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
     }
 
     @Override
     public void initListeners() {
         initTreeListeners();
+        TextFieldUtils.addChangeListener(searchTextField, e -> {
+            TextInputField textInputField = (TextInputField) e.getSource();
+            if(textInputField.containsText()) {
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.SEARCH_COLLECTION, dataContext, searchTextField.getText());
+                TreeUtils.expandAllNodes(collectionStoreTree);
+            }
+        });
     }
 
     public JPanel dynamicTree(Component parentComponent) {

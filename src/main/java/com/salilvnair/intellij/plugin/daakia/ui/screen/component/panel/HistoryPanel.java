@@ -5,27 +5,27 @@ import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.HistoryTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     private JScrollPane scrollPane;
     private Tree historyTree;
-    private DefaultTreeModel historyTreeModel;
-
+    private JPanel searchPanel;
+    TextInputField searchTextField;
     public HistoryPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init();
@@ -46,10 +46,14 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         initTreeNode();
         scrollPane = new JBScrollPane(historyTree);
         historyTree.setCellRenderer(new HistoryTreeCellRenderer());
+        searchPanel = new JPanel(new BorderLayout());
+        searchTextField = new TextInputField("Search");
+        searchPanel.add(searchTextField, BorderLayout.CENTER);
     }
 
     @Override
     public void initChildrenLayout() {
+        add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
     }
 
@@ -61,12 +65,20 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
                 TreeUtils.expandAllNodes(historyTree);
             }
         });
+
+        TextFieldUtils.addChangeListener(searchTextField, e -> {
+            TextInputField textInputField = (TextInputField) e.getSource();
+            if(textInputField.containsText()) {
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.SEARCH_HISTORY, dataContext, searchTextField.getText());
+                TreeUtils.expandAllNodes(historyTree);
+            }
+        });
     }
 
     private void initTreeNode() {
         daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_HISTORY, dataContext);
         DefaultMutableTreeNode root = dataContext.sideNavContext().historyRootNode();
-        historyTreeModel = new DefaultTreeModel(root);
+        DefaultTreeModel historyTreeModel = new DefaultTreeModel(root);
         historyTree = new Tree(historyTreeModel);
         historyTree.setRootVisible(false);
         TreeUtils.expandAllNodes(historyTree);
@@ -112,12 +124,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     private void showPopupMenu(Component component, int x, int y, DaakiaHistory daakiaHistory) {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem renameMenuItem = new JMenuItem("Rename");
-        renameMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                renameSelectedTreeItem(daakiaHistory);
-            }
-        });
+        renameMenuItem.addActionListener(e -> renameSelectedTreeItem(daakiaHistory));
         popupMenu.add(renameMenuItem);
         popupMenu.show(component, x, y);
     }
