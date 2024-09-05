@@ -40,9 +40,12 @@
         <br>
         v1.0.6 released with below updates:
             fixed some minor bugs and polished some rough edges.
-
+        <br>
         v1.0.7 released with below updates:
             added support for the multipart-form data more testing is needed though 😂
+        <br>
+        v1.0.8 released with below updates:
+            added support for the search text functionality in the collection and history panel 😈
     ]]>
     </change-notes>
 
