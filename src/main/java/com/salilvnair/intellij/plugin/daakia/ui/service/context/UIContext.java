@@ -42,6 +42,8 @@ public class UIContext {
 
     private JProgressBar progressBar;
 
+    private boolean downloadResponse;
+
 
 
 
@@ -224,5 +226,13 @@ public class UIContext {
 
     public void setRequestContentType(String requestContentType) {
         this.requestContentType = requestContentType;
+    }
+
+    public boolean downloadResponse() {
+        return downloadResponse;
+    }
+
+    public void setDownloadResponse(boolean downloadResponse) {
+        this.downloadResponse = downloadResponse;
     }
 }

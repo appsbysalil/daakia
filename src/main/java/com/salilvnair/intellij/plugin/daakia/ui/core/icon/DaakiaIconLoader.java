@@ -2,6 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.core.icon;
 
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
@@ -13,7 +14,7 @@ public class DaakiaIconLoader {
     }
 
     public static Icon getIcon(String iconPath, String darkIconPath, Class<?> aClass) {
-        boolean isDarkTheme = UIUtil.isUnderDarcula() || (SystemInfo.isMac && UIUtil.isUnderIntelliJLaF());
+        boolean isDarkTheme = !JBColor.isBright() || (SystemInfo.isMac && UIUtil.isUnderIntelliJLaF());
         if(darkIconPath!=null && isDarkTheme) {
             return IconLoader.getIcon(darkIconPath, aClass.getClassLoader());
         }

@@ -4,6 +4,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.FileUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -56,10 +57,13 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
         subscriber().subscribe(event ->{
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RECEIVING_RESPONSE)) {
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
-                ResponseEntity<String> responseEntity = daakiaEvent.responseEntity();
+                ResponseEntity<?> responseEntity = daakiaEvent.responseEntity();
                 if(responseEntity != null) {
-                    String formattedText = JsonUtils.format(responseEntity.getBody());
+                    String formattedText = uiContext().downloadResponse() ? null : responseEntity.getBody() == null ? null :JsonUtils.format((String) responseEntity.getBody());
                     responseTextArea.setText(formattedText);
+                    if(uiContext().downloadResponse()) {
+                        FileUtils.saveResponseAsFile(responseEntity);
+                    }
                 }
                 else if(daakiaEvent.daakiaContext() != null && daakiaEvent.daakiaContext().errorMessage() != null) {
                     responseTextArea.setText(daakiaEvent.daakiaContext().errorMessage());

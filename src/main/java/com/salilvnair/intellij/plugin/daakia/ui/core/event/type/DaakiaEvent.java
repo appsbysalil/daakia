@@ -16,7 +16,7 @@ public class DaakiaEvent extends EventObject {
     private final DaakiaEventType eventType;
     private String deletedHeaderKey;
     private String deletedFormDataKey;
-    private ResponseEntity<String> responseEntity;
+    private ResponseEntity<?> responseEntity;
     private DaakiaHistory selectedDaakiaHistory;
     private DaakiaStoreRecord selectedDaakiaStoreRecord;
     private DataContext dataContext;
@@ -49,11 +49,11 @@ public class DaakiaEvent extends EventObject {
     }
 
 
-    public ResponseEntity<String> responseEntity() {
+    public ResponseEntity<?> responseEntity() {
         return responseEntity;
     }
 
-    public void setResponseEntity(ResponseEntity<String> responseEntity) {
+    public void setResponseEntity(ResponseEntity<?> responseEntity) {
         this.responseEntity = responseEntity;
     }
 

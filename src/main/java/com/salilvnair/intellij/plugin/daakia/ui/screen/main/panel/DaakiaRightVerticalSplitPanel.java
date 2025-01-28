@@ -4,8 +4,6 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
-import org.springframework.http.ResponseEntity;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +63,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
                 rightPanel.setVisible(false);
                 progressBar.setVisible(true);
             }
-            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RECEIVING_RESPONSE)) {
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
                 rightPanel.setVisible(true);
                 progressBar.setVisible(false);
             }

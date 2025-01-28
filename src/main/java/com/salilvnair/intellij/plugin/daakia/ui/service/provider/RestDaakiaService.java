@@ -38,15 +38,20 @@ public class RestDaakiaService extends BaseDaakiaService {
         RestResponseErrorHandler errorHandler = new RestResponseErrorHandler();
         restTemplate.setErrorHandler(errorHandler);
         restTemplate.setRequestFactory(new JdkClientHttpRequestFactory());
-        ResponseEntity<String> response = null;
+        ResponseEntity<?> response = null;
         String errorMessage = null;
         try {
-            response = restTemplate.exchange(url, HttpMethod.valueOf(requestType != null ? requestType : "GET"), entity, String.class);
+            if(dataContext.uiContext().downloadResponse()) {
+                response = restTemplate.exchange(url, HttpMethod.valueOf(requestType != null ? requestType : "GET"), entity, byte[].class);
+            }
+            else {
+                response = restTemplate.exchange(url, HttpMethod.valueOf(requestType != null ? requestType : "GET"), entity, String.class);
+            }
         }
         catch (Exception e) {
             errorMessage = e.getLocalizedMessage();
         }
-        ResponseEntity<String> finalResponse = response;
+        ResponseEntity<?> finalResponse = response;
         String finalErrorMessage = errorMessage;
         ApplicationManager.getApplication().invokeLater(() -> {
             updateDaakiaContext(startTime, dataContext, finalResponse, finalErrorMessage);
@@ -72,9 +77,9 @@ public class RestDaakiaService extends BaseDaakiaService {
         return new HttpEntity<>(body, headers);
     }
 
-    private void updateDaakiaContext(long startTime, DataContext dataContext, ResponseEntity<String> response, String finalErrorMessage) {
+    private void updateDaakiaContext(long startTime, DataContext dataContext, ResponseEntity<?> response, String finalErrorMessage) {
         if (response != null) {
-            String body = response.getBody();
+            String body = response.getBody()!=null ? response.getBody()+"": null;
             HttpHeaders headers = response.getHeaders();
             HttpStatusCode statusCode = response.getStatusCode();
             HttpStatus status = HttpStatus.valueOf(statusCode.value());

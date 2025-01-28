@@ -9,7 +9,7 @@ import org.springframework.util.MultiValueMap;
 public class DaakiaContext {
     private String errorMessage;
     private MultiValueMap<String, String> requestHeaders;
-    private ResponseEntity<String> responseEntity;
+    private ResponseEntity<?> responseEntity;
     private HttpStatus httpStatus;
     private ResponseMetadata responseMetadata;
     private MultiValueMap<String, String> responseHeaders;
@@ -36,11 +36,11 @@ public class DaakiaContext {
         this.responseHeaders = responseHeaders;
     }
 
-    public ResponseEntity<String> responseEntity() {
+    public ResponseEntity<?> responseEntity() {
         return responseEntity;
     }
 
-    public void setResponseEntity(ResponseEntity<String> responseEntity) {
+    public void setResponseEntity(ResponseEntity<?> responseEntity) {
         this.responseEntity = responseEntity;
     }
 

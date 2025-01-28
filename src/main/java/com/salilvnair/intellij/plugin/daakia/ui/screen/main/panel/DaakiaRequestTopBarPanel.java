@@ -67,11 +67,16 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
     private void sendAction() {
         sendButton.setEnabled(false);
         eventPublisher().onClickSend();
+        dataContext.uiContext().setDownloadResponse(false);
         daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
     }
 
     private void sendAndDownloadAction() {
-        JOptionPane.showMessageDialog(null, "Feature coming soon..!", "Coming soon...", JOptionPane.INFORMATION_MESSAGE,DaakiaIcons.DaakiaIcon48);
+        //JOptionPane.showMessageDialog(null, "Feature coming soon..!", "Coming soon...", JOptionPane.INFORMATION_MESSAGE,DaakiaIcons.DaakiaIcon48);
+        sendButton.setEnabled(false);
+        eventPublisher().onClickSend();
+        dataContext.uiContext().setDownloadResponse(true);
+        daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
     }
 
     @Override

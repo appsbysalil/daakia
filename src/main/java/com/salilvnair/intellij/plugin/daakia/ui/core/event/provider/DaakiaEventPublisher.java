@@ -45,7 +45,7 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
-    public void onReceivingResponse(DaakiaContext daakiaContext, ResponseEntity<String> responseEntity) {
+    public void onReceivingResponse(DaakiaContext daakiaContext, ResponseEntity<?> responseEntity) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RECEIVING_RESPONSE);
         event.setResponseEntity(responseEntity);
         event.setDaakiaContext(daakiaContext);

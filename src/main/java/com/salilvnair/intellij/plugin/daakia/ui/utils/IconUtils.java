@@ -1,8 +1,8 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
+import com.intellij.ui.JBColor;
 import com.intellij.util.IconUtil;
 import com.intellij.util.ui.ImageUtil;
-import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +31,7 @@ public class IconUtils {
     public static ImageIcon createIconByTheme(String... paths) {
         String lightPath = paths[0];
         String darkPath = paths[1];
-        if(UIUtil.isUnderDarcula()) {
+        if(!JBColor.isBright()) {
             return createIcon(darkPath);
         }
         return createIcon(lightPath);
@@ -40,7 +40,7 @@ public class IconUtils {
     public static ImageIcon createIconByTheme(int w , int h, String... paths) {
         String lightPath = paths[0];
         String darkPath = paths[1];
-        if(UIUtil.isUnderDarcula()) {
+        if(!JBColor.isBright()) {
             return createIcon(darkPath, w, h);
         }
         return createIcon(lightPath, w, h);
