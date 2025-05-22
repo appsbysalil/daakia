@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.salilvnair.jb.plugin"
-version = "1.0.9"
+version = "2.0.0"
 
 repositories {
     mavenCentral()
@@ -42,7 +42,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("243")
-        untilBuild.set("250.*")
+        untilBuild.set("253.*")
     }
 
     signPlugin {
