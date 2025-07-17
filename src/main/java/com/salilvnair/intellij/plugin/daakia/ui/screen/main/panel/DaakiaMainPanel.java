@@ -5,6 +5,7 @@ import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.dialog.PostmanExportDialog;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.persistence.EnvironmentDao;
@@ -110,7 +111,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
             dataContext.globalContext().setSelectedEnvironment(env);
         });
         importButton.addActionListener(e -> showImportDialog());
-        exportButton.addActionListener(e -> globalEventPublisher().onClickExportPostman());
+        exportButton.addActionListener(e -> showExportDialog());
         environmentButton.addActionListener(e -> {
             globalEventPublisher().onOpenEnvironmentManager();
         });
@@ -151,9 +152,42 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
                 new EnvironmentDao().saveEnvironments(dataContext.globalContext().environments());
                 dataContext.globalContext().setSelectedEnvironment(env);
                 refreshEnvironmentCombo();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Failed to import environment: " + ex.getMessage());
+            }
+        }
+    }
+
+    /** Show dialog to choose between exporting collections or environments. */
+    private void showExportDialog() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        PostmanExportDialog dialog = new PostmanExportDialog(window,
+                () -> globalEventPublisher().onClickExportPostman(),
+                this::exportPostmanEnvironment);
+        dialog.setVisible(true);
+    }
+
+    /**
+     * Exports the selected environment as a Postman environment JSON file.
+     */
+    private void exportPostmanEnvironment() {
+        Environment env = (Environment) environmentCombo.getSelectedItem();
+        if (env == null) {
+            JOptionPane.showMessageDialog(this, "No environment selected to export");
+            return;
+        }
+        JFileChooser chooser = new JFileChooser();
+        int res = chooser.showSaveDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = chooser.getSelectedFile();
+                String json = PostmanEnvironmentUtils.toPostmanJson(env);
+                JsonUtils.writeJsonToFile(json, file);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to export environment: " + ex.getMessage());
             }
         }
     }
