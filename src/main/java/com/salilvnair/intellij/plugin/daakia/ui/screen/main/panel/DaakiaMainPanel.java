@@ -7,9 +7,17 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
+import com.salilvnair.intellij.plugin.daakia.persistence.EnvironmentDao;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.dialog.PostmanImportDialog;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 import javax.swing.*;
+import javax.swing.SwingUtilities;
+import javax.swing.JFileChooser;
 import java.awt.*;
+import java.awt.Window;
+import java.io.File;
 
 
 public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
@@ -101,7 +109,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
             Environment env = (Environment) environmentCombo.getSelectedItem();
             dataContext.globalContext().setSelectedEnvironment(env);
         });
-        importButton.addActionListener(e -> globalEventPublisher().onClickImportPostman());
+        importButton.addActionListener(e -> showImportDialog());
         exportButton.addActionListener(e -> globalEventPublisher().onClickExportPostman());
         environmentButton.addActionListener(e -> {
             globalEventPublisher().onOpenEnvironmentManager();
@@ -116,6 +124,37 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
         }
         if(selected != null) {
             environmentCombo.setSelectedItem(selected);
+        }
+    }
+
+    /** Show dialog to choose between importing collections or environments. */
+    private void showImportDialog() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        PostmanImportDialog dialog = new PostmanImportDialog(window,
+                () -> globalEventPublisher().onClickImportPostman(),
+                this::importPostmanEnvironment);
+        dialog.setVisible(true);
+    }
+
+    /**
+     * Imports a Postman environment JSON file and persists it into Daakia.
+     */
+    private void importPostmanEnvironment() {
+        JFileChooser chooser = new JFileChooser();
+        int res = chooser.showOpenDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = chooser.getSelectedFile();
+                String json = JsonUtils.readJsonFromFile(file);
+                Environment env = PostmanEnvironmentUtils.fromPostmanJson(json);
+                dataContext.globalContext().environments().add(env);
+                new EnvironmentDao().saveEnvironments(dataContext.globalContext().environments());
+                dataContext.globalContext().setSelectedEnvironment(env);
+                refreshEnvironmentCombo();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to import environment: " + ex.getMessage());
+            }
         }
     }
 
