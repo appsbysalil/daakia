@@ -60,9 +60,11 @@ public class GlobalContext {
 
     public void setSelectedEnvironment(Environment selectedEnvironment) {
         this.selectedEnvironment = selectedEnvironment;
-        if(selectedEnvironment != null) {
-            DaakiaSettings settings = DaakiaSettings.getInstance();
+        DaakiaSettings settings = DaakiaSettings.getInstance();
+        if(selectedEnvironment != null && selectedEnvironment.getId() != null) {
             settings.getState().lastEnvironmentId = selectedEnvironment.getId();
+        } else if(selectedEnvironment == null) {
+            settings.getState().lastEnvironmentId = -1;
         }
     }
 }
