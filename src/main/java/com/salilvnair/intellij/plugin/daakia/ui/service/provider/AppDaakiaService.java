@@ -86,11 +86,13 @@ public class AppDaakiaService extends BaseDaakiaService {
         ResponseMetadata responseMetadata = dataContext.daakiaContext().responseMetadata();
         HttpStatus httpStatus = dataContext.daakiaContext().httpStatus();
         String statusColor = "#10b97e";
-        if(httpStatus.isError()) {
+        if(httpStatus !=null && httpStatus.isError()) {
             statusColor = "#ef4444";
         }
 
-        dataContext.uiContext().statusLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;Status: ", httpStatus.value() + " " + httpStatus.getReasonPhrase(), null, statusColor));
+        if(httpStatus !=null) {
+            dataContext.uiContext().statusLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;Status: ", httpStatus.value() + " " + httpStatus.getReasonPhrase(), null, statusColor));
+        }
         dataContext.uiContext().sizeLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size: ", responseMetadata.getSizeText(), null, statusColor));
         dataContext.uiContext().timeLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time: ", responseMetadata.getTimeTaken(), null, statusColor));
     }
@@ -182,7 +184,9 @@ public class AppDaakiaService extends BaseDaakiaService {
         MultiValueMap<String, String> responseHeaders = JsonUtils.jsonStringToMultivaluedMap(responseHeadersJsonString);
         dataContext.daakiaContext().setRequestHeaders(requestHeaders);
         dataContext.daakiaContext().setResponseHeaders(responseHeaders);
-        dataContext.daakiaContext().setHttpStatus(HttpStatus.valueOf(baseStoreData.getStatusCode()));
+        if(baseStoreData.getStatusCode()!=0) {
+            dataContext.daakiaContext().setHttpStatus(HttpStatus.valueOf(baseStoreData.getStatusCode()));
+        }
         dataContext.daakiaContext().setResponseMetadata(new ResponseMetadata(baseStoreData.getStatusCode(), baseStoreData.getTimeTaken(), baseStoreData.getSizeText()));
         dataContext.uiContext().headerTextFields().clear();
         dataContext.uiContext().headersPanel().removeAll();

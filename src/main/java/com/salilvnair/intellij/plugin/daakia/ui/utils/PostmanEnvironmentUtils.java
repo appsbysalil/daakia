@@ -41,4 +41,19 @@ public final class PostmanEnvironmentUtils {
         env.setVariables(vars);
         return env;
     }
+
+    public static String resolveVariables(String text, Environment env) {
+        if(text == null || env == null) {
+            return text;
+        }
+        for(Variable v : env.getVariables()) {
+            if(v.getKey() != null) {
+                String placeholder = "{{" + v.getKey() + "}}";
+                String val = v.getCurrentValue()!=null ? v.getCurrentValue() : v.getInitialValue();
+                text = text.replace(placeholder, val != null ? val : "");
+
+            }
+        }
+        return text;
+    }
 }

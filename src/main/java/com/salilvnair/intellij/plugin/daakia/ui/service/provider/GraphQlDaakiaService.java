@@ -10,6 +10,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.*;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
@@ -29,9 +30,9 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
 
     private void invokeGraphQlApi(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
-        String url = resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
+        String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
         String originalBody = dataContext.uiContext().requestTextArea().getText();
-        String resolvedBody = resolveVariables(originalBody, env);
+        String resolvedBody = PostmanEnvironmentUtils.resolveVariables(originalBody, env);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = prepareRequestHeaders(dataContext);
@@ -75,8 +76,8 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
         HttpHeaders headers = new HttpHeaders();
         Environment env = dataContext.globalContext().selectedEnvironment();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
-            String headerName = resolveVariables(v.get(0).getText(), env);
-            String headerVal = resolveVariables(v.get(1).getText(), env);
+            String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), env);
+            String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), env);
             headers.add(headerName, headerVal);
         });
         HttpHeaders authHeaders = addAuthorizationHeaderIfPresent(dataContext);
@@ -102,20 +103,6 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
             }
         }
         return authHeaders;
-    }
-
-    private String resolveVariables(String text, Environment env) {
-        if(text == null || env == null) {
-            return text;
-        }
-        for(Variable v : env.getVariables()) {
-            if(v.getKey() != null) {
-                String placeholder = "{{" + v.getKey() + "}}";
-                String val = v.getCurrentValue()!=null ? v.getCurrentValue() : v.getInitialValue();
-                text = text.replace(placeholder, val != null ? val : "");
-            }
-        }
-        return text;
     }
 
     private void updateDaakiaContext(long startTime, DataContext dataContext, ResponseEntity<?> response, String finalErrorMessage) {
