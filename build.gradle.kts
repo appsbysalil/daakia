@@ -18,6 +18,7 @@ dependencies {
     }
     implementation("com.fifesoft:rsyntaxtextarea:3.4.0")
     implementation("org.json:json:20240303")
+    implementation("org.xerial:sqlite-jdbc:3.45.3.0")
     compileOnly("org.projectlombok:lombok:0.11.0")
 }
 

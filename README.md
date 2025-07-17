@@ -27,6 +27,13 @@ It offers a comprehensive set of features to manage and test the rest APIs seaml
 1. After installation, access the Daakia plugin from the toolbar (![DaakiaIcon24](https://github.com/appsbysalil/daakia/assets/34584327/f75731fa-5640-4f19-9022-29b7533492e2)) at the bottom.
 2. Create API requests and organize them into collections for efficient management.
 3. Configure request parameters, headers, and authentication settings as needed.
+4. Use the **Import** and **Export** icons in the main toolbar to load or save Postman collections.
+
+### Importing and Exporting Postman Collections
+
+1. Click the **Import** icon in the header to choose a Postman `.json` file.
+2. The imported collection immediately appears in the tree and is stored using the SQLite persistence layer.
+3. Click the **Export** icon to save the selected collection in Postman v2 format.
 
 ## Feedback and Support:
 
@@ -35,3 +42,15 @@ If you encounter any issues or have suggestions for improvement, please don't he
 ## License:
 
 This plugin is distributed under the MIT License. See the LICENSE file for details.
+
+## Changelog
+
+### Contributions by Codex
+
+- Added SQLite persistence layer and DAO classes.
+- Created Postman import/export utilities for collections.
+- Implemented environment and variable data models with management UI.
+- Enhanced plugin with GraphQL request support.
+- Refined environment panel layout and text box alignment.
+- Added dynamic row management for environment variables.
+- Introduced placeholder-enabled `PasswordInputField` and updated authorization panel layout.

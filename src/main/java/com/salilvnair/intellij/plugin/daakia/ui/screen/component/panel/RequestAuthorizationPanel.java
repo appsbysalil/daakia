@@ -1,7 +1,10 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
 import com.intellij.openapi.ui.ComboBox;
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
@@ -29,12 +32,15 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
         authTypes = new ComboBox<>(new String[]{"None","Basic Auth", "Bearer Token"});
         authPanel = new JPanel();
         TextInputField userNameTextField = new TextInputField("Username");
-        TextInputField bearerTokenTextField = new TextInputField("Token");
-        bearerTokenTextField.setPreferredSize(new Dimension(600, 25));
-
         userNameTextField.setPreferredSize(new Dimension(600, 25));
-        TextInputField passwordTextField = new TextInputField("Password");
+
+        PasswordInputField passwordTextField = new PasswordInputField("Password");
         passwordTextField.setPreferredSize(new Dimension(600, 25));
+        IconButton passwordToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(30,25));
+
+        PasswordInputField bearerTokenTextField = new PasswordInputField("Token");
+        bearerTokenTextField.setPreferredSize(new Dimension(600,25));
+        IconButton bearerToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(30,25));
 
         basicAuthTextboxPanel = new JPanel();
         basicAuthTextboxPanel.setLayout(new BorderLayout());
@@ -45,16 +51,18 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
         bearerTokenTextBoxPanel.setVisible(false);
 
         JPanel userNameContainer = new JPanel();
-        userNameContainer.setLayout(new FlowLayout(FlowLayout.LEFT));
+        userNameContainer.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
         userNameContainer.add(userNameTextField);
 
         JPanel passwordContainer = new JPanel();
-        passwordContainer.setLayout(new FlowLayout(FlowLayout.LEFT));
+        passwordContainer.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
         passwordContainer.add(passwordTextField);
+        passwordContainer.add(passwordToggle);
 
         JPanel bearerTokenContainer = new JPanel();
-        bearerTokenContainer.setLayout(new FlowLayout(FlowLayout.LEFT));
+        bearerTokenContainer.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
         bearerTokenContainer.add(bearerTokenTextField);
+        bearerTokenContainer.add(bearerToggle);
 
         basicAuthTextboxPanel.add(userNameContainer, BorderLayout.NORTH);
         basicAuthTextboxPanel.add(passwordContainer, BorderLayout.CENTER);
@@ -81,6 +89,9 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
         uiContext().setUserNameTextField(userNameTextField);
         uiContext().setPasswordTextField(passwordTextField);
         uiContext().setBearerTokenTextField(bearerTokenTextField);
+
+        passwordToggle.addActionListener(e -> togglePasswordField(passwordTextField, passwordToggle));
+        bearerToggle.addActionListener(e -> togglePasswordField(bearerTokenTextField, bearerToggle));
     }
 
     @Override
@@ -109,5 +120,17 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
                 basicAuthTextboxPanel.setVisible(false);
             }
         });
+    }
+
+    private void togglePasswordField(JPasswordField field, IconButton button) {
+        boolean visible = field.getEchoChar() == 0;
+        if (visible) {
+            field.setEchoChar('\u2022');
+            button.setIcon(DaakiaIcons.EyeIcon);
+        }
+        else {
+            field.setEchoChar((char) 0);
+            button.setIcon(DaakiaIcons.EyeOffIcon);
+        }
     }
 }

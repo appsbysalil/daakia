@@ -135,6 +135,9 @@ public class DaakiaBaseStoreData {
         if("POST".equals(requestType)) {
             hexCode ="#eab208";
         }
+        else if("GRAPHQL".equals(requestType)) {
+            hexCode = "#6b21a8";
+        }
         String displayText = displayName == null ? url: displayName;
         return LabelUtils.colorText(null, requestType, "&nbsp;"+displayText, hexCode);
     }

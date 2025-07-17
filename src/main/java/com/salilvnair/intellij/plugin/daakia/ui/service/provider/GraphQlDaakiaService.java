@@ -4,42 +4,41 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.core.rest.exception.RestResponseErrorHandler;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
-import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-public class RestDaakiaService extends BaseDaakiaService {
+import java.util.HashMap;
+import java.util.Map;
+
+public class GraphQlDaakiaService extends BaseDaakiaService {
     @Override
     public DaakiaContext execute(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
-        if(RestDaakiaType.EXCHANGE.equals(type)) {
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                invokeRestApi(dataContext);
-            });
-
+        if(GraphQlDaakiaType.EXECUTE.equals(type)) {
+            ApplicationManager.getApplication().executeOnPooledThread(() -> invokeGraphQlApi(dataContext));
         }
         return dataContext.daakiaContext();
     }
 
-    private void invokeRestApi(DataContext dataContext) {
+    private void invokeGraphQlApi(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
         String url = resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
-        String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
-
         String originalBody = dataContext.uiContext().requestTextArea().getText();
         String resolvedBody = resolveVariables(originalBody, env);
 
         RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<?> entity = prepareRequestEntity(dataContext, resolvedBody);
+        HttpHeaders headers = prepareRequestHeaders(dataContext);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("query", resolvedBody);
+        HttpEntity<?> entity = new HttpEntity<>(payload, headers);
         long startTime = System.currentTimeMillis();
         RestResponseErrorHandler errorHandler = new RestResponseErrorHandler();
         restTemplate.setErrorHandler(errorHandler);
@@ -48,10 +47,10 @@ public class RestDaakiaService extends BaseDaakiaService {
         String errorMessage = null;
         try {
             if(dataContext.uiContext().downloadResponse()) {
-                response = restTemplate.exchange(url, HttpMethod.valueOf(requestType != null ? requestType : "GET"), entity, byte[].class);
+                response = restTemplate.postForEntity(url, entity, byte[].class);
             }
             else {
-                response = restTemplate.exchange(url, HttpMethod.valueOf(requestType != null ? requestType : "GET"), entity, String.class);
+                response = restTemplate.postForEntity(url, entity, String.class);
             }
         }
         catch (Exception e) {
@@ -66,56 +65,10 @@ public class RestDaakiaService extends BaseDaakiaService {
 
     private @NotNull HttpEntity<?> prepareRequestEntity(DataContext dataContext, String bodyText) {
         HttpHeaders headers = prepareRequestHeaders(dataContext);
-        if("2".equals(dataContext.uiContext().requestContentType())) {
-            return formDataRequestEntity(dataContext, headers);
-        }
-        return new HttpEntity<>(bodyText, headers);
-    }
-
-    private HttpEntity<?> formDataRequestEntity(DataContext dataContext, HttpHeaders headers) {
-        Environment env = dataContext.globalContext().selectedEnvironment();
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        for (String key : dataContext.uiContext().formDataFileFields().keySet()) {
-            body.add(key, new FileSystemResource(dataContext.uiContext().formDataFileFields().get(key)));
-        }
-        dataContext.uiContext().formDataTextFields().forEach((k, v) -> {
-            String val = resolveVariables(v.get(1).getText(), env);
-            body.add(v.get(0).getText(), val);
-        });
-        return new HttpEntity<>(body, headers);
-    }
-
-    private void updateDaakiaContext(long startTime, DataContext dataContext, ResponseEntity<?> response, String finalErrorMessage) {
-        if (response != null) {
-            String body = response.getBody()!=null ? response.getBody()+"": null;
-            HttpHeaders headers = response.getHeaders();
-            HttpStatusCode statusCode = response.getStatusCode();
-            HttpStatus status = HttpStatus.valueOf(statusCode.value());
-            long endTime = System.currentTimeMillis();
-            long timeTaken = endTime - startTime;
-            ResponseMetadata responseMetadata = new ResponseMetadata();
-            responseMetadata.setSizeText((headers.getContentLength() != -1 ? headers.getContentLength() : body!=null ? body.getBytes().length : 0) + " bytes");
-            responseMetadata.setTimeTaken(timeTaken + " ms");
-            responseMetadata.setStatusCode(statusCode.value());
-            dataContext.daakiaContext().setResponseEntity(response);
-            dataContext.daakiaContext().setResponseMetadata(responseMetadata);
-            dataContext.daakiaContext().setResponseHeaders(headers);
-            dataContext.daakiaContext().setHttpStatus(status);
-        }
-        else {
-            HttpStatus status = HttpStatus.valueOf(503);
-            dataContext.daakiaContext().setHttpStatus(status);
-            long endTime = System.currentTimeMillis();
-            long timeTaken = endTime - startTime;
-            ResponseMetadata responseMetadata = new ResponseMetadata();
-            responseMetadata.setSizeText("0 bytes");
-            responseMetadata.setTimeTaken(timeTaken + " ms");
-            responseMetadata.setStatusCode(503);
-            dataContext.daakiaContext().setResponseMetadata(responseMetadata);
-            dataContext.daakiaContext().setResponseHeaders(new LinkedMultiValueMap<>());
-        }
-        dataContext.daakiaContext().setErrorMessage(finalErrorMessage);
-        dataContext.eventPublisher().afterRestApiExchange(dataContext.daakiaContext());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("query", bodyText);
+        return new HttpEntity<>(payload, headers);
     }
 
     private HttpHeaders prepareRequestHeaders(DataContext dataContext) {
@@ -130,15 +83,8 @@ public class RestDaakiaService extends BaseDaakiaService {
         if(!authHeaders.isEmpty()) {
             headers.addAll(authHeaders);
         }
-        addApplicableContentType(dataContext, headers);
         dataContext.daakiaContext().setRequestHeaders(headers);
         return headers;
-    }
-
-    private void addApplicableContentType(DataContext dataContext, HttpHeaders headers) {
-        if("2".equals(dataContext.uiContext().requestContentType())) {
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        }
     }
 
     private HttpHeaders addAuthorizationHeaderIfPresent(DataContext dataContext) {
@@ -167,9 +113,41 @@ public class RestDaakiaService extends BaseDaakiaService {
                 String placeholder = "{{" + v.getKey() + "}}";
                 String val = v.getCurrentValue()!=null ? v.getCurrentValue() : v.getInitialValue();
                 text = text.replace(placeholder, val != null ? val : "");
-
             }
         }
         return text;
+    }
+
+    private void updateDaakiaContext(long startTime, DataContext dataContext, ResponseEntity<?> response, String finalErrorMessage) {
+        if (response != null) {
+            String body = response.getBody()!=null ? response.getBody()+"" : null;
+            HttpHeaders headers = response.getHeaders();
+            HttpStatusCode statusCode = response.getStatusCode();
+            HttpStatus status = HttpStatus.valueOf(statusCode.value());
+            long endTime = System.currentTimeMillis();
+            long timeTaken = endTime - startTime;
+            ResponseMetadata responseMetadata = new ResponseMetadata();
+            responseMetadata.setSizeText((headers.getContentLength() != -1 ? headers.getContentLength() : body!=null ? body.getBytes().length : 0) + " bytes");
+            responseMetadata.setTimeTaken(timeTaken + " ms");
+            responseMetadata.setStatusCode(statusCode.value());
+            dataContext.daakiaContext().setResponseEntity(response);
+            dataContext.daakiaContext().setResponseMetadata(responseMetadata);
+            dataContext.daakiaContext().setResponseHeaders(headers);
+            dataContext.daakiaContext().setHttpStatus(status);
+        }
+        else {
+            HttpStatus status = HttpStatus.valueOf(503);
+            dataContext.daakiaContext().setHttpStatus(status);
+            long endTime = System.currentTimeMillis();
+            long timeTaken = endTime - startTime;
+            ResponseMetadata responseMetadata = new ResponseMetadata();
+            responseMetadata.setSizeText("0 bytes");
+            responseMetadata.setTimeTaken(timeTaken + " ms");
+            responseMetadata.setStatusCode(503);
+            dataContext.daakiaContext().setResponseMetadata(responseMetadata);
+            dataContext.daakiaContext().setResponseHeaders(new HttpHeaders());
+        }
+        dataContext.daakiaContext().setErrorMessage(finalErrorMessage);
+        dataContext.eventPublisher().afterRestApiExchange(dataContext.daakiaContext());
     }
 }

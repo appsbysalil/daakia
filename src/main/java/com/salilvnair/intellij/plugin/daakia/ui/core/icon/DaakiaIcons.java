@@ -15,4 +15,7 @@ public interface DaakiaIcons {
     Icon DeleteIcon = DaakiaIconLoader.getIcon("/icons/deleteIcon.svg", DaakiaIcons.class);
     Icon PackageName48 = DaakiaIconLoader.getIcon("/icons/abbreviatePackageNames.svg", "/icons/abbreviatePackageNames_dark.svg", DaakiaIcons.class);
     Icon ErrorIcon48 = DaakiaIconLoader.getIcon("/icons/notificationError48.svg", "/icons/notificationError48_dark.svg", DaakiaIcons.class);
+    Icon EnvironmentIcon = DaakiaIconLoader.getIcon("/icons/environment.svg", "/icons/environment.svg", DaakiaIcons.class);
+    Icon EyeIcon = DaakiaIconLoader.getIcon("/icons/eye.svg", DaakiaIcons.class);
+    Icon EyeOffIcon = DaakiaIconLoader.getIcon("/icons/eye_off.svg", DaakiaIcons.class);
 }

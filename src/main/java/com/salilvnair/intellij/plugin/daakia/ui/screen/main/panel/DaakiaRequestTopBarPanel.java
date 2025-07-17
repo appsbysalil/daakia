@@ -5,15 +5,19 @@ import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.dialog.EnvironmentManagerDialog;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 
 import javax.swing.*;
+import javax.swing.DefaultComboBoxModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -37,7 +41,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
 
     @Override
     public void initComponents() {
-        requestTypes = new ComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE"});
+        requestTypes = new ComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE", "GRAPHQL"});
         urlTextField = new JTextField();
         sendButton = new JButton("Send");
         JPopupMenu dropdownMenu = new JPopupMenu();
@@ -68,7 +72,12 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         sendButton.setEnabled(false);
         eventPublisher().onClickSend();
         dataContext.uiContext().setDownloadResponse(false);
-        daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
+        if("GRAPHQL".equals(requestTypes.getSelectedItem())) {
+            daakiaService(DaakiaType.GRAPHQL).execute(GraphQlDaakiaType.EXECUTE, dataContext);
+        }
+        else {
+            daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
+        }
     }
 
     private void sendAndDownloadAction() {
@@ -76,7 +85,12 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         sendButton.setEnabled(false);
         eventPublisher().onClickSend();
         dataContext.uiContext().setDownloadResponse(true);
-        daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
+        if("GRAPHQL".equals(requestTypes.getSelectedItem())) {
+            daakiaService(DaakiaType.GRAPHQL).execute(GraphQlDaakiaType.EXECUTE, dataContext);
+        }
+        else {
+            daakiaService(DaakiaType.REST).execute(RestDaakiaType.EXCHANGE, dataContext);
+        }
     }
 
     @Override

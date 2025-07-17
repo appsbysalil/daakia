@@ -3,8 +3,11 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.BasicButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
@@ -15,6 +18,10 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
+import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,6 +30,7 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> {
     private JScrollPane scrollPane;
@@ -72,6 +80,14 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 TreeUtils.expandAllNodes(collectionStoreTree);
             }
         });
+        globalSubscriber().subscribe(event -> {
+            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN)) {
+                importPostmanCollection();
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN)) {
+                exportPostmanCollection();
+            }
+        });
     }
 
     public JPanel dynamicTree(Component parentComponent) {
@@ -94,6 +110,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         deleteMenuItem.setEnabled(false);
         moreOptionsMenu.add(deleteMenuItem);
 
+
         deleteMenuItem.addActionListener(e -> {
             TreePath[] selectionPaths = collectionStoreTree.getSelectionPaths();
             if(selectionPaths == null) {
@@ -110,6 +127,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             globalEventPublisher().onClickDeleteCollections();
 
         });
+
 
         collectionStoreTree.addTreeSelectionListener( e -> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
@@ -214,5 +232,42 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void renameSelectedTreeItem(DaakiaStoreRecord daakiaStoreRecord) {
         globalEventPublisher().onRightClickRenameStoreCollectionNode(daakiaStoreRecord);
+    }
+
+    private void importPostmanCollection() {
+        JFileChooser chooser = new JFileChooser();
+        int res = chooser.showOpenDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = chooser.getSelectedFile();
+                String json = JsonUtils.readJsonFromFile(file);
+                DaakiaStore store = PostmanUtils.fromPostmanJson(json);
+                sideNavContext().setDaakiaStore(store);
+                DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Collections");
+                DefaultMutableTreeNode newRoot = DaakiaUtils.convertCollectionStoreToTreeNode(store, rootNode);
+                sideNavContext().setCollectionStoreRootNode(newRoot);
+                collectionStoreTreeModel.setRoot(newRoot);
+                collectionStoreTreeModel.reload();
+                new CollectionDao().saveStore(store);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Failed to import: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void exportPostmanCollection() {
+        JFileChooser chooser = new JFileChooser();
+        int res = chooser.showSaveDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            try {
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode) collectionStoreTreeModel.getRoot();
+                DaakiaStore store = DaakiaUtils.convertTreeToCollectionStore(root);
+                String json = PostmanUtils.toPostmanJson(store);
+                File file = chooser.getSelectedFile();
+                JsonUtils.writeJsonToFile(json, file);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Failed to export: " + ex.getMessage());
+            }
+        }
     }
 }

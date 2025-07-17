@@ -102,11 +102,19 @@ public class DaakiaUtils {
         timer.start();
     }
 
+    /**
+     * @deprecated Use the SQLite based persistence layer instead
+     */
+    @Deprecated
     public static File storeFile() {
         String userHomePath = FileUtils.userHomePath();
         return new File(userHomePath + File.separator + ".salilvnair" + File.separator + "daakia"+ File.separator + "daakia-store.json");
     }
 
+    /**
+     * @deprecated Use the SQLite based persistence layer instead
+     */
+    @Deprecated
     public static File historyFile() {
         String userHomePath = FileUtils.userHomePath();
         return new File(userHomePath + File.separator + ".salilvnair" + File.separator + "daakia"+ File.separator + "daakia-history.json");

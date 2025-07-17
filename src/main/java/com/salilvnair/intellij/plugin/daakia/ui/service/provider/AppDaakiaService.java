@@ -16,8 +16,10 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.*;
+import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
+import java.util.Base64;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -26,7 +28,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -175,7 +176,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         dataContext.uiContext().responseTextArea().setText(baseStoreData.getResponseBody());
         dataContext.uiContext().requestTypes().setSelectedItem(baseStoreData.getRequestType());
         dataContext.uiContext().urlTextField().setText(baseStoreData.getUrl());
-        String headersJsonString = baseStoreData.getHeaders();
+        String headersJsonString = CryptoUtils.decrypt(baseStoreData.getHeaders());
         String responseHeadersJsonString = baseStoreData.getResponseHeaders();
         MultiValueMap<String, String> requestHeaders = JsonUtils.jsonStringToMultivaluedMap(headersJsonString);
         MultiValueMap<String, String> responseHeaders = JsonUtils.jsonStringToMultivaluedMap(responseHeadersJsonString);
@@ -186,6 +187,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         dataContext.uiContext().headerTextFields().clear();
         dataContext.uiContext().headersPanel().removeAll();
         createRequestHeaders(dataContext, objects);
+        loadAuthorizationPanel(requestHeaders, dataContext);
         createResponseHeaders(dataContext, objects);
         createResponseStatus(dataContext, objects);
     }
@@ -197,11 +199,32 @@ public class AppDaakiaService extends BaseDaakiaService {
         });
     }
 
+    private void loadAuthorizationPanel(MultiValueMap<String, String> requestHeaders, DataContext dataContext) {
+        if(requestHeaders.containsKey("Authorization")) {
+            String value = requestHeaders.getFirst("Authorization");
+            if(value != null) {
+                if(value.startsWith("Bearer ")) {
+                    dataContext.uiContext().authTypes().setSelectedItem("Bearer Token");
+                    dataContext.uiContext().bearerTokenTextField().setText(value.substring(7));
+                } else if(value.startsWith("Basic ")) {
+                    try {
+                        String decoded = new String(Base64.getDecoder().decode(value.substring(6)));
+                        String[] parts = decoded.split(":",2);
+                        if(parts.length==2) {
+                            dataContext.uiContext().authTypes().setSelectedItem("Basic Auth");
+                            dataContext.uiContext().userNameTextField().setText(parts[0]);
+                            dataContext.uiContext().passwordTextField().setText(parts[1]);
+                        }
+                    } catch (Exception ignore) {}
+                }
+            }
+        }
+    }
+
     private void initStoreCollectionsFromSearchText(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         try {
             String searchText = (String) objects[0];
-            String jsonString = JsonUtils.readJsonFromFile(DaakiaUtils.storeFile());
-            DaakiaStore daakiaStore = JsonUtils.jsonToPojo(jsonString, DaakiaStore.class);
+            DaakiaStore daakiaStore = new CollectionDao().loadStore();
             if(daakiaStore != null) {
                 DefaultMutableTreeNode rootNode;
                 DefaultMutableTreeNode collectionStoreRootNode = new DefaultMutableTreeNode("Collections");
@@ -218,7 +241,7 @@ public class AppDaakiaService extends BaseDaakiaService {
                 treeModel.reload();
             }
         }
-        catch (IOException ignore) {}
+        catch (Exception ignore) {}
     }
 
     private void initHistoryRootNodeFromSearchText(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
@@ -302,6 +325,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             headers = objectMapper.writeValueAsString(requestHeaders);
+            headers = CryptoUtils.encrypt(headers);
             daakiaBaseStoreData.setUuid(UUID.randomUUID().toString());
             daakiaBaseStoreData.setHeaders(headers);
             daakiaBaseStoreData.setResponseHeaders(objectMapper.writeValueAsString(responseHeaders));

@@ -6,6 +6,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.EnvironmentPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.GlobalContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
@@ -79,6 +80,9 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         globalSubscriber().subscribe(e -> {
             if(DaakiaEvent.ofAnyType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA, DaakiaEventType.ON_LOAD_SELECTED_STORE_COLLECTION_DATA)) {
                 initNewTabBySelectedNode(e);
+            } else if(DaakiaEvent.ofType(e, DaakiaEventType.ON_OPEN_ENVIRONMENT_MANAGER)) {
+                EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.globalContext()));
+                addPanelTab("Environment", panel);
             }
         });
     }
@@ -103,7 +107,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         return new DaakiaRightVerticalSplitPanel(getRootPane(), dataContext);
     }
 
-    private JPanel tabPanel(String requestType, String tabTitle, DaakiaRightVerticalSplitPanel contentPanel) {
+    private JPanel tabPanel(String requestType, String tabTitle, JPanel contentPanel) {
         JPanel pnlTab = new JPanel();
         pnlTab.setLayout(new BoxLayout(pnlTab, BoxLayout.X_AXIS));
         pnlTab.setOpaque(false);
@@ -162,7 +166,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         }
     }
 
-    private void showPopupMenu(Component component, int x, int y, DaakiaRightVerticalSplitPanel contentPanel) {
+    private void showPopupMenu(Component component, int x, int y, JPanel contentPanel) {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItem1 = new JMenuItem("Close All Tabs");
         JMenuItem menuItem2 = new JMenuItem("Close Others");
@@ -205,6 +209,14 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         tabTitle = tabTitle == null ? "Untitled" : tabTitle;
         JPanel pnlTab = tabPanel(requestType, tabTitle, tabC);
         dynamicDaakiaTabbedPane.insertTab(tabTitle, null, tabC, null, index);
+        dynamicDaakiaTabbedPane.setSelectedIndex(index);
+        dynamicDaakiaTabbedPane.setTabComponentAt(index, pnlTab);
+    }
+
+    public void addPanelTab(String tabTitle, JPanel panel) {
+        int index = dynamicDaakiaTabbedPane.getTabCount() - 1;
+        JPanel pnlTab = tabPanel("", tabTitle, panel);
+        dynamicDaakiaTabbedPane.insertTab(tabTitle, null, panel, null, index);
         dynamicDaakiaTabbedPane.setSelectedIndex(index);
         dynamicDaakiaTabbedPane.setTabComponentAt(index, pnlTab);
     }

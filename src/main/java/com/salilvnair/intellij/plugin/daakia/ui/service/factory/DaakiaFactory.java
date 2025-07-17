@@ -4,6 +4,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.core.DaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.provider.AppDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.provider.StoreDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.provider.RestDaakiaService;
+import com.salilvnair.intellij.plugin.daakia.ui.service.provider.GraphQlDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 
 public final class DaakiaFactory {
@@ -13,6 +14,9 @@ public final class DaakiaFactory {
     public static DaakiaService generate(DaakiaType daakiaType) {
         if (DaakiaType.REST.equals(daakiaType)) {
             return new RestDaakiaService();
+        }
+        else if (DaakiaType.GRAPHQL.equals(daakiaType)) {
+            return new GraphQlDaakiaService();
         }
         else if (DaakiaType.STORE.equals(daakiaType)) {
             return new StoreDaakiaService();

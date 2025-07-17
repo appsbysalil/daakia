@@ -115,4 +115,24 @@ public class DaakiaGlobalEventPublisher {
         publisher.publish(event);
     }
 
+    public void onOpenEnvironmentManager() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_OPEN_ENVIRONMENT_MANAGER);
+        publisher.publish(event);
+    }
+
+    public void onEnvironmentListChanged() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_ENVIRONMENT_LIST_CHANGED);
+        publisher.publish(event);
+    }
+
+    public void onClickImportPostman() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN);
+        publisher.publish(event);
+    }
+
+    public void onClickExportPostman() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN);
+        publisher.publish(event);
+    }
+
 }

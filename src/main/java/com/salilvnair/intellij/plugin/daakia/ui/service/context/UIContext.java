@@ -1,7 +1,9 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
 import com.intellij.openapi.ui.ComboBox;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
@@ -21,6 +23,7 @@ public class UIContext {
     private String requestContentType = "1";
     private ComboBox<String> requestTypes;
     private JTextField urlTextField;
+    private ComboBox<Environment> environmentCombo;
     private JTable responseHeaderTable;
     private DefaultTableModel responseHeaderTableModel;
     private JLabel statusLabel;
@@ -37,8 +40,8 @@ public class UIContext {
 
     private ComboBox<String> authTypes;
     private TextInputField userNameTextField;
-    private TextInputField passwordTextField;
-    private TextInputField bearerTokenTextField;
+    private PasswordInputField passwordTextField;
+    private PasswordInputField bearerTokenTextField;
 
     private JProgressBar progressBar;
 
@@ -84,6 +87,14 @@ public class UIContext {
 
     public void setUrlTextField(JTextField urlTextField) {
         this.urlTextField = urlTextField;
+    }
+
+    public ComboBox<Environment> environmentCombo() {
+        return environmentCombo;
+    }
+
+    public void setEnvironmentCombo(ComboBox<Environment> environmentCombo) {
+        this.environmentCombo = environmentCombo;
     }
 
     public JPanel headerScrollPanel() {
@@ -158,19 +169,19 @@ public class UIContext {
         this.userNameTextField = userNameTextField;
     }
 
-    public TextInputField passwordTextField() {
+    public PasswordInputField passwordTextField() {
         return passwordTextField;
     }
 
-    public void setPasswordTextField(TextInputField passwordTextField) {
+    public void setPasswordTextField(PasswordInputField passwordTextField) {
         this.passwordTextField = passwordTextField;
     }
 
-    public TextInputField bearerTokenTextField() {
+    public PasswordInputField bearerTokenTextField() {
         return bearerTokenTextField;
     }
 
-    public void setBearerTokenTextField(TextInputField bearerTokenTextField) {
+    public void setBearerTokenTextField(PasswordInputField bearerTokenTextField) {
         this.bearerTokenTextField = bearerTokenTextField;
     }
 
