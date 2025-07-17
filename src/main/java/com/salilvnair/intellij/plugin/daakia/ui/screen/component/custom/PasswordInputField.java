@@ -72,17 +72,6 @@ public class PasswordInputField extends JPasswordField {
         }
     }
 
-    @Override
-    public void setText(String t) {
-        super.setText(t);
-        if(t != null && !t.isEmpty() && !t.equals(placeholder)) {
-            setForeground(JBColor.BLACK);
-            setFont(getFont().deriveFont(Font.PLAIN));
-        } else if(t == null || t.isEmpty()) {
-            paintPlaceholderText();
-        }
-    }
-
     private void paintPlaceholderText() {
         if (placeholder != null && String.valueOf(getPassword()).isEmpty() && !hasFocus()) {
             setForeground(JBColor.GRAY);
