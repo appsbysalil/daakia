@@ -207,7 +207,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
 
         IconButton deleteButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(30,25));
 
-        JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         rowPanel.add(keyField);
         rowPanel.add(typeCombo);
         rowPanel.add(initialField);
@@ -252,6 +252,9 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
     }
 
     private String getPasswordText(PasswordInputField field) {
+        if(!field.containsText()) {
+            return "";
+        }
         return new String(field.getPassword());
     }
 

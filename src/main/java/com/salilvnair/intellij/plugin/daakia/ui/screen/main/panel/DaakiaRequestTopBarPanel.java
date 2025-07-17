@@ -5,7 +5,6 @@ import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.dialog.EnvironmentManagerDialog;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
@@ -14,10 +13,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
-
 import javax.swing.*;
-import javax.swing.DefaultComboBoxModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

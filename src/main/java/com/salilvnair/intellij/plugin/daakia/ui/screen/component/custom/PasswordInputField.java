@@ -46,7 +46,7 @@ public class PasswordInputField extends JPasswordField {
             private void update() {
                 String text = String.valueOf(getPassword());
                 if(text.isEmpty()) {
-                    paintPlaceholderText();
+                    SwingUtilities.invokeLater(() -> paintPlaceholderText());
                 } else if(!text.equals(placeholder)) {
                     setForeground(JBColor.BLACK);
                     setFont(getFont().deriveFont(Font.PLAIN));
