@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.EnvironmentPanel;
@@ -80,11 +81,16 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         globalSubscriber().subscribe(e -> {
             if(DaakiaEvent.ofAnyType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA, DaakiaEventType.ON_LOAD_SELECTED_STORE_COLLECTION_DATA)) {
                 initNewTabBySelectedNode(e);
-            } else if(DaakiaEvent.ofType(e, DaakiaEventType.ON_OPEN_ENVIRONMENT_MANAGER)) {
-                EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.globalContext()));
-                addPanelTab("Environment", panel);
+            }
+            else if(DaakiaEvent.ofType(e, DaakiaEventType.ON_OPEN_ENVIRONMENT_MANAGER)) {
+                initNewEnvironmentTab(e);
             }
         });
+    }
+
+    private void initNewEnvironmentTab(EventObject e) {
+        EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.globalContext()));
+        addPanelTab("Environment", DaakiaIcons.EnvironmentIcon, panel);
     }
 
     private void initNewTabBySelectedNode(EventObject e) {
@@ -213,12 +219,15 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         dynamicDaakiaTabbedPane.setTabComponentAt(index, pnlTab);
     }
 
-    public void addPanelTab(String tabTitle, JPanel panel) {
+    public void addPanelTab(String tabTitle, Icon tabIcon, JPanel panel) {
         int index = dynamicDaakiaTabbedPane.getTabCount() - 1;
         JPanel pnlTab = tabPanel("", tabTitle, panel);
-        dynamicDaakiaTabbedPane.insertTab(tabTitle, null, panel, null, index);
+        dynamicDaakiaTabbedPane.insertTab(tabTitle, tabIcon, panel, null, index);
         dynamicDaakiaTabbedPane.setSelectedIndex(index);
         dynamicDaakiaTabbedPane.setTabComponentAt(index, pnlTab);
+    }
+    public void addPanelTab(String tabTitle, JPanel panel) {
+        addPanelTab(tabTitle, null, panel);
     }
 
     private void initDefaultTab() {

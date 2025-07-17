@@ -5,12 +5,15 @@ import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
 import javax.swing.*;
@@ -21,7 +24,7 @@ import java.awt.event.MouseEvent;
 public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBarPanel> {
 
     private ComboBox<String> requestTypes;
-    private JTextField urlTextField;
+    private TextInputField urlTextField;
     private JButton saveButton;
     private JButton sendButton;
 
@@ -38,7 +41,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
     @Override
     public void initComponents() {
         requestTypes = new ComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE", "GRAPHQL"});
-        urlTextField = new JTextField();
+        urlTextField = new TextInputField("Enter URL");
         sendButton = new JButton("Send");
         JPopupMenu dropdownMenu = new JPopupMenu();
 
@@ -104,15 +107,15 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         add(urlTextField);
         add(sendButton);
         add(saveButton);
-        urlTextField.setPreferredSize(new Dimension(400, 25));
+        urlTextField.setPreferredSize(new Dimension(400, 32));
     }
 
     @Override
     public void initListeners() {
 
         TextFieldUtils.addChangeListener(urlTextField, e -> {
-            sendButton.setEnabled(!urlTextField.getText().isEmpty() && UrlUtils.validateURL(urlTextField.getText()));
-            saveButton.setEnabled(!urlTextField.getText().isEmpty() && UrlUtils.validateURL(urlTextField.getText()));
+            sendButton.setEnabled(!urlTextField.getText().isEmpty() && validateURL());
+            saveButton.setEnabled(!urlTextField.getText().isEmpty() && validateURL());
         });
 
         sendButton.addActionListener(e -> {
@@ -133,5 +136,15 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
                 daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
             }
         });
+    }
+
+    private boolean validateURL() {
+        boolean validUrl = false;
+        if(!urlTextField.getText().isEmpty()) {
+            Environment env = dataContext.globalContext().selectedEnvironment();
+            String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
+            validUrl = UrlUtils.validateURL(url);
+        }
+        return validUrl;
     }
 }

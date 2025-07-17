@@ -7,7 +7,9 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Utility methods for converting Postman environment definitions into
@@ -40,5 +42,43 @@ public final class PostmanEnvironmentUtils {
         }
         env.setVariables(vars);
         return env;
+    }
+
+    /**
+     * Convert a {@link Environment} into a Postman environment JSON string.
+     */
+    public static String toPostmanJson(Environment env) throws IOException {
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("name", env.getName());
+        List<Map<String, Object>> values = new ArrayList<>();
+        if (env.getVariables() != null) {
+            for (Variable v : env.getVariables()) {
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("key", v.getKey());
+                String value = v.getCurrentValue() != null ? v.getCurrentValue() : v.getInitialValue();
+                map.put("value", value);
+                if (v.getType() != null) {
+                    map.put("type", v.getType());
+                }
+                values.add(map);
+            }
+        }
+        root.put("values", values);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
+    }
+
+    public static String resolveVariables(String text, Environment env) {
+        if(text == null || env == null) {
+            return text;
+        }
+        for(Variable v : env.getVariables()) {
+            if(v.getKey() != null) {
+                String placeholder = "{{" + v.getKey() + "}}";
+                String val = v.getCurrentValue()!=null ? v.getCurrentValue() : v.getInitialValue();
+                text = text.replace(placeholder, val != null ? val : "");
+
+            }
+        }
+        return text;
     }
 }

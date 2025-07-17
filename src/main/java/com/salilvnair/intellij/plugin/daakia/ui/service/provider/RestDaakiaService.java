@@ -10,6 +10,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
@@ -32,11 +33,11 @@ public class RestDaakiaService extends BaseDaakiaService {
 
     private void invokeRestApi(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
-        String url = resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
+        String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
         String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
 
         String originalBody = dataContext.uiContext().requestTextArea().getText();
-        String resolvedBody = resolveVariables(originalBody, env);
+        String resolvedBody = PostmanEnvironmentUtils.resolveVariables(originalBody, env);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<?> entity = prepareRequestEntity(dataContext, resolvedBody);
@@ -79,7 +80,7 @@ public class RestDaakiaService extends BaseDaakiaService {
             body.add(key, new FileSystemResource(dataContext.uiContext().formDataFileFields().get(key)));
         }
         dataContext.uiContext().formDataTextFields().forEach((k, v) -> {
-            String val = resolveVariables(v.get(1).getText(), env);
+            String val = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), env);
             body.add(v.get(0).getText(), val);
         });
         return new HttpEntity<>(body, headers);
@@ -122,8 +123,8 @@ public class RestDaakiaService extends BaseDaakiaService {
         HttpHeaders headers = new HttpHeaders();
         Environment env = dataContext.globalContext().selectedEnvironment();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
-            String headerName = resolveVariables(v.get(0).getText(), env);
-            String headerVal = resolveVariables(v.get(1).getText(), env);
+            String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), env);
+            String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), env);
             headers.add(headerName, headerVal);
         });
         HttpHeaders authHeaders = addAuthorizationHeaderIfPresent(dataContext);
@@ -156,20 +157,5 @@ public class RestDaakiaService extends BaseDaakiaService {
             }
         }
         return authHeaders;
-    }
-
-    private String resolveVariables(String text, Environment env) {
-        if(text == null || env == null) {
-            return text;
-        }
-        for(Variable v : env.getVariables()) {
-            if(v.getKey() != null) {
-                String placeholder = "{{" + v.getKey() + "}}";
-                String val = v.getCurrentValue()!=null ? v.getCurrentValue() : v.getInitialValue();
-                text = text.replace(placeholder, val != null ? val : "");
-
-            }
-        }
-        return text;
     }
 }
