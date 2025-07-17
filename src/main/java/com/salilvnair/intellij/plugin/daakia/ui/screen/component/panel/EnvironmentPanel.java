@@ -46,6 +46,14 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
     @Override
     public void initComponents() {
         environmentCombo = new ComboBox<>(globalContext.environments().toArray(new Environment[0]));
+        if(environmentCombo.getItemCount() == 0) {
+            Environment env = new Environment();
+            env.setName("New Environment");
+            globalContext.environments().add(env);
+            environmentCombo.addItem(env);
+            environmentCombo.setSelectedItem(env);
+            globalContext.setSelectedEnvironment(env);
+        }
         nameField = new JTextField(15);
         variablePanel = new JPanel();
         variablePanel.setLayout(new BoxLayout(variablePanel, BoxLayout.Y_AXIS));
@@ -100,6 +108,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
         globalContext.environments().add(env);
         environmentCombo.addItem(env);
         environmentCombo.setSelectedItem(env);
+        globalContext.setSelectedEnvironment(env);
         nameField.setText(env.getName());
         variablePanel.removeAll();
         variableRows.clear();
@@ -213,6 +222,19 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
         variableRows.put(rowId, varRow);
 
         updateSecretFields(varRow);
+
+        initialField.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                updateSecretFields(varRow);
+            }
+        });
+        currentField.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                updateSecretFields(varRow);
+            }
+        });
 
         typeCombo.addActionListener(e -> updateSecretFields(varRow));
         deleteButton.addActionListener(e -> {

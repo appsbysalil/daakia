@@ -3,6 +3,8 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom;
 import com.intellij.ui.JBColor;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -40,6 +42,34 @@ public class PasswordInputField extends JPasswordField {
                 }
             }
         });
+        getDocument().addDocumentListener(new DocumentListener() {
+            private void update() {
+                String text = String.valueOf(getPassword());
+                if(text.isEmpty()) {
+                    paintPlaceholderText();
+                } else if(!text.equals(placeholder)) {
+                    setForeground(JBColor.BLACK);
+                    setFont(getFont().deriveFont(Font.PLAIN));
+                }
+            }
+            @Override
+            public void insertUpdate(DocumentEvent e) { update(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { update(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { update(); }
+        });
+    }
+
+    @Override
+    public void setText(String t) {
+        super.setText(t);
+        if(t != null && !t.isEmpty() && !t.equals(placeholder)) {
+            setForeground(JBColor.BLACK);
+            setFont(getFont().deriveFont(Font.PLAIN));
+        } else if(t == null || t.isEmpty()) {
+            paintPlaceholderText();
+        }
     }
 
     private void paintPlaceholderText() {
