@@ -30,6 +30,14 @@ public class EnvironmentManagerDialog extends DialogWrapper {
     protected @Nullable JComponent createCenterPanel() {
         JPanel panel = new JPanel(new BorderLayout(5,5));
         environmentCombo = new JComboBox<>(globalContext.environments().toArray(new Environment[0]));
+        if(environmentCombo.getItemCount() == 0) {
+            Environment env = new Environment();
+            env.setName("New Environment");
+            globalContext.environments().add(env);
+            environmentCombo.addItem(env);
+            environmentCombo.setSelectedItem(env);
+            globalContext.setSelectedEnvironment(env);
+        }
         environmentCombo.addActionListener(e -> loadSelected());
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
         top.add(new JLabel("Environment:"));
@@ -41,6 +49,7 @@ public class EnvironmentManagerDialog extends DialogWrapper {
             globalContext.environments().add(env);
             environmentCombo.addItem(env);
             environmentCombo.setSelectedItem(env);
+            globalContext.setSelectedEnvironment(env);
             nameField.setText(env.getName());
             model.setRowCount(0);
             globalContext.globalEventPublisher().onEnvironmentListChanged();
