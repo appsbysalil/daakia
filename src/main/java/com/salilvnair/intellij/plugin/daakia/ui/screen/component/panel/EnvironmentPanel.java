@@ -247,8 +247,8 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
 
     private void updateSecretFields(VariableRow row) {
         boolean secret = "secret".equals(row.typeCombo.getSelectedItem());
-        row.initialField.setEchoChar(secret ? '•' : (char)0);
-        row.currentField.setEchoChar(secret ? '•' : (char)0);
+        row.initialField.setEchoChar(secret && row.initialField.containsText() ? '•' : (char)0);
+        row.currentField.setEchoChar(secret && row.currentField.containsText() ? '•' : (char)0);
     }
 
     private String getPasswordText(PasswordInputField field) {

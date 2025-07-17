@@ -29,7 +29,7 @@ public class PasswordInputField extends JPasswordField {
             public void focusGained(FocusEvent e) {
                 if (String.valueOf(getPassword()).equals(placeholder)) {
                     setText("");
-                    setEchoChar('\u2022');
+                    setEchoChar('•');
                     setForeground(JBColor.BLACK);
                     setFont(getFont().deriveFont(Font.PLAIN));
                 }
