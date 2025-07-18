@@ -122,7 +122,7 @@ public class DaakiaUtils {
 
     public static void showAboutDaakia(Component component) {
         String message = """
-                <html><font size="5"><b>Daakia 2.0.1 (Build DK-2.0.1)</b></font>
+                <html><font size="5"><b>Daakia 2.0.2 (Build DK-2.0.2)</b></font>
                
                 <html><br><br>Website: <a href="www.salilvnair.com">www.salilvnair.com</a></html>
                 <html>Support: <a href="mailto:support@salilvnair.com">support@salilvnair.com</a><br></html>

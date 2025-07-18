@@ -46,6 +46,16 @@
         <br>
         v1.0.8 released with below updates:
             added support for the search text functionality in the collection and history panel 😈
+        <br>
+        v2.0.2
+        - Added SQLite persistence layer and DAO classes.
+        - Created Postman import/export utilities for collections.
+        - Implemented environment and variable data models with management UI.
+        - Enhanced plugin with GraphQL request support.
+        - Refined environment panel layout and text box alignment.
+        - Added dynamic row management for environment variables.
+        - Introduced placeholder-enabled `PasswordInputField` and updated authorization panel layout.
+        - Bug fixes and enhancements
     ]]>
     </change-notes>
 
