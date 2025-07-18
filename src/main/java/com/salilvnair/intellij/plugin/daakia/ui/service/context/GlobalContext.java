@@ -21,13 +21,15 @@ public class GlobalContext {
         this.sideNavContext = new SideNavContext();
         this.publisher = new Publisher<>();
         this.globalEventPublisher = new DaakiaGlobalEventPublisher(publisher);
-        this.environments = new EnvironmentDao().loadEnvironments();
-        int envId = DaakiaSettings.getInstance().getState().lastEnvironmentId;
-        if(envId > 0 && envId <= environments.size()) {
-            this.selectedEnvironment = environments.get(envId - 1);
-        } else if(!environments.isEmpty()) {
-            this.selectedEnvironment = environments.get(0);
-        }
+        new EnvironmentDao().loadEnvironmentsAsync(envs -> {
+            this.environments = envs;
+            int envId = DaakiaSettings.getInstance().getState().lastEnvironmentId;
+            if(envId > 0 && envId <= environments.size()) {
+                this.selectedEnvironment = environments.get(envId - 1);
+            } else if(!environments.isEmpty()) {
+                this.selectedEnvironment = environments.get(0);
+            }
+        });
     }
 
     public Publisher<EventObject> globalPublisher() {
@@ -47,6 +49,9 @@ public class GlobalContext {
     }
 
     public List<Environment> environments() {
+        if(environments == null) {
+            environments = new ArrayList<>();
+        }
         return environments;
     }
 

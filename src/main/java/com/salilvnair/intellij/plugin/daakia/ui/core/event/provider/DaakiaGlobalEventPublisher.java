@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.provider;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
@@ -7,7 +8,6 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import org.springframework.http.ResponseEntity;
-
 import java.util.EventObject;
 
 public class DaakiaGlobalEventPublisher {
@@ -18,126 +18,128 @@ public class DaakiaGlobalEventPublisher {
     }
 
     public void onClickAddHeader() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_ADD_HEADER);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CLICK_ADD_HEADER);
     }
 
     public void onClickDeleteHeaderRow(String headerKey) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_DELETE_HEADER_ROW);
         event.setDeletedHeaderKey(headerKey);
-        publisher.publish(event);
+        publishSync(event);
     }
 
     public void onReceivingResponse(ResponseEntity<String> responseEntity) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RECEIVING_RESPONSE);
         event.setResponseEntity(responseEntity);
-        publisher.publish(event);
+        publishSync(event);
     }
 
     public void onClickSend() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_SEND);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CLICK_SEND);
     }
 
     public void onClickSave() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_SAVE);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CLICK_SAVE);
     }
 
     public void onAfterHistoryAdded() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_AFTER_HISTORY_ADDED);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_AFTER_HISTORY_ADDED);
     }
 
     public void onSelectHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_SELECT_HISTORY_DATA_NODE);
         event.setSelectedDaakiaHistory(selectedDaakiaHistory);
-        publisher.publish(event);
+        publishSync(event);
     }
 
     public void onDoubleClickHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DBL_CLICK_HISTORY_DATA_NODE);
         event.setSelectedDaakiaHistory(selectedDaakiaHistory);
-        publisher.publish(event);
+        publishSync(event);
     }
-
 
     public void onLoadSelectedHistoryData(DataContext dataContext, DaakiaHistory selectedDaakiaHistory) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA);
         event.setDataContext(dataContext);
         event.setSelectedDaakiaHistory(selectedDaakiaHistory);
-        publisher.publish(event);
+        publishAsync(event); // 🔁 background
     }
 
     public void onLoadSelectedStoreCollectionData(DataContext dataContext, DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_LOAD_SELECTED_STORE_COLLECTION_DATA);
         event.setDataContext(dataContext);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
-        publisher.publish(event);
+        publishAsync(event); // 🔁 background
     }
 
     public void onRightClickRenameHistoryDataNode(DaakiaHistory selectedDaakiaHistory) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RIGHT_CLICK_RENAME_HISTORY_NODE);
         event.setSelectedDaakiaHistory(selectedDaakiaHistory);
-        publisher.publish(event);
+        publishSync(event);
     }
 
     public void onSelectStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_SELECT_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
-        publisher.publish(event);
+        publishSync(event);
     }
 
     public void onDoubleClickStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DBL_CLICK_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
-        publisher.publish(event);
+        publishSync(event);
     }
 
     public void onRightClickRenameStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RIGHT_CLICK_RENAME_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);
-        publisher.publish(event);
+        publishSync(event);
     }
 
     public void onClickAddNewCollection() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_ADD_NEW_COLLECTION);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CLICK_ADD_NEW_COLLECTION);
     }
 
     public void onClickDeleteCollections() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_DELETE_COLLECTIONS);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CLICK_DELETE_COLLECTIONS);
     }
 
     public void onClickSideNavVisibilityToggler() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER);
     }
 
     public void onOpenEnvironmentManager() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_OPEN_ENVIRONMENT_MANAGER);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_OPEN_ENVIRONMENT_MANAGER);
     }
 
     public void onEnvironmentListChanged() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_ENVIRONMENT_LIST_CHANGED);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_ENVIRONMENT_LIST_CHANGED);
     }
 
     public void onCurrentEnvironmentChange() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED);
     }
 
     public void onClickImportPostman() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN);
-        publisher.publish(event);
+        publishSync(DaakiaEventType.ON_CLICK_IMPORT_POSTMAN);
     }
 
     public void onClickExportPostman() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN);
+        publishSync(DaakiaEventType.ON_CLICK_EXPORT_POSTMAN);
+    }
+
+    // ------------------------
+    // 🔽 Helper methods below
+    // ------------------------
+
+    private void publishSync(DaakiaEventType type) {
+        publisher.publish(new DaakiaEvent(this, type));
+    }
+
+    private void publishSync(DaakiaEvent event) {
         publisher.publish(event);
     }
 
+    private void publishAsync(DaakiaEvent event) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> publisher.publish(event));
+    }
 }

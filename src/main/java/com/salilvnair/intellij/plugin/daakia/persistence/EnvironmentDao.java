@@ -1,11 +1,13 @@
 package com.salilvnair.intellij.plugin.daakia.persistence;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /** DAO for environment records */
 public class EnvironmentDao {
@@ -42,5 +44,20 @@ public class EnvironmentDao {
                 }
             }
         } catch (Exception ignore) {}
+    }
+
+    public void loadEnvironmentsAsync(Consumer<List<Environment>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<Environment> environments = loadEnvironments();
+            if (callback != null) {
+                callback.accept(environments);
+            }
+        });
+    }
+
+    public void saveEnvironmentsAsync(List<Environment> envs) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+           saveEnvironments(envs);
+        });
     }
 }

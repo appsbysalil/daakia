@@ -228,22 +228,24 @@ public class AppDaakiaService extends BaseDaakiaService {
     private void initStoreCollectionsFromSearchText(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         try {
             String searchText = (String) objects[0];
-            DaakiaStore daakiaStore = new CollectionDao().loadStore();
-            if(daakiaStore != null) {
-                DefaultMutableTreeNode rootNode;
-                DefaultMutableTreeNode collectionStoreRootNode = new DefaultMutableTreeNode("Collections");
-                if(searchText == null || searchText.isEmpty()) {
-                    rootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, collectionStoreRootNode);
+            new CollectionDao().loadStoreAsync(daakiaStore -> {
+                if(daakiaStore != null) {
+                    DefaultMutableTreeNode rootNode;
+                    DefaultMutableTreeNode collectionStoreRootNode = new DefaultMutableTreeNode("Collections");
+                    if(searchText == null || searchText.isEmpty()) {
+                        rootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, collectionStoreRootNode);
+                    }
+                    else {
+                        rootNode = DaakiaUtils.convertCollectionStoreToTreeNodeFilterBySearchText(daakiaStore, collectionStoreRootNode, searchText);
+                    }
+                    Tree collectionStoreTree = dataContext.sideNavContext().collectionStoreTree();
+                    // Update the tree model with new data
+                    DefaultTreeModel treeModel = (DefaultTreeModel) collectionStoreTree.getModel();
+                    treeModel.setRoot(rootNode);
+                    treeModel.reload();
                 }
-                else {
-                    rootNode = DaakiaUtils.convertCollectionStoreToTreeNodeFilterBySearchText(daakiaStore, collectionStoreRootNode, searchText);
-                }
-                Tree collectionStoreTree = dataContext.sideNavContext().collectionStoreTree();
-                // Update the tree model with new data
-                DefaultTreeModel treeModel = (DefaultTreeModel) collectionStoreTree.getModel();
-                treeModel.setRoot(rootNode);
-                treeModel.reload();
-            }
+            });
+
         }
         catch (Exception ignore) {}
     }

@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
@@ -20,16 +21,25 @@ public class StoreDaakiaService extends BaseDaakiaService {
     @Override
     public DaakiaContext execute(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         if(StoreDaakiaType.SAVE_HISTORY.equals(type)) {
-            saveHistory(dataContext);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                saveHistory(dataContext);
+            });
+
         }
         else if(StoreDaakiaType.LOAD_HISTORY.equals(type)) {
-            loadHistory(dataContext);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                loadHistory(dataContext);
+            });
         }
         else if(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION.equals(type)) {
-            saveRequest(dataContext);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                saveRequest(dataContext);
+            });
         }
         else if(StoreDaakiaType.LOAD_STORE_COLLECTIONS.equals(type)) {
-            loadRequest(dataContext);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                loadRequest(dataContext);
+            });
         }
 
 
@@ -39,31 +49,34 @@ public class StoreDaakiaService extends BaseDaakiaService {
 
 
     private void loadHistory(DataContext dataContext) {
-        Map<String, List<DaakiaHistory>> historyData = new HistoryDao().loadHistory();
-        if(historyData == null) {
-            historyData = new LinkedHashMap<>();
-        }
-        dataContext.sideNavContext().setHistoryData(historyData);
+        new HistoryDao().loadHistoryAsync(historyData -> {
+            if(historyData == null) {
+                historyData = new LinkedHashMap<>();
+            }
+            dataContext.sideNavContext().setHistoryData(historyData);
+        });
     }
 
     private static void saveHistory(DataContext dataContext) {
-        new HistoryDao().saveHistory(dataContext.sideNavContext().historyData());
+        new HistoryDao().saveHistoryAsync(dataContext.sideNavContext().historyData());
     }
 
     private void loadRequest(DataContext dataContext) {
-        DaakiaStore daakiaStore = new CollectionDao().loadStore();
-        if(daakiaStore != null) {
-            dataContext.sideNavContext().setDaakiaStore(daakiaStore);
-            DefaultMutableTreeNode newRootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, dataContext.sideNavContext().collectionStoreRootNode());
-            dataContext.sideNavContext().setCollectionStoreRootNode(newRootNode);
-        }
+        new CollectionDao().loadStoreAsync( daakiaStore -> {
+            if(daakiaStore != null) {
+                dataContext.sideNavContext().setDaakiaStore(daakiaStore);
+                DefaultMutableTreeNode newRootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, dataContext.sideNavContext().collectionStoreRootNode());
+                dataContext.sideNavContext().setCollectionStoreRootNode(newRootNode);
+            }
+        });
+
 
     }
 
     private void saveRequest(DataContext dataContext) {
         DefaultMutableTreeNode rootNode = dataContext.sideNavContext().collectionStoreRootNode();
         DaakiaStore store = DaakiaUtils.convertTreeToCollectionStore(rootNode);
-        new CollectionDao().saveStore(store);
+        new CollectionDao().saveStoreAsync(store);
     }
 
 }

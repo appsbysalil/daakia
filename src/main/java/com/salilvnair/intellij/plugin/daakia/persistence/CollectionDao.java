@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.persistence;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 
@@ -30,4 +31,21 @@ public class CollectionDao {
             ps.executeUpdate();
         } catch (Exception ignore) {}
     }
+
+    public void loadStoreAsync(java.util.function.Consumer<DaakiaStore> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            DaakiaStore daakiaStore = loadStore();
+            if (callback != null) {
+                callback.accept(daakiaStore);
+            }
+        });
+    }
+
+    public void saveStoreAsync(DaakiaStore store) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            saveStore(store);
+        });
+    }
+
+
 }

@@ -150,7 +150,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
                 String json = JsonUtils.readJsonFromFile(file);
                 Environment env = PostmanEnvironmentUtils.fromPostmanJson(json);
                 dataContext.globalContext().environments().add(env);
-                new EnvironmentDao().saveEnvironments(dataContext.globalContext().environments());
+                new EnvironmentDao().saveEnvironmentsAsync(dataContext.globalContext().environments());
                 dataContext.globalContext().setSelectedEnvironment(env);
                 refreshEnvironmentCombo();
             }

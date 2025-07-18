@@ -1,10 +1,12 @@
 package com.salilvnair.intellij.plugin.daakia.persistence;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /** DAO for history records */
@@ -43,4 +45,22 @@ public class HistoryDao {
             }
         } catch (SQLException ignore) {}
     }
+
+    public void loadHistoryAsync(Consumer<Map<String, List<DaakiaHistory>>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            Map<String, List<DaakiaHistory>> data = loadHistory();
+            if (callback != null) {
+                callback.accept(data);
+            }
+        });
+    }
+
+    public void saveHistoryAsync(Map<String, List<DaakiaHistory>> data) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            saveHistory(data);
+        });
+    }
+
+
+
 }

@@ -248,7 +248,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 sideNavContext().setCollectionStoreRootNode(newRoot);
                 collectionStoreTreeModel.setRoot(newRoot);
                 collectionStoreTreeModel.reload();
-                new CollectionDao().saveStore(store);
+                new CollectionDao().saveStoreAsync(store);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Failed to import: " + ex.getMessage());
             }
