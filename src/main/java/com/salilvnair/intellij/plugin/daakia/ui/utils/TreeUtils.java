@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.treeStructure.Tree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -12,8 +13,10 @@ public final class TreeUtils {
     private TreeUtils() {}
 
     public static void expandAllNodes(Tree tree) {
-        TreeNode root = (TreeNode) tree.getModel().getRoot();
-        expandAll(tree, new TreePath(root));
+        ApplicationManager.getApplication().invokeLater(() -> {
+            TreeNode root = (TreeNode) tree.getModel().getRoot();
+            expandAll(tree, new TreePath(root));
+        });
     }
 
     public static void expandAll(Tree tree, TreePath parent) {
