@@ -94,12 +94,12 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
 
     @Override
     public void initListeners() {
-        environmentCombo.addActionListener(e -> loadSelected());
+        environmentCombo.addActionListener(e -> loadSelected(false));
         addButton.addActionListener(e -> addVariableRow(null, "default", null, null));
         newButton.addActionListener(e -> createNewEnvironment());
         deleteButton.addActionListener(e -> deleteSelectedEnvironment());
         saveButton.addActionListener(e -> saveCurrentEnvironment());
-        loadSelected();
+        loadSelected(true);
     }
 
     private void createNewEnvironment() {
@@ -161,10 +161,10 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
         closeTab();
     }
 
-    private void loadSelected() {
-        Environment env = dataContext.globalContext().selectedEnvironment();
+    private void loadSelected(boolean init) {
+        Environment env = init ? dataContext.globalContext().selectedEnvironment() : (Environment) environmentCombo.getSelectedItem();
         env = env == null ? (Environment) environmentCombo.getSelectedItem() : env;
-        if(env==null && environmentCombo.getItemCount() > 0) {
+        if(env == null && environmentCombo.getItemCount() > 0) {
             env = environmentCombo.getItemAt(0);
         }
         else {

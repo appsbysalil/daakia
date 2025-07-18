@@ -23,6 +23,7 @@ public class GlobalContext {
         this.globalEventPublisher = new DaakiaGlobalEventPublisher(publisher);
         new EnvironmentDao().loadEnvironmentsAsync(envs -> {
             this.environments = envs;
+            globalEventPublisher().onEnvironmentListChanged();
             int envId = DaakiaSettings.getInstance().getState().lastEnvironmentId;
             if(envId > 0 && envId <= environments.size()) {
                 this.selectedEnvironment = environments.get(envId - 1);
