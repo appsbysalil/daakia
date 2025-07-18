@@ -125,6 +125,11 @@ public class DaakiaGlobalEventPublisher {
         publisher.publish(event);
     }
 
+    public void onCurrentEnvironmentChange() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED);
+        publisher.publish(event);
+    }
+
     public void onClickImportPostman() {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN);
         publisher.publish(event);

@@ -1,11 +1,10 @@
 package com.salilvnair.intellij.plugin.daakia.ui.core.event.core;
 
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Publisher<T> {
-    private final List<Subscriber<T>> subscribers = new ArrayList<>();
+    private final List<Subscriber<T>> subscribers = new CopyOnWriteArrayList<>();
 
     // Method to subscribe a subscriber
     public void subscribe(Subscriber<T> subscriber) {

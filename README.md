@@ -43,7 +43,7 @@ If you encounter any issues or have suggestions for improvement, please don't he
 
 This plugin is distributed under the MIT License. See the LICENSE file for details.
 
-## Changelog
+## Change log
 
 ### Contributions by Codex
 

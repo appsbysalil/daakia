@@ -109,6 +109,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
         environmentCombo.addActionListener(e -> {
             Environment env = (Environment) environmentCombo.getSelectedItem();
             dataContext.globalContext().setSelectedEnvironment(env);
+            globalEventPublisher().onCurrentEnvironmentChange();
         });
         importButton.addActionListener(e -> showImportDialog());
         exportButton.addActionListener(e -> showExportDialog());

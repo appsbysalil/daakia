@@ -122,10 +122,10 @@ public class DaakiaUtils {
 
     public static void showAboutDaakia(Component component) {
         String message = """
-                <html><font size="5"><b>Daakia 2.0.0 (Build DK-2.0.0)</b></font>
+                <html><font size="5"><b>Daakia 2.0.1 (Build DK-2.0.1)</b></font>
                
-                <html>Website: <a href="www.salilvnair.com">www.salilvnair.com</a></html>
-                <html>Support: <a href="mailto:support@salilvnair.com">support@salilvnair.com</a></html>
+                <html><br><br>Website: <a href="www.salilvnair.com">www.salilvnair.com</a></html>
+                <html>Support: <a href="mailto:support@salilvnair.com">support@salilvnair.com</a><br></html>
                 
                 Powered by open source software
                 License: MIT

@@ -114,8 +114,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
     public void initListeners() {
 
         TextFieldUtils.addChangeListener(urlTextField, e -> {
-            sendButton.setEnabled(!urlTextField.getText().isEmpty() && validateURL());
-            saveButton.setEnabled(!urlTextField.getText().isEmpty() && validateURL());
+            refreshActionButtons();
         });
 
         sendButton.addActionListener(e -> {
@@ -136,6 +135,16 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
                 daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
             }
         });
+        globalSubscriber().subscribe(event -> {
+            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED)) {
+                refreshActionButtons();
+            }
+        });
+    }
+
+    private void refreshActionButtons() {
+        sendButton.setEnabled(!urlTextField.getText().isEmpty() && validateURL());
+        saveButton.setEnabled(!urlTextField.getText().isEmpty() && validateURL());
     }
 
     private boolean validateURL() {
