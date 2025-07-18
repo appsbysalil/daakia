@@ -48,7 +48,9 @@ public class AppDaakiaService extends BaseDaakiaService {
             initStoreCollections(type, dataContext, objects);
         }
         else if(AppDaakiaType.ADD_HISTORY.equals(type)) {
-            addHistoryData(type, dataContext, objects);
+            SwingUtilities.invokeLater(() -> {
+                addHistoryData(type, dataContext, objects);
+            });
         }
         else if(AppDaakiaType.ON_CLICK_HISTORY_NODE.equals(type)) {
             loadApplicableDaakiaUiComponentsOnClickHistoryNode(type, dataContext, objects);

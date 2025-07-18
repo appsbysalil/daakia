@@ -82,7 +82,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         });
         globalSubscriber().subscribe(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN)) {
-                importPostmanCollection();
+                importPostmanCollection1();
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN)) {
                 exportPostmanCollection();
@@ -234,26 +234,81 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         globalEventPublisher().onRightClickRenameStoreCollectionNode(daakiaStoreRecord);
     }
 
-    private void importPostmanCollection() {
+    private void importPostmanCollectionToRootNode(DefaultMutableTreeNode node, DaakiaStore store) {
+        try {
+            sideNavContext().setDaakiaStore(store);
+            DefaultMutableTreeNode newRoot = DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
+            sideNavContext().setCollectionStoreRootNode(newRoot);
+            SwingUtilities.invokeLater(() -> {
+                collectionStoreTreeModel.setRoot(newRoot);
+                collectionStoreTreeModel.reload();
+            });
+            new CollectionDao().saveStoreAsync(store);
+
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Failed to import: " + ex.getMessage());
+        }
+    }
+
+    private void importPostmanCollectionToNode(DefaultMutableTreeNode node, DaakiaStore store) {
+        try {
+            sideNavContext().setDaakiaStore(store);
+            DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
+            SwingUtilities.invokeLater(() -> {
+                collectionStoreTreeModel.reload();
+            });
+            new CollectionDao().saveStoreAsync(store);
+
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Failed to import: " + ex.getMessage());
+        }
+    }
+
+    private void importPostmanCollection1() {
         JFileChooser chooser = new JFileChooser();
         int res = chooser.showOpenDialog(this);
         if (res == JFileChooser.APPROVE_OPTION) {
             try {
                 File file = chooser.getSelectedFile();
                 String json = JsonUtils.readJsonFromFile(file);
-                DaakiaStore store = PostmanUtils.fromPostmanJson(json);
-                sideNavContext().setDaakiaStore(store);
-                DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Collections");
-                DefaultMutableTreeNode newRoot = DaakiaUtils.convertCollectionStoreToTreeNode(store, rootNode);
-                sideNavContext().setCollectionStoreRootNode(newRoot);
-                collectionStoreTreeModel.setRoot(newRoot);
-                collectionStoreTreeModel.reload();
-                new CollectionDao().saveStoreAsync(store);
+                DaakiaStore importedStore = PostmanUtils.fromPostmanJson(json);
+
+                if (importedStore.getChildren() == null || importedStore.getChildren().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "No valid collections found in file.");
+                    return;
+                }
+
+                TreePath selectedPath = collectionStoreTree.getSelectionPath();
+
+                if (selectedPath != null) {
+                    // Append into selected folder
+                    DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
+                    Object userObject = selectedNode.getUserObject();
+
+                    if (userObject instanceof DaakiaStoreRecord) {
+                        JOptionPane.showMessageDialog(this, "Please select a folder to import into.");
+                    }
+                    else {
+                        importPostmanCollectionToNode(selectedNode, importedStore);
+                    }
+                }
+                else {
+                    // Append into root
+                    importPostmanCollectionToRootNode((DefaultMutableTreeNode) collectionStoreTreeModel.getRoot(), importedStore);
+                }
+
+                // Save final tree to DB
+                DaakiaStore finalStore = DaakiaUtils.convertTreeToCollectionStore((DefaultMutableTreeNode) collectionStoreTreeModel.getRoot()); // if this doesn't exist, I’ll rewrite this too
+                new CollectionDao().saveStoreAsync(finalStore);
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Failed to import: " + ex.getMessage());
             }
         }
     }
+
 
     private void exportPostmanCollection() {
         JFileChooser chooser = new JFileChooser();

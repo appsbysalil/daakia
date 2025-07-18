@@ -80,6 +80,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
         leftRightSplitPane.setDividerLocation(300);
         leftRightSplitPane.setDividerSize(3);
         dataContext.uiContext().setEnvironmentCombo(environmentCombo);
+        refreshEnvironmentCombo();
     }
 
     @Override

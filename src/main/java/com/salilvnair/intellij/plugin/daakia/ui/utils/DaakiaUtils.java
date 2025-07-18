@@ -27,7 +27,7 @@ public class DaakiaUtils {
     }
 
     public static DaakiaStore convertTreeToCollectionStore(DaakiaStore parentNode, DefaultMutableTreeNode node) {
-        parentNode.setName(node.getUserObject().toString());
+        parentNode.setName(node.getUserObject() != null ? node.getUserObject().toString(): "");
         parentNode.setCollection(true);
         if(node.isLeaf()) {
             if(node.getUserObject() instanceof DaakiaStoreRecord daakiaStoreRecord) {
