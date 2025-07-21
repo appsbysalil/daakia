@@ -6,11 +6,11 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.rest.exception.RestResponse
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaScriptExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.*;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
@@ -29,6 +29,7 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
     }
 
     private void invokeGraphQlApi(DataContext dataContext) {
+        executePreRequestScript(dataContext);
         Environment env = dataContext.globalContext().selectedEnvironment();
         String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
         String originalBody = dataContext.uiContext().requestTextArea().getText();
@@ -94,11 +95,15 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
             String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
             if("Bearer Token".equals(selectedAuthType)) {
                 String bearerToken = new String(dataContext.uiContext().bearerTokenTextField().getPassword());
+                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext.globalContext().selectedEnvironment());
                 authHeaders.setBearerAuth(bearerToken);
             }
             else if("Basic Auth".equals(selectedAuthType)) {
                 String userName = dataContext.uiContext().userNameTextField().getText();
                 String password = new String(dataContext.uiContext().passwordTextField().getPassword());
+                Environment env = dataContext.globalContext().selectedEnvironment();
+                userName = PostmanEnvironmentUtils.resolveVariables(userName, env);
+                password = PostmanEnvironmentUtils.resolveVariables(password, env);
                 authHeaders.setBasicAuth(userName, password);
             }
         }
@@ -136,5 +141,18 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
         }
         dataContext.daakiaContext().setErrorMessage(finalErrorMessage);
         dataContext.eventPublisher().afterRestApiExchange(dataContext.daakiaContext());
+        executePostRequestScript(dataContext);
+    }
+
+    private void executePreRequestScript(DataContext dataContext) {
+        Environment env = dataContext.globalContext().selectedEnvironment();
+        String script = dataContext.uiContext().preRequestScriptArea() != null ? dataContext.uiContext().preRequestScriptArea().getText() : null;
+        DaakiaScriptExecutor.execute(script, env);
+    }
+
+    private void executePostRequestScript(DataContext dataContext) {
+        Environment env = dataContext.globalContext().selectedEnvironment();
+        String script = dataContext.uiContext().postRequestScriptArea() != null ? dataContext.uiContext().postRequestScriptArea().getText() : null;
+        DaakiaScriptExecutor.execute(script, env);
     }
 }
