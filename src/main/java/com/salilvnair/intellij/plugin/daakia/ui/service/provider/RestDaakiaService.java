@@ -7,10 +7,10 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaScriptExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
@@ -168,34 +168,12 @@ public class RestDaakiaService extends BaseDaakiaService {
     private void executePreRequestScript(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
         String script = dataContext.uiContext().preRequestScriptArea() != null ? dataContext.uiContext().preRequestScriptArea().getText() : null;
-        executeEnvironmentSetScript(script, env);
+        DaakiaScriptExecutor.execute(script, env);
     }
 
     private void executePostRequestScript(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
         String script = dataContext.uiContext().postRequestScriptArea() != null ? dataContext.uiContext().postRequestScriptArea().getText() : null;
-        executeEnvironmentSetScript(script, env);
-    }
-
-    private void executeEnvironmentSetScript(String script, Environment env) {
-        if(script == null || env == null) return;
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile("pm\\.environment\\.set\\(\"([^\"]+)\",\\s*\"([^\"]*)\"\\)");
-        java.util.regex.Matcher m = p.matcher(script);
-        while(m.find()) {
-            setEnvironmentVariable(env, m.group(1), m.group(2));
-        }
-    }
-
-    private void setEnvironmentVariable(Environment env, String key, String value) {
-        for(Variable v : env.getVariables()) {
-            if(key.equals(v.getKey())) {
-                v.setCurrentValue(value);
-                return;
-            }
-        }
-        Variable v = new Variable();
-        v.setKey(key);
-        v.setCurrentValue(value);
-        env.getVariables().add(v);
+        DaakiaScriptExecutor.execute(script, env);
     }
 }
