@@ -32,6 +32,7 @@ public class RestDaakiaService extends BaseDaakiaService {
     }
 
     private void invokeRestApi(DataContext dataContext) {
+        executePreRequestScript(dataContext);
         Environment env = dataContext.globalContext().selectedEnvironment();
         String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
         String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
@@ -117,6 +118,7 @@ public class RestDaakiaService extends BaseDaakiaService {
         }
         dataContext.daakiaContext().setErrorMessage(finalErrorMessage);
         dataContext.eventPublisher().afterRestApiExchange(dataContext.daakiaContext());
+        executePostRequestScript(dataContext);
     }
 
     private HttpHeaders prepareRequestHeaders(DataContext dataContext) {
@@ -148,14 +150,52 @@ public class RestDaakiaService extends BaseDaakiaService {
             String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
             if("Bearer Token".equals(selectedAuthType)) {
                 String bearerToken = new String(dataContext.uiContext().bearerTokenTextField().getPassword());
+                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext.globalContext().selectedEnvironment());
                 authHeaders.setBearerAuth(bearerToken);
             }
             else if("Basic Auth".equals(selectedAuthType)) {
                 String userName = dataContext.uiContext().userNameTextField().getText();
                 String password = new String(dataContext.uiContext().passwordTextField().getPassword());
+                Environment env = dataContext.globalContext().selectedEnvironment();
+                userName = PostmanEnvironmentUtils.resolveVariables(userName, env);
+                password = PostmanEnvironmentUtils.resolveVariables(password, env);
                 authHeaders.setBasicAuth(userName, password);
             }
         }
         return authHeaders;
+    }
+
+    private void executePreRequestScript(DataContext dataContext) {
+        Environment env = dataContext.globalContext().selectedEnvironment();
+        String script = dataContext.uiContext().preRequestScriptArea() != null ? dataContext.uiContext().preRequestScriptArea().getText() : null;
+        executeEnvironmentSetScript(script, env);
+    }
+
+    private void executePostRequestScript(DataContext dataContext) {
+        Environment env = dataContext.globalContext().selectedEnvironment();
+        String script = dataContext.uiContext().postRequestScriptArea() != null ? dataContext.uiContext().postRequestScriptArea().getText() : null;
+        executeEnvironmentSetScript(script, env);
+    }
+
+    private void executeEnvironmentSetScript(String script, Environment env) {
+        if(script == null || env == null) return;
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile("pm\\.environment\\.set\\(\"([^\"]+)\",\\s*\"([^\"]*)\"\\)");
+        java.util.regex.Matcher m = p.matcher(script);
+        while(m.find()) {
+            setEnvironmentVariable(env, m.group(1), m.group(2));
+        }
+    }
+
+    private void setEnvironmentVariable(Environment env, String key, String value) {
+        for(Variable v : env.getVariables()) {
+            if(key.equals(v.getKey())) {
+                v.setCurrentValue(value);
+                return;
+            }
+        }
+        Variable v = new Variable();
+        v.setKey(key);
+        v.setCurrentValue(value);
+        env.getVariables().add(v);
     }
 }
