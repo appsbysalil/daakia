@@ -54,7 +54,7 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event ->{
+        listen(event ->{
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RECEIVING_RESPONSE)) {
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
                 ResponseEntity<?> responseEntity = daakiaEvent.responseEntity();

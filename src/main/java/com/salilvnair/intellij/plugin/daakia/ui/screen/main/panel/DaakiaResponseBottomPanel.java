@@ -48,7 +48,7 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event -> {
+        listen(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
                 tabbedPane.setSelectedIndex(0);
             }

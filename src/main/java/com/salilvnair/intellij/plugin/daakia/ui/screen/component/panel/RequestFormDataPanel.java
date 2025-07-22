@@ -55,7 +55,7 @@ public class RequestFormDataPanel extends BaseDaakiaPanel<RequestFormDataPanel> 
 
     @Override
     public void initListeners() {
-        subscriber().subscribe( event -> {
+        listen( event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_FORM_DATA_ADD)) {
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_FORM_DATA, dataContext, null, null);
             }

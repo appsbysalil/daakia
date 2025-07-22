@@ -57,7 +57,7 @@ public class DaakiaRequestBottomPanel extends BaseDaakiaPanel<DaakiaRequestBotto
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event -> {
+        listen(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
                 tabbedPane.setSelectedIndex(1);
             }
