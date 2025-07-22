@@ -243,7 +243,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 TreeUtils.expandAllNodes(collectionStoreTree);
             });
             sideNavContext().setCollectionStoreRootNode(node);
-
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Failed to import: " + ex.getMessage());
