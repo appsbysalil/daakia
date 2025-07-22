@@ -20,6 +20,10 @@ public class DaakiaBaseStoreData {
     protected String responseHeaders;
     protected String requestBody;
     protected String responseBody;
+    /** JavaScript executed before a request is sent */
+    protected String preRequestScript;
+    /** JavaScript executed after a request completes */
+    protected String postRequestScript;
     protected String createdDate;
     protected String sizeText;
     protected String timeTaken;
@@ -80,6 +84,22 @@ public class DaakiaBaseStoreData {
 
     public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
+    }
+
+    public String getPreRequestScript() {
+        return preRequestScript;
+    }
+
+    public void setPreRequestScript(String preRequestScript) {
+        this.preRequestScript = preRequestScript;
+    }
+
+    public String getPostRequestScript() {
+        return postRequestScript;
+    }
+
+    public void setPostRequestScript(String postRequestScript) {
+        this.postRequestScript = postRequestScript;
     }
 
     public String getCreatedDate() {

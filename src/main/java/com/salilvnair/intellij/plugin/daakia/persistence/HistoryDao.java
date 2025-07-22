@@ -26,7 +26,7 @@ public class HistoryDao {
             }
         } catch (SQLException ignore) {}
         return list.stream()
-                .collect(Collectors.groupingBy(h -> h.getCreatedDate().substring(0, 4), LinkedHashMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(DaakiaHistory::getCreatedDate, LinkedHashMap::new, Collectors.toList()));
     }
 
     public void saveHistory(Map<String, List<DaakiaHistory>> data) {
