@@ -240,7 +240,9 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             SwingUtilities.invokeLater(() -> {
                 collectionStoreTreeModel.setRoot(node);
                 collectionStoreTreeModel.reload();
+                TreeUtils.expandAllNodes(collectionStoreTree);
             });
+            sideNavContext().setCollectionStoreRootNode(node);
 
         }
         catch (Exception ex) {
@@ -253,6 +255,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
             SwingUtilities.invokeLater(() -> {
                 collectionStoreTreeModel.reload();
+                TreeUtils.expandAllNodes(collectionStoreTree);
             });
         }
         catch (Exception ex) {
