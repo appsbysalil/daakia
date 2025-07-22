@@ -16,6 +16,7 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
     private JPanel authPanel;
     private JPanel basicAuthTextboxPanel;
     private JPanel bearerTokenTextBoxPanel;
+    private boolean maskPassword = true;
 
     public RequestAuthorizationPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -107,6 +108,7 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
     @Override
     public void initListeners() {
         authTypes.addActionListener(e -> {
+            maskPassword = true; // Reset mask state when auth type changes
             if ("None".equals(authTypes.getSelectedItem())) {
                 basicAuthTextboxPanel.setVisible(false);
                 bearerTokenTextBoxPanel.setVisible(false);
@@ -122,15 +124,22 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
         });
     }
 
-    private void togglePasswordField(JPasswordField field, IconButton button) {
-        boolean visible = field.getEchoChar() == 0;
-        if (visible) {
-            field.setEchoChar('\u2022');
+    private void togglePasswordField(PasswordInputField field, IconButton button) {
+        if (maskPassword && field.containsText()) {
+            field.setEchoChar('•');
             button.setIcon(DaakiaIcons.EyeIcon);
         }
         else {
             field.setEchoChar((char) 0);
             button.setIcon(DaakiaIcons.EyeOffIcon);
         }
+        maskPassword = !maskPassword;
+    }
+
+    private String passwordText(PasswordInputField field) {
+        if(!field.containsText()) {
+            return "";
+        }
+        return new String(field.getPassword());
     }
 }

@@ -151,7 +151,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
         boolean validUrl = false;
         if(!urlTextField.getText().isEmpty()) {
             Environment env = dataContext.globalContext().selectedEnvironment();
-            String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
+            String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), dataContext);
             validUrl = UrlUtils.validateURL(url);
         }
         return validUrl;

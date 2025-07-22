@@ -140,7 +140,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
             environmentCombo.addItem(env);
         }
         env.setName(nameField.getText());
-        env.getVariables().clear();
+        env.variables().clear();
         for(VariableRow row : variableRows.values()) {
             String key = row.keyField.getText();
             String type = (String) row.typeCombo.getSelectedItem();
@@ -152,7 +152,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
                 v.setType(type);
                 v.setInitialValue(initialVal);
                 v.setCurrentValue(currentVal);
-                env.getVariables().add(v);
+                env.variables().add(v);
             }
         }
         new EnvironmentDao().saveEnvironmentsAsync(globalContext.environments());
@@ -174,7 +174,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
             nameField.setText(env.getName());
             variablePanel.removeAll();
             variableRows.clear();
-            for(Variable v: env.getVariables()) {
+            for(Variable v: env.variables()) {
                 addVariableRow(v.getKey(), v.getType(), v.getInitialValue(), v.getCurrentValue());
             }
         }

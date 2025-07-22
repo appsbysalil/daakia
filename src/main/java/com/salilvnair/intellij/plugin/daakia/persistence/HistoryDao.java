@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.persistence;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 

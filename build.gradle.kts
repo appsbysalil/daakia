@@ -9,6 +9,10 @@ version = "2.0.2"
 
 repositories {
     mavenCentral()
+    maven {
+        name = "GraalVM"
+        url = uri("https://maven.pkg.jetbrains.space/graalvm/p/graalvm/maven")
+    }
 }
 
 dependencies {
@@ -20,7 +24,10 @@ dependencies {
     implementation("org.json:json:20240303")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
     implementation("org.openjdk.nashorn:nashorn-core:15.4")
+    implementation("org.graalvm.sdk:graal-sdk:24.2.2")
+    implementation("org.graalvm.js:js:24.2.2")
     compileOnly("org.projectlombok:lombok:0.11.0")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
 }
 
 // Configure Gradle IntelliJ Plugin
@@ -40,6 +47,10 @@ tasks {
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
+    }
+
+    withType<JavaCompile> {
+        options.annotationProcessorPath = configurations.annotationProcessor.get()
     }
 
     patchPluginXml {

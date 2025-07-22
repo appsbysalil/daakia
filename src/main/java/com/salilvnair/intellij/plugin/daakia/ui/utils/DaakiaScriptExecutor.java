@@ -20,7 +20,7 @@ public final class DaakiaScriptExecutor {
     private DaakiaScriptExecutor() {}
 
     public static void execute(String script, Environment env) {
-        if (script == null || env == null || ENGINE == null) {
+        if (script == null || env == null) {
             return;
         }
         Bindings bindings = ENGINE.createBindings();
@@ -48,7 +48,7 @@ public final class DaakiaScriptExecutor {
                 return;
             }
             Variable var = null;
-            for (Variable v : env.getVariables()) {
+            for (Variable v : env.variables()) {
                 if (key.equals(v.getKey())) {
                     var = v;
                     break;
@@ -57,7 +57,7 @@ public final class DaakiaScriptExecutor {
             if (var == null) {
                 var = new Variable();
                 var.setKey(key);
-                env.getVariables().add(var);
+                env.variables().add(var);
             }
             var.setCurrentValue(value);
         }

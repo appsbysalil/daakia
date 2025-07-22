@@ -10,7 +10,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaScriptExecutor;
+import com.salilvnair.intellij.plugin.daakia.script.main.DaakiaScriptExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
@@ -33,12 +33,11 @@ public class RestDaakiaService extends BaseDaakiaService {
 
     private void invokeRestApi(DataContext dataContext) {
         executePreRequestScript(dataContext);
-        Environment env = dataContext.globalContext().selectedEnvironment();
-        String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
+        String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), dataContext);
         String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
 
         String originalBody = dataContext.uiContext().requestTextArea().getText();
-        String resolvedBody = PostmanEnvironmentUtils.resolveVariables(originalBody, env);
+        String resolvedBody = PostmanEnvironmentUtils.resolveVariables(originalBody, dataContext);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<?> entity = prepareRequestEntity(dataContext, resolvedBody);
@@ -81,7 +80,7 @@ public class RestDaakiaService extends BaseDaakiaService {
             body.add(key, new FileSystemResource(dataContext.uiContext().formDataFileFields().get(key)));
         }
         dataContext.uiContext().formDataTextFields().forEach((k, v) -> {
-            String val = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), env);
+            String val = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), dataContext);
             body.add(v.get(0).getText(), val);
         });
         return new HttpEntity<>(body, headers);
@@ -125,8 +124,8 @@ public class RestDaakiaService extends BaseDaakiaService {
         HttpHeaders headers = new HttpHeaders();
         Environment env = dataContext.globalContext().selectedEnvironment();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
-            String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), env);
-            String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), env);
+            String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), dataContext);
+            String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), dataContext);
             headers.add(headerName, headerVal);
         });
         HttpHeaders authHeaders = addAuthorizationHeaderIfPresent(dataContext);
@@ -150,15 +149,15 @@ public class RestDaakiaService extends BaseDaakiaService {
             String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
             if("Bearer Token".equals(selectedAuthType)) {
                 String bearerToken = new String(dataContext.uiContext().bearerTokenTextField().getPassword());
-                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext.globalContext().selectedEnvironment());
+                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext);
                 authHeaders.setBearerAuth(bearerToken);
             }
             else if("Basic Auth".equals(selectedAuthType)) {
                 String userName = dataContext.uiContext().userNameTextField().getText();
                 String password = new String(dataContext.uiContext().passwordTextField().getPassword());
                 Environment env = dataContext.globalContext().selectedEnvironment();
-                userName = PostmanEnvironmentUtils.resolveVariables(userName, env);
-                password = PostmanEnvironmentUtils.resolveVariables(password, env);
+                userName = PostmanEnvironmentUtils.resolveVariables(userName, dataContext);
+                password = PostmanEnvironmentUtils.resolveVariables(password, dataContext);
                 authHeaders.setBasicAuth(userName, password);
             }
         }
@@ -166,14 +165,13 @@ public class RestDaakiaService extends BaseDaakiaService {
     }
 
     private void executePreRequestScript(DataContext dataContext) {
-        Environment env = dataContext.globalContext().selectedEnvironment();
         String script = dataContext.uiContext().preRequestScriptArea() != null ? dataContext.uiContext().preRequestScriptArea().getText() : null;
-        DaakiaScriptExecutor.execute(script, env);
+        DaakiaScriptExecutor.init(dataContext).executeScript(script);
     }
 
     private void executePostRequestScript(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
         String script = dataContext.uiContext().postRequestScriptArea() != null ? dataContext.uiContext().postRequestScriptArea().getText() : null;
-        DaakiaScriptExecutor.execute(script, env);
+        DaakiaScriptExecutor.init(dataContext).executeScript(script);
     }
 }

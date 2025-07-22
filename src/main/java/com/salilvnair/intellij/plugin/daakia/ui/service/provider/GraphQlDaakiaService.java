@@ -31,9 +31,9 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
     private void invokeGraphQlApi(DataContext dataContext) {
         executePreRequestScript(dataContext);
         Environment env = dataContext.globalContext().selectedEnvironment();
-        String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), env);
+        String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), dataContext);
         String originalBody = dataContext.uiContext().requestTextArea().getText();
-        String resolvedBody = PostmanEnvironmentUtils.resolveVariables(originalBody, env);
+        String resolvedBody = PostmanEnvironmentUtils.resolveVariables(originalBody, dataContext);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = prepareRequestHeaders(dataContext);
@@ -77,8 +77,8 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
         HttpHeaders headers = new HttpHeaders();
         Environment env = dataContext.globalContext().selectedEnvironment();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
-            String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), env);
-            String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), env);
+            String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), dataContext);
+            String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), dataContext);
             headers.add(headerName, headerVal);
         });
         HttpHeaders authHeaders = addAuthorizationHeaderIfPresent(dataContext);
@@ -95,15 +95,15 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
             String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
             if("Bearer Token".equals(selectedAuthType)) {
                 String bearerToken = new String(dataContext.uiContext().bearerTokenTextField().getPassword());
-                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext.globalContext().selectedEnvironment());
+                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext);
                 authHeaders.setBearerAuth(bearerToken);
             }
             else if("Basic Auth".equals(selectedAuthType)) {
                 String userName = dataContext.uiContext().userNameTextField().getText();
                 String password = new String(dataContext.uiContext().passwordTextField().getPassword());
                 Environment env = dataContext.globalContext().selectedEnvironment();
-                userName = PostmanEnvironmentUtils.resolveVariables(userName, env);
-                password = PostmanEnvironmentUtils.resolveVariables(password, env);
+                userName = PostmanEnvironmentUtils.resolveVariables(userName, dataContext);
+                password = PostmanEnvironmentUtils.resolveVariables(password, dataContext);
                 authHeaders.setBasicAuth(userName, password);
             }
         }
