@@ -11,13 +11,21 @@ import java.awt.event.FocusListener;
 
 public class PasswordInputField extends JPasswordField {
     private final String placeholder;
+    private boolean mask;
 
     public PasswordInputField() {
         this(null, 0);
+        this.mask = true; // Default to masking
     }
 
     public PasswordInputField(String placeholder) {
         this(placeholder, 0);
+        this.mask = true; // Default to masking
+    }
+
+    public PasswordInputField(String placeholder, boolean mask) {
+        this(placeholder, 0);
+        this.mask = mask;
     }
 
     public PasswordInputField(String placeholder, int columns) {

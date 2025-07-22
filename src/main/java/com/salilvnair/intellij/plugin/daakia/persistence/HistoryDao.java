@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.persistence;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 
@@ -26,7 +27,7 @@ public class HistoryDao {
             }
         } catch (SQLException ignore) {}
         return list.stream()
-                .collect(Collectors.groupingBy(h -> h.getCreatedDate().substring(0, 4), LinkedHashMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(DaakiaBaseStoreData::getCreatedDate, LinkedHashMap::new, Collectors.toList()));
     }
 
     public void saveHistory(Map<String, List<DaakiaHistory>> data) {

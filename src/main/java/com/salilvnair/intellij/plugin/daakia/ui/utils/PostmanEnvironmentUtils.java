@@ -3,7 +3,9 @@ package com.salilvnair.intellij.plugin.daakia.ui.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.EnvironmentTemplate;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,8 +53,8 @@ public final class PostmanEnvironmentUtils {
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("name", env.getName());
         List<Map<String, Object>> values = new ArrayList<>();
-        if (env.getVariables() != null) {
-            for (Variable v : env.getVariables()) {
+        if (env.variables() != null) {
+            for (Variable v : env.variables()) {
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("key", v.getKey());
                 String value = v.getCurrentValue() != null ? v.getCurrentValue() : v.getInitialValue();
@@ -67,11 +69,15 @@ public final class PostmanEnvironmentUtils {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
     }
 
-    public static String resolveVariables(String text, Environment env) {
-        if(text == null || env == null) {
+    public static String resolveVariables(String text, DataContext dataContext) {
+        EnvironmentTemplate environmentTemplate = dataContext.globalContext().selectedEnvironment();
+        if(environmentTemplate == null) {
+            environmentTemplate = dataContext.globalContext().getGlobalEnvironment();
+        }
+        if(text == null || environmentTemplate == null) {
             return text;
         }
-        for(Variable v : env.getVariables()) {
+        for(Variable v : environmentTemplate.variables()) {
             if(v.getKey() != null) {
                 String placeholder = "{{" + v.getKey() + "}}";
                 String val = v.getCurrentValue()!=null ? v.getCurrentValue() : v.getInitialValue();
