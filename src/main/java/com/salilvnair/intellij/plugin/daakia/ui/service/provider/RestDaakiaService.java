@@ -74,7 +74,6 @@ public class RestDaakiaService extends BaseDaakiaService {
     }
 
     private HttpEntity<?> formDataRequestEntity(DataContext dataContext, HttpHeaders headers) {
-        Environment env = dataContext.globalContext().selectedEnvironment();
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         for (String key : dataContext.uiContext().formDataFileFields().keySet()) {
             body.add(key, new FileSystemResource(dataContext.uiContext().formDataFileFields().get(key)));
@@ -122,7 +121,6 @@ public class RestDaakiaService extends BaseDaakiaService {
 
     private HttpHeaders prepareRequestHeaders(DataContext dataContext) {
         HttpHeaders headers = new HttpHeaders();
-        Environment env = dataContext.globalContext().selectedEnvironment();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
             String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), dataContext);
             String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), dataContext);
@@ -155,7 +153,6 @@ public class RestDaakiaService extends BaseDaakiaService {
             else if("Basic Auth".equals(selectedAuthType)) {
                 String userName = dataContext.uiContext().userNameTextField().getText();
                 String password = new String(dataContext.uiContext().passwordTextField().getPassword());
-                Environment env = dataContext.globalContext().selectedEnvironment();
                 userName = PostmanEnvironmentUtils.resolveVariables(userName, dataContext);
                 password = PostmanEnvironmentUtils.resolveVariables(password, dataContext);
                 authHeaders.setBasicAuth(userName, password);
@@ -166,12 +163,15 @@ public class RestDaakiaService extends BaseDaakiaService {
 
     private void executePreRequestScript(DataContext dataContext) {
         String script = dataContext.uiContext().preRequestScriptArea() != null ? dataContext.uiContext().preRequestScriptArea().getText() : null;
-        DaakiaScriptExecutor.init(dataContext).executeScript(script);
+        try (DaakiaScriptExecutor executor = DaakiaScriptExecutor.init(dataContext)) {
+            executor.executeScript(script);
+        }
     }
 
     private void executePostRequestScript(DataContext dataContext) {
-        Environment env = dataContext.globalContext().selectedEnvironment();
         String script = dataContext.uiContext().postRequestScriptArea() != null ? dataContext.uiContext().postRequestScriptArea().getText() : null;
-        DaakiaScriptExecutor.init(dataContext).executeScript(script);
+        try (DaakiaScriptExecutor executor = DaakiaScriptExecutor.init(dataContext)) {
+            executor.executeScript(script);
+        }
     }
 }

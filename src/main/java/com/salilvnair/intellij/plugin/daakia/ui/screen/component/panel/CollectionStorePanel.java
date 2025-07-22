@@ -236,14 +236,11 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void importPostmanCollectionToRootNode(DefaultMutableTreeNode node, DaakiaStore store) {
         try {
-            sideNavContext().setDaakiaStore(store);
-            DefaultMutableTreeNode newRoot = DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
-            sideNavContext().setCollectionStoreRootNode(newRoot);
+            DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
             SwingUtilities.invokeLater(() -> {
-                collectionStoreTreeModel.setRoot(newRoot);
+                collectionStoreTreeModel.setRoot(node);
                 collectionStoreTreeModel.reload();
             });
-            new CollectionDao().saveStoreAsync(store);
 
         }
         catch (Exception ex) {
@@ -253,13 +250,10 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void importPostmanCollectionToNode(DefaultMutableTreeNode node, DaakiaStore store) {
         try {
-            sideNavContext().setDaakiaStore(store);
             DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
             SwingUtilities.invokeLater(() -> {
                 collectionStoreTreeModel.reload();
             });
-            new CollectionDao().saveStoreAsync(store);
-
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Failed to import: " + ex.getMessage());
@@ -300,7 +294,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 }
 
                 // Save final tree to DB
-                DaakiaStore finalStore = DaakiaUtils.convertTreeToCollectionStore((DefaultMutableTreeNode) collectionStoreTreeModel.getRoot()); // if this doesn't exist, I’ll rewrite this too
+                DaakiaStore finalStore = DaakiaUtils.convertTreeToCollectionStore((DefaultMutableTreeNode) collectionStoreTreeModel.getRoot());
+                sideNavContext().setDaakiaStore(finalStore);
                 new CollectionDao().saveStoreAsync(finalStore);
 
             } catch (Exception ex) {
