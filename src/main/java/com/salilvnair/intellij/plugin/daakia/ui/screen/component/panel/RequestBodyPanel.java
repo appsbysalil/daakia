@@ -54,7 +54,7 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(e -> {
+        listen(e -> {
             if(DaakiaEvent.ofType(e, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN)) {
                 if(requestTextArea.getText() != null && !requestTextArea.getText().isEmpty()) {
                     String formattedText = JsonUtils.format(requestTextArea.getText());

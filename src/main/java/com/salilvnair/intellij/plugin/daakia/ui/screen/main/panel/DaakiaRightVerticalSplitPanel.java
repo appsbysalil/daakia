@@ -58,7 +58,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event ->{
+        listen(event ->{
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
                 rightPanel.setVisible(false);
                 progressBar.setVisible(true);

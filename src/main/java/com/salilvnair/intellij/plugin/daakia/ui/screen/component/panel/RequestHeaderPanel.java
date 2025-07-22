@@ -55,7 +55,7 @@ public class RequestHeaderPanel extends BaseDaakiaPanel<RequestHeaderPanel> {
 
     @Override
     public void initListeners() {
-        subscriber().subscribe( event -> {
+        listen( event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_ADD_HEADER)) {
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_REQUEST_HEADER, dataContext, null, null);
             }

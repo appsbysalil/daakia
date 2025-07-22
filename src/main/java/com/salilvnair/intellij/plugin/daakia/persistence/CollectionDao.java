@@ -36,7 +36,7 @@ public class CollectionDao {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             DaakiaStore daakiaStore = loadStore();
             if (callback != null) {
-                callback.accept(daakiaStore);
+                ApplicationManager.getApplication().invokeLater(() -> callback.accept(daakiaStore));
             }
         });
     }

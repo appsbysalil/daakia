@@ -57,7 +57,7 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
 
     @Override
     public void initListeners() {
-        globalSubscriber().subscribe(event -> {
+        listenGlobal(event -> {
             if(DaakiaEvent.ofAnyType(event, DaakiaEventType.ON_SELECT_HISTORY_DATA_NODE, DaakiaEventType.ON_DBL_CLICK_HISTORY_DATA_NODE)) {
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
                 sideNavContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
