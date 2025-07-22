@@ -11,6 +11,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInpu
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
@@ -247,10 +248,11 @@ public class AppDaakiaService extends BaseDaakiaService {
                         rootNode = DaakiaUtils.convertCollectionStoreToTreeNodeFilterBySearchText(daakiaStore, collectionStoreRootNode, searchText);
                     }
                     Tree collectionStoreTree = dataContext.sideNavContext().collectionStoreTree();
-                    // Update the tree model with new data
                     DefaultTreeModel treeModel = (DefaultTreeModel) collectionStoreTree.getModel();
-                    treeModel.setRoot(rootNode);
-                    treeModel.reload();
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        treeModel.setRoot(rootNode);
+                        treeModel.reload();
+                    });
                 }
             });
 
