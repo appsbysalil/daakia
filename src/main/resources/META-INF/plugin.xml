@@ -56,6 +56,16 @@
         - Added dynamic row management for environment variables.
         - Introduced placeholder-enabled `PasswordInputField` and updated authorization panel layout.
         - Bug fixes and enhancements
+        <br>
+        v2.0.3
+          <ul>
+            <li><b>Scripts Tab:</b> Added pre-request and post-request script editors for customizing request behavior using JavaScript.</li>
+            <li><b>Environment Variable Scripting:</b> Support for modifying environment variables via <code>daakia.setGlobalEnvVar</code> in scripts.</li>
+            <li><b>Authorization Enhancements:</b> Authorization headers now resolve environment variable placeholders (e.g., <code>{{token}}</code>).</li>
+            <li><b>GraalVM Migration:</b> Replaced Nashorn with GraalVM for executing modern JavaScript securely.</li>
+            <li><b>Postman Compatibility:</b> Enhanced Postman import/export to include auth headers and script events.</li>
+            <li><b>Persistence:</b> Script content is now saved with history and collection records for full reproducibility.</li>
+          </ul>
     ]]>
     </change-notes>
 
