@@ -178,6 +178,12 @@ public class AppDaakiaService extends BaseDaakiaService {
     private void loadApplicableDaakiaUiComponents(DataContext dataContext, DaakiaBaseStoreData baseStoreData, Object... objects) {
         dataContext.uiContext().requestTextArea().setText(baseStoreData.getRequestBody());
         dataContext.uiContext().responseTextArea().setText(baseStoreData.getResponseBody());
+        if(dataContext.uiContext().preRequestScriptArea()!=null) {
+            dataContext.uiContext().preRequestScriptArea().setText(baseStoreData.getPreRequestScript());
+        }
+        if(dataContext.uiContext().postRequestScriptArea()!=null) {
+            dataContext.uiContext().postRequestScriptArea().setText(baseStoreData.getPostRequestScript());
+        }
         dataContext.uiContext().requestTypes().setSelectedItem(baseStoreData.getRequestType());
         dataContext.uiContext().urlTextField().setText(baseStoreData.getUrl());
         String headersJsonString = CryptoUtils.decrypt(baseStoreData.getHeaders());
@@ -326,6 +332,10 @@ public class AppDaakiaService extends BaseDaakiaService {
         String requestType = (String) dataContext.uiContext().requestTypes().getSelectedItem();
         String requestBody = dataContext.uiContext().requestTextArea().getText();
         String responseBody = dataContext.uiContext().responseTextArea().getText();
+        String preScript = dataContext.uiContext().preRequestScriptArea() != null ?
+                dataContext.uiContext().preRequestScriptArea().getText() : null;
+        String postScript = dataContext.uiContext().postRequestScriptArea() != null ?
+                dataContext.uiContext().postRequestScriptArea().getText() : null;
         MultiValueMap<String, String> requestHeaders = dataContext.daakiaContext().requestHeaders();
         MultiValueMap<String, String> responseHeaders = dataContext.daakiaContext().responseHeaders();
         ResponseMetadata responseMetadata = dataContext.daakiaContext().responseMetadata();
@@ -341,6 +351,8 @@ public class AppDaakiaService extends BaseDaakiaService {
             daakiaBaseStoreData.setUrl(url);
             daakiaBaseStoreData.setRequestBody(requestBody);
             daakiaBaseStoreData.setResponseBody(responseBody);
+            daakiaBaseStoreData.setPreRequestScript(preScript);
+            daakiaBaseStoreData.setPostRequestScript(postScript);
             daakiaBaseStoreData.setCreatedDate(DateUtils.todayAsString());
             daakiaBaseStoreData.setStatusCode(responseMetadata.getStatusCode());
             daakiaBaseStoreData.setTimeTaken(responseMetadata.getTimeTaken());

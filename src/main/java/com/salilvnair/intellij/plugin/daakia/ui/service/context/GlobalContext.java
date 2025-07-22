@@ -4,17 +4,23 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaGlobalEventPublisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.persistence.EnvironmentDao;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.GlobalEnvironment;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
+@Getter
+@Setter
 public class GlobalContext {
     private SideNavContext sideNavContext;
     private Publisher<EventObject> publisher;
     private DaakiaGlobalEventPublisher globalEventPublisher;
     private List<Environment> environments;
+    private GlobalEnvironment globalEnvironment;
     private Environment selectedEnvironment;
 
     public GlobalContext() {
@@ -56,13 +62,18 @@ public class GlobalContext {
         return environments;
     }
 
-    public void setEnvironments(List<Environment> environments) {
-        this.environments = environments;
-    }
 
     public Environment selectedEnvironment() {
         return selectedEnvironment;
     }
+
+    public GlobalEnvironment globalEnvironment() {
+        if(globalEnvironment == null) {
+            globalEnvironment = new GlobalEnvironment();
+        }
+        return globalEnvironment;
+    }
+
 
     public void setSelectedEnvironment(Environment selectedEnvironment) {
         this.selectedEnvironment = selectedEnvironment;

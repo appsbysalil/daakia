@@ -45,6 +45,9 @@ public class UIContext {
 
     private JProgressBar progressBar;
 
+    private RSyntaxTextArea preRequestScriptArea;
+    private RSyntaxTextArea postRequestScriptArea;
+
     private boolean downloadResponse;
 
 
@@ -191,6 +194,22 @@ public class UIContext {
 
     public void setProgressBar(JProgressBar progressBar) {
         this.progressBar = progressBar;
+    }
+
+    public RSyntaxTextArea preRequestScriptArea() {
+        return preRequestScriptArea;
+    }
+
+    public void setPreRequestScriptArea(RSyntaxTextArea preRequestScriptArea) {
+        this.preRequestScriptArea = preRequestScriptArea;
+    }
+
+    public RSyntaxTextArea postRequestScriptArea() {
+        return postRequestScriptArea;
+    }
+
+    public void setPostRequestScriptArea(RSyntaxTextArea postRequestScriptArea) {
+        this.postRequestScriptArea = postRequestScriptArea;
     }
 
     public JPanel formDataKeyValuesPanel() {
