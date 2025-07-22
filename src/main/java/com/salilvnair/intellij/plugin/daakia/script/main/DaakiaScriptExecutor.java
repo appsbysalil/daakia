@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 /**
  * DaakiaScriptExecutor - Entry point to execute user-defined JS scripts using pm.* API
  */
-public class DaakiaScriptExecutor {
+public class DaakiaScriptExecutor implements AutoCloseable {
     private final DaakiaBridge bridge;
     private final Context context;
 
@@ -78,5 +78,10 @@ public class DaakiaScriptExecutor {
             }
         }
         return null;
+    }
+
+    @Override
+    public void close() {
+        context.close(true);
     }
 }
