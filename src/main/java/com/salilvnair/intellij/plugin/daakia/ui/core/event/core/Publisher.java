@@ -26,8 +26,6 @@ public class Publisher<T> {
                         e.printStackTrace();
                     }
                 });
-            } else {
-                subscribers.remove(ref);
             }
         }
     }

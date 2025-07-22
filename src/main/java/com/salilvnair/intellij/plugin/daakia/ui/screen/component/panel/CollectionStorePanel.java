@@ -80,7 +80,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 TreeUtils.expandAllNodes(collectionStoreTree);
             }
         });
-        globalSubscriber().subscribe(event -> {
+        listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN)) {
                 importPostmanCollection1();
             }

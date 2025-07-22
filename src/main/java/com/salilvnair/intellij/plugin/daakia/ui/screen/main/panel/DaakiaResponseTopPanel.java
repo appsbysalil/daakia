@@ -53,7 +53,7 @@ public class DaakiaResponseTopPanel extends BaseDaakiaPanel<DaakiaResponseTopPan
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event ->{
+        listen(event ->{
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RECEIVING_RESPONSE)) {
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_RESPONSE_STATUS, dataContext);
             }

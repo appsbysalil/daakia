@@ -78,7 +78,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
             }
         });
 
-        globalSubscriber().subscribe(e -> {
+        listenGlobal(e -> {
             if(DaakiaEvent.ofAnyType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA, DaakiaEventType.ON_LOAD_SELECTED_STORE_COLLECTION_DATA)) {
                 initNewTabBySelectedNode(e);
             }

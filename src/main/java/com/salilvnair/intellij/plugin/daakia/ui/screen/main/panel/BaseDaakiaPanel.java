@@ -6,6 +6,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.awt.SwingComponent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaEventPublisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaGlobalEventPublisher;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Subscriber;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.SideNavContext;
@@ -18,12 +19,17 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.EventObject;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> implements SwingComponent {
     protected final JRootPane rootPane;
     protected final DataContext dataContext;
 
     protected boolean debugEnabled = false;
+
+    private final List<Subscriber<EventObject>> localSubscribers = new ArrayList<>();
+    private final List<Subscriber<EventObject>> globalSubscribers = new ArrayList<>();
 
     public BaseDaakiaPanel(JRootPane rootPane, DataContext dataContext) {
         this.rootPane = rootPane;
@@ -101,6 +107,11 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
         return dataContext.subscriber();
     }
 
+    protected void listen(Subscriber<EventObject> subscriber) {
+        localSubscribers.add(subscriber);
+        subscriber().subscribe(subscriber);
+    }
+
 
     public DaakiaGlobalEventPublisher globalEventPublisher() {
         return dataContext.globalEventPublisher();
@@ -108,6 +119,11 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
 
     public Publisher<EventObject> globalSubscriber() {
         return dataContext.globalSubscriber();
+    }
+
+    protected void listenGlobal(Subscriber<EventObject> subscriber) {
+        globalSubscribers.add(subscriber);
+        globalSubscriber().subscribe(subscriber);
     }
 
 

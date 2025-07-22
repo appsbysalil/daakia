@@ -125,7 +125,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
             daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext);
             daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
         });
-        subscriber().subscribe(event -> {
+        listen(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
                 sendButton.setEnabled(true);
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
@@ -135,7 +135,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
                 daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
             }
         });
-        globalSubscriber().subscribe(event -> {
+        listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED)) {
                 refreshActionButtons();
             }

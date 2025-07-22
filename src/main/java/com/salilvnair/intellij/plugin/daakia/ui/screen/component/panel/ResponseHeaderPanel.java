@@ -52,7 +52,7 @@ public class ResponseHeaderPanel extends BaseDaakiaPanel<ResponseHeaderPanel> {
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event ->{
+        listen(event ->{
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RECEIVING_RESPONSE)) {
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
                 if(daakiaEvent.responseEntity() != null) {
