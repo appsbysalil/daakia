@@ -150,18 +150,20 @@ public class DaakiaUtils {
         else if(component instanceof com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel<?> panel) {
             dataContext = panel.dataContext();
         }
-        if(dataContext != null) {
+        if (dataContext != null) {
             dataContext.uiContext().setScriptLogEnabled(scriptCheck.isSelected());
-            if(res == 1 && scriptCheck.isSelected()) {
+            if (res == 1 && scriptCheck.isSelected()) {
                 DebugLogManager.startCapture();
                 dataContext.uiContext().setDebugMode(true);
                 EditorEx editor = dataContext.uiContext().debugLogEditor();
-                if(editor != null) {
-                    com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
-                            () -> editor.getDocument().setText(DebugLogManager.getLogs()));
+                if (editor != null) {
+                    com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
+                            () -> com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
+                                    () -> editor.getDocument().setText(DebugLogManager.getLogs()))
+                    );
                 }
                 dataContext.globalEventPublisher().onEnableDebugMode();
-            } else if(!scriptCheck.isSelected()) {
+            } else if (!scriptCheck.isSelected()) {
                 DebugLogManager.stopCapture();
                 dataContext.uiContext().setDebugMode(false);
             }

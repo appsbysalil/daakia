@@ -58,12 +58,14 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
     @Override
     public void initListeners() {
         listen(event -> {
-            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
-                tabbedPane.setSelectedIndex(0);
+            if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
+                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
+                        () -> tabbedPane.setSelectedIndex(0)
+                );
             }
-            else if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
+            else if (DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
                 EditorEx editor = uiContext().debugLogEditor();
-                if(editor != null) {
+                if (editor != null) {
                     com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
                             () -> com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
                                     () -> editor.getDocument().setText(DebugLogManager.getLogs()))
@@ -80,12 +82,12 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
 
     private void enableDebugTab() {
         com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
-            if(!debugTabAdded) {
+            if (!debugTabAdded) {
                 tabbedPane.addTab("Debug Mode", null, debugLogPanel);
                 debugTabAdded = true;
             }
             EditorEx editor = uiContext().debugLogEditor();
-            if(editor != null) {
+            if (editor != null) {
                 com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
                         () -> editor.getDocument().setText(DebugLogManager.getLogs()));
             }
