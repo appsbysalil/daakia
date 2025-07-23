@@ -41,6 +41,13 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
         this.debugEnabled = debugEnabled;
     }
 
+    /**
+     * Exposes the data context associated with this panel.
+     */
+    public DataContext dataContext() {
+        return dataContext;
+    }
+
     protected void debugIfApplicable(Object instance) {
         if(debugEnabled) {
             JBColor jbColor = generateRandomJBColor();
