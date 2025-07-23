@@ -50,7 +50,7 @@ public class EnvironmentDao {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             List<Environment> environments = loadEnvironments();
             if (callback != null) {
-                callback.accept(environments);
+                ApplicationManager.getApplication().invokeLater(() -> callback.accept(environments));
             }
         });
     }

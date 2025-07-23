@@ -64,9 +64,11 @@ public class StoreDaakiaService extends BaseDaakiaService {
     private void loadRequest(DataContext dataContext) {
         new CollectionDao().loadStoreAsync( daakiaStore -> {
             if(daakiaStore != null) {
-                dataContext.sideNavContext().setDaakiaStore(daakiaStore);
-                DefaultMutableTreeNode newRootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, dataContext.sideNavContext().collectionStoreRootNode());
-                dataContext.sideNavContext().setCollectionStoreRootNode(newRootNode);
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    dataContext.sideNavContext().setDaakiaStore(daakiaStore);
+                    DefaultMutableTreeNode newRootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, dataContext.sideNavContext().collectionStoreRootNode());
+                    dataContext.sideNavContext().setCollectionStoreRootNode(newRootNode);
+                });
             }
         });
 

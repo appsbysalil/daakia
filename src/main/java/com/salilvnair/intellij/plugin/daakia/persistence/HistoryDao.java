@@ -51,7 +51,7 @@ public class HistoryDao {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             Map<String, List<DaakiaHistory>> data = loadHistory();
             if (callback != null) {
-                callback.accept(data);
+                ApplicationManager.getApplication().invokeLater(() -> callback.accept(data));
             }
         });
     }
