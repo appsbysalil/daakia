@@ -114,6 +114,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
         variableRows.clear();
         variablePanel.revalidate();
         variablePanel.repaint();
+        new EnvironmentDao().saveEnvironmentsSync(globalContext.environments());
         globalEventPublisher().onEnvironmentListChanged();
     }
 
