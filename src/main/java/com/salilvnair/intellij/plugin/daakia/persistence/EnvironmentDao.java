@@ -8,6 +8,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.concurrent.ExecutionException;
 
 /** DAO for environment records */
 public class EnvironmentDao {
@@ -56,8 +57,17 @@ public class EnvironmentDao {
     }
 
     public void saveEnvironmentsAsync(List<Environment> envs) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-           saveEnvironments(envs);
-        });
+        // Use a pooled thread but wait for completion to guarantee persistence
+        try {
+            ApplicationManager.getApplication()
+                    .executeOnPooledThread(() -> saveEnvironments(envs)).get();
+        }
+        catch (InterruptedException | ExecutionException ignored) {
+        }
+    }
+
+    /** Synchronously save environments on the current thread. */
+    public void saveEnvironmentsSync(List<Environment> envs) {
+        saveEnvironments(envs);
     }
 }
