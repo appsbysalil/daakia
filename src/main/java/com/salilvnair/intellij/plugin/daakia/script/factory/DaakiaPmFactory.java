@@ -89,14 +89,18 @@ public class DaakiaPmFactory extends AbstractDaakiaProxy {
                         System.out.println("🔵 Daakia: HTTP " + code);
                         System.out.println("🟢 Daakia: Raw response = " + responseStr);
 
-                        Value result;
-                        try {
-                            result = context.eval("js", "JSON.parse").execute(responseStr);
-                        } catch (Exception ex) {
-                            result = context.asValue(responseStr);
-                        }
+//                        Value result;
+//                        try {
+//                            result = context.eval("js", "JSON.parse").execute(responseStr);
+//                        } catch (Exception ex) {
+//                            result = context.asValue(responseStr);
+//                        }
+//
+//                        callback.execute(null, result);
 
-                        callback.execute(null, result);
+
+                        Value responseObj = PostmanResponseFactory.create(context, responseStr, code, headers);
+                        callback.execute(null, responseObj);
                     }
                     catch (PolyglotException e) {
                         System.err.println("💥 JavaScript execution error:");
