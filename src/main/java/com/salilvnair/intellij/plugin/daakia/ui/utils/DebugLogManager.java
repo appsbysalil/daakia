@@ -37,15 +37,9 @@ public class DebugLogManager {
         // Normalize captured log line endings based on the OS the plugin is
         // running on. First convert all CRLF/CR to LF and then switch to the
         // system line separator if it differs from LF.
-        String normalized = LOGS.toString()
+        return LOGS.toString()
                 .replace("\r\n", "\n")
                 .replace('\r', '\n');
-
-        String osSeparator = System.lineSeparator();
-        if (!"\n".equals(osSeparator)) {
-            normalized = normalized.replace("\n", osSeparator);
-        }
-        return normalized;
     }
 
     public static void clear() {
