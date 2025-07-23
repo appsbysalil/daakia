@@ -76,9 +76,15 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
     }
 
     private void enableDebugTab() {
-        if(!debugTabAdded) {
-            tabbedPane.addTab("Debug Mode", null, debugLogPanel);
-            debugTabAdded = true;
-        }
+        com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
+            if(!debugTabAdded) {
+                tabbedPane.addTab("Debug Mode", null, debugLogPanel);
+                debugTabAdded = true;
+            }
+            EditorEx editor = uiContext().debugLogEditor();
+            if(editor != null) {
+                editor.getDocument().setText(DebugLogManager.getLogs());
+            }
+        });
     }
 }
