@@ -32,9 +32,6 @@ public abstract class AbstractDaakiaProxy implements ProxyObject {
     }
 
     protected void setGlobalEnvVariable(String key, String value) {
-        if(globalEnvironment == null) {
-            globalEnvironment = new GlobalEnvironment();
-        }
         Variable var = null;
         for (Variable v : globalEnvironment.variables()) {
             if (key.equals(v.getKey())) {

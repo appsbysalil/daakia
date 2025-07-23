@@ -8,10 +8,9 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.Variable;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility methods for converting Postman environment definitions into
@@ -70,21 +69,52 @@ public final class PostmanEnvironmentUtils {
     }
 
     public static String resolveVariables(String text, DataContext dataContext) {
-        EnvironmentTemplate environmentTemplate = dataContext.globalContext().selectedEnvironment();
-        if(environmentTemplate == null) {
-            environmentTemplate = dataContext.globalContext().getGlobalEnvironment();
+        if (text == null) {
+            return null;
         }
-        if(text == null || environmentTemplate == null) {
+
+        EnvironmentTemplate selectedEnv = dataContext.globalContext().selectedEnvironment();
+        EnvironmentTemplate globalEnv = dataContext.globalContext().getGlobalEnvironment();
+
+        if (selectedEnv == null && globalEnv == null) {
             return text;
         }
-        for(Variable v : environmentTemplate.variables()) {
-            if(v.getKey() != null) {
-                String placeholder = "{{" + v.getKey() + "}}";
-                String val = v.getCurrentValue()!=null ? v.getCurrentValue() : v.getInitialValue();
-                text = text.replace(placeholder, val != null ? val : "");
 
+        // Combined variable lookup with fallback to global
+        return resolveWithFallback(text, selectedEnv, globalEnv);
+    }
+
+    private static String resolveWithFallback(String text, EnvironmentTemplate selected, EnvironmentTemplate global) {
+        // Collect selected and global variables into maps
+        Map<String, String> selectedVars = toVariableMap(selected);
+        Map<String, String> globalVars = toVariableMap(global);
+
+        Pattern pattern = Pattern.compile("\\{\\{(.+?)}}");
+        Matcher matcher = pattern.matcher(text);
+
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            String key = matcher.group(1);
+            String value = selectedVars.containsKey(key)
+                    ? selectedVars.get(key)
+                    : globalVars.getOrDefault(key, "");
+            matcher.appendReplacement(result, Matcher.quoteReplacement(value != null ? value : ""));
+        }
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+
+    private static Map<String, String> toVariableMap(EnvironmentTemplate env) {
+        Map<String, String> map = new HashMap<>();
+        if (env != null && env.variables() != null) {
+            for (Variable v : env.variables()) {
+                if (v.getKey() != null) {
+                    String val = v.getCurrentValue() != null ? v.getCurrentValue() : v.getInitialValue();
+                    map.put(v.getKey(), val != null ? val : "");
+                }
             }
         }
-        return text;
+        return map;
     }
 }
