@@ -91,13 +91,9 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
 
     private void initNewEnvironmentTab(EventObject e) {
         EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.globalContext()));
-        Runnable task = () -> addPanelTab("Environment", DaakiaIcons.EnvironmentIcon, panel);
-        if(ApplicationManager.getApplication().isDispatchThread()) {
-            task.run();
-        }
-        else {
-            ApplicationManager.getApplication().invokeLater(task);
-        }
+        ApplicationManager.getApplication().invokeLater(
+                () -> addPanelTab("Environment", DaakiaIcons.EnvironmentIcon, panel)
+        );
     }
 
     private void initNewTabBySelectedNode(EventObject e) {
@@ -108,20 +104,14 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         String requestType = storeData.getRequestType();
         String displayName = storeData.getDisplayName();
         displayName = displayName == null ? "Untitled" : displayName;
-        Runnable task = () -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             addNewTab(newTabDataContext, requestType, displayName, true);
             daakiaService(DaakiaType.APP).execute(
                     DaakiaEvent.ofType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA)
                             ? AppDaakiaType.ON_CLICK_HISTORY_NODE
                             : AppDaakiaType.ON_CLICK_STORE_COLLECTION_NODE,
                     newTabDataContext);
-        };
-        if(ApplicationManager.getApplication().isDispatchThread()) {
-            task.run();
-        }
-        else {
-            ApplicationManager.getApplication().invokeLater(task);
-        }
+        });
     }
 
     private DaakiaRightVerticalSplitPanel tabContent(GlobalContext globalContext) {
