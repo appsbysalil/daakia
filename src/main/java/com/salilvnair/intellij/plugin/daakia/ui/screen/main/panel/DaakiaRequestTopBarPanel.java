@@ -6,17 +6,13 @@ import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.*;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -153,7 +149,6 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
     private boolean validateURL() {
         boolean validUrl = false;
         if(!urlTextField.getText().isEmpty()) {
-            Environment env = dataContext.globalContext().selectedEnvironment();
             String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), dataContext);
             validUrl = UrlUtils.validateURL(url);
         }

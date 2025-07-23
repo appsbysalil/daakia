@@ -1,17 +1,16 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
+import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.DebugLogManager;
-import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
-import com.intellij.openapi.editor.ex.EditorEx;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
@@ -136,7 +135,7 @@ public class DaakiaUtils {
                 <br><br><br>
                 </html>
                 """;
-        JCheckBox scriptCheck = new JCheckBox("Script/javascript/GraalVM");
+        JCheckBox scriptCheck = new JCheckBox("Console");
         scriptCheck.setSelected(DaakiaSettings.getInstance().getState().scriptLogEnabled);
         Object[] params = {message, scriptCheck};
         Object[] options = {"Close", "Debug Mode"};

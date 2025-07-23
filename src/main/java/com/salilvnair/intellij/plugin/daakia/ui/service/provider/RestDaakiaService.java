@@ -1,16 +1,15 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.salilvnair.intellij.plugin.daakia.script.main.DaakiaScriptExecutor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.core.rest.exception.RestResponseErrorHandler;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
-import com.salilvnair.intellij.plugin.daakia.script.main.DaakiaScriptExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
@@ -147,15 +146,15 @@ public class RestDaakiaService extends BaseDaakiaService {
             String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
             if("Bearer Token".equals(selectedAuthType)) {
                 String bearerToken = new String(dataContext.uiContext().bearerTokenTextField().getPassword());
-                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext);
-                authHeaders.setBearerAuth(bearerToken);
+                String resolvedBearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext);
+                authHeaders.setBearerAuth(resolvedBearerToken);
             }
             else if("Basic Auth".equals(selectedAuthType)) {
                 String userName = dataContext.uiContext().userNameTextField().getText();
                 String password = new String(dataContext.uiContext().passwordTextField().getPassword());
-                userName = PostmanEnvironmentUtils.resolveVariables(userName, dataContext);
-                password = PostmanEnvironmentUtils.resolveVariables(password, dataContext);
-                authHeaders.setBasicAuth(userName, password);
+                String resolvedUserName = PostmanEnvironmentUtils.resolveVariables(userName, dataContext);
+                String resolvedPassword = PostmanEnvironmentUtils.resolveVariables(password, dataContext);
+                authHeaders.setBasicAuth(resolvedUserName, resolvedPassword);
             }
         }
         return authHeaders;
