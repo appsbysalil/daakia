@@ -62,6 +62,8 @@ public class DaakiaScriptExecutor implements AutoCloseable {
                 pe.printStackTrace();
                 if (pe.isGuestException()) {
                     System.err.println("🧠 JS Message: " + pe.getMessage());
+                    System.err.println("🧠 JS Message: " + e.getMessage());
+                    System.err.println("🧠 JS StackTrace:\n" + pe.getPolyglotStackTrace());
                 }
             }
         }
