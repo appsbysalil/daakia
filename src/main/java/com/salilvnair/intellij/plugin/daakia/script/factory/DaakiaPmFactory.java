@@ -51,8 +51,10 @@ public class DaakiaPmFactory extends AbstractDaakiaProxy {
 
                     String url = options.getMember("url").asString();
                     String method = options.hasMember("method") ? options.getMember("method").asString() : "GET";
-                    String body = options.hasMember("body") ? options.getMember("body").asString() : "";
-
+                    String body = "";
+                    if (options.hasMember("body")) {
+                        body = RestSendRequestPmFactory.buildRequestBody(options.getMember("body"));
+                    }
                     HttpHeaders headers = new HttpHeaders();
                     if (options.hasMember("headers")) {
                         Value headerObj = options.getMember("headers");
