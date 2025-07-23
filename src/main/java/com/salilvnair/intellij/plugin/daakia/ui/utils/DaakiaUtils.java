@@ -157,7 +157,8 @@ public class DaakiaUtils {
                 dataContext.uiContext().setDebugMode(true);
                 EditorEx editor = dataContext.uiContext().debugLogEditor();
                 if(editor != null) {
-                    editor.getDocument().setText(DebugLogManager.getLogs());
+                    com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
+                            () -> editor.getDocument().setText(DebugLogManager.getLogs()));
                 }
                 dataContext.globalEventPublisher().onEnableDebugMode();
             } else if(!scriptCheck.isSelected()) {

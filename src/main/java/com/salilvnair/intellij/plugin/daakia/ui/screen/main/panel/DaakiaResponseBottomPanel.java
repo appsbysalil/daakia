@@ -64,7 +64,8 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
             else if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
                 EditorEx editor = uiContext().debugLogEditor();
                 if(editor != null) {
-                    editor.getDocument().setText(DebugLogManager.getLogs());
+                    com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
+                            () -> editor.getDocument().setText(DebugLogManager.getLogs()));
                 }
             }
         });
@@ -83,7 +84,8 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
             }
             EditorEx editor = uiContext().debugLogEditor();
             if(editor != null) {
-                editor.getDocument().setText(DebugLogManager.getLogs());
+                com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
+                        () -> editor.getDocument().setText(DebugLogManager.getLogs()));
             }
         });
     }
