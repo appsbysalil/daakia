@@ -43,6 +43,9 @@ public class DaakiaScriptExecutor implements AutoCloseable {
     }
 
     public void executeScript(String script) {
+        if (script == null || script.isBlank()) {
+            return;
+        }
 //        context.eval("js", script);
         try {
             Source source = Source.newBuilder("js", script, "user-script.mjs")
@@ -50,11 +53,18 @@ public class DaakiaScriptExecutor implements AutoCloseable {
                     .build();
             context.eval(source);
         }
-        catch (PolyglotException e) {
-            System.err.println("💥 JavaScript execution error:");
-            e.printStackTrace();  // full JS stack trace, even from `await` or callbacks
-            if (e.isGuestException()) {
-                System.err.println("🧠 JS Message: " + e.getMessage());
+        catch (PolyglotException | ClassCastException e) {
+            try {
+                context.eval("js", script);
+            }
+            catch (PolyglotException pe) {
+                System.err.println("💥 JavaScript execution error:");
+                pe.printStackTrace();
+                if (pe.isGuestException()) {
+                    System.err.println("🧠 JS Message: " + pe.getMessage());
+                    System.err.println("🧠 JS Message: " + e.getMessage());
+                    System.err.println("🧠 JS StackTrace:\n" + pe.getPolyglotStackTrace());
+                }
             }
         }
         catch (IOException e) {
