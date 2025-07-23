@@ -125,17 +125,18 @@ public class DaakiaUtils {
 
     public static void showAboutDaakia(Component component) {
         String message = """
-                <html><font size="5"><b>Daakia 2.0.2 (Build DK-2.0.2)</b></font>
-
-                <html><br><br>Website: <a href="www.salilvnair.com">www.salilvnair.com</a></html>
-                <html>Support: <a href="mailto:support@salilvnair.com">support@salilvnair.com</a><br></html>
-
-                Powered by open source software
-                License: MIT
+                <html>
+                <font size="5"><b>Daakia 2.0.2 (Build DK-2.0.2)</b></font><br><br>
+                Website: <a href="www.salilvnair.com">www.salilvnair.com</a><br>
+                Support: <a href="mailto:support@salilvnair.com">support@salilvnair.com</a><br>
+                Powered by open source software<br>
+                License: MIT<br>
                 Copyright © 2025
                 <br><br><br>
+                </html>
                 """;
         JCheckBox scriptCheck = new JCheckBox("Script/javascript/GraalVM");
+        scriptCheck.setSelected(false);
         Object[] params = {message, scriptCheck};
         Object[] options = {"Close", "Debug Mode"};
         int res = JOptionPane.showOptionDialog(component, params, "About Daakia",

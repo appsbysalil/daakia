@@ -49,7 +49,9 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
     public void initChildrenLayout() {
         tabbedPane.addTab("Response Body", AllIcons.Json.Object, responseBodyContainer);
         tabbedPane.addTab("Response Headers", AllIcons.Actions.Minimap, responseHeaderPanel);
-        tabbedPane.addTab("Debug Mode", null, debugLogPanel);
+        if(uiContext().debugMode()) {
+            enableDebugTab();
+        }
         add(tabbedPane, BorderLayout.CENTER);
     }
 

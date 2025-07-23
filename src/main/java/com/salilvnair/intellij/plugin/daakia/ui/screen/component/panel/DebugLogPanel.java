@@ -6,7 +6,6 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.ex.EditorEx;
 
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -15,7 +14,6 @@ import java.awt.*;
  */
 public class DebugLogPanel extends BaseDaakiaPanel<DebugLogPanel> {
     private EditorEx logEditor;
-
 
     public DebugLogPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
