@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 
 public class UIContext {
     // request response components
@@ -288,6 +289,7 @@ public class UIContext {
 
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
+        DaakiaSettings.getInstance().getState().debugMode = debugMode;
     }
 
     public boolean scriptLogEnabled() {
@@ -296,5 +298,6 @@ public class UIContext {
 
     public void setScriptLogEnabled(boolean scriptLogEnabled) {
         this.scriptLogEnabled = scriptLogEnabled;
+        DaakiaSettings.getInstance().getState().scriptLogEnabled = scriptLogEnabled;
     }
 }

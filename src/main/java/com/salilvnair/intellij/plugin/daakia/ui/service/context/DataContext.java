@@ -6,6 +6,8 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaGlobal
 import com.salilvnair.intellij.plugin.daakia.ui.service.core.DaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.factory.DaakiaFactory;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.DebugLogManager;
+import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 
 import java.util.EventObject;
 
@@ -20,6 +22,12 @@ public class DataContext {
         this.globalContext = globalContext;
         this.daakiaContext = new DaakiaContext();
         this.uiContext = new UIContext();
+        DaakiaSettings settings = DaakiaSettings.getInstance();
+        this.uiContext.setDebugMode(settings.getState().debugMode);
+        this.uiContext.setScriptLogEnabled(settings.getState().scriptLogEnabled);
+        if(this.uiContext.debugMode()) {
+            DebugLogManager.startCapture();
+        }
         this.publisher = new Publisher<>();
         this.eventPublisher = new DaakiaEventPublisher(this.publisher);
     }
