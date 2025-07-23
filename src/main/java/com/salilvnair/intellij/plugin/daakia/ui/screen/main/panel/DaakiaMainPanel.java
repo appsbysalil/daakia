@@ -99,7 +99,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
 
     @Override
     public void initListeners() {
-        globalSubscriber().subscribe(event -> {
+        listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER)) {
                 leftRightSplitPane.setDividerLocation(leftRightSplitPane.getDividerLocation() == 42 ? 300 : 42);
             }
@@ -151,7 +151,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
                 String json = JsonUtils.readJsonFromFile(file);
                 Environment env = PostmanEnvironmentUtils.fromPostmanJson(json);
                 dataContext.globalContext().environments().add(env);
-                new EnvironmentDao().saveEnvironmentsAsync(dataContext.globalContext().environments());
+                new EnvironmentDao().saveEnvironmentsSync(dataContext.globalContext().environments());
                 dataContext.globalContext().setSelectedEnvironment(env);
                 refreshEnvironmentCombo();
             }

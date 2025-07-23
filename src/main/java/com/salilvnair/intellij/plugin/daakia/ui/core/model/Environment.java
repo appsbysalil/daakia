@@ -14,6 +14,7 @@ public class Environment implements EnvironmentTemplate {
     private Integer id;
     @Getter
     private String name;
+    @Getter
     private List<Variable> variables;
 
     public void setId(Integer id) {

@@ -114,6 +114,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
         variableRows.clear();
         variablePanel.revalidate();
         variablePanel.repaint();
+        new EnvironmentDao().saveEnvironmentsSync(globalContext.environments());
         globalEventPublisher().onEnvironmentListChanged();
     }
 
@@ -127,7 +128,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
             variableRows.clear();
             variablePanel.revalidate();
             variablePanel.repaint();
-            new EnvironmentDao().saveEnvironmentsAsync(globalContext.environments());
+            new EnvironmentDao().saveEnvironmentsSync(globalContext.environments());
             globalEventPublisher().onEnvironmentListChanged();
         }
     }
@@ -155,7 +156,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
                 env.variables().add(v);
             }
         }
-        new EnvironmentDao().saveEnvironmentsAsync(globalContext.environments());
+        new EnvironmentDao().saveEnvironmentsSync(globalContext.environments());
         environmentCombo.repaint();
         globalEventPublisher().onEnvironmentListChanged();
         closeTab();

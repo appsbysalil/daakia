@@ -13,6 +13,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.GlobalContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.LabelUtils;
+import com.intellij.openapi.application.ApplicationManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -78,7 +79,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
             }
         });
 
-        globalSubscriber().subscribe(e -> {
+        listenGlobal(e -> {
             if(DaakiaEvent.ofAnyType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA, DaakiaEventType.ON_LOAD_SELECTED_STORE_COLLECTION_DATA)) {
                 initNewTabBySelectedNode(e);
             }
@@ -90,7 +91,9 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
 
     private void initNewEnvironmentTab(EventObject e) {
         EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.globalContext()));
-        addPanelTab("Environment", DaakiaIcons.EnvironmentIcon, panel);
+        ApplicationManager.getApplication().invokeLater(
+                () -> addPanelTab("Environment", DaakiaIcons.EnvironmentIcon, panel)
+        );
     }
 
     private void initNewTabBySelectedNode(EventObject e) {
@@ -101,8 +104,15 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         String requestType = storeData.getRequestType();
         String displayName = storeData.getDisplayName();
         displayName = displayName == null ? "Untitled" : displayName;
-        addNewTab(newTabDataContext, requestType, displayName, true);
-        daakiaService(DaakiaType.APP).execute(DaakiaEvent.ofType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA) ? AppDaakiaType.ON_CLICK_HISTORY_NODE : AppDaakiaType.ON_CLICK_STORE_COLLECTION_NODE, newTabDataContext);
+        String finalDisplayName = displayName;
+        ApplicationManager.getApplication().invokeLater(() -> {
+            addNewTab(newTabDataContext, requestType, finalDisplayName, true);
+            daakiaService(DaakiaType.APP).execute(
+                    DaakiaEvent.ofType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA)
+                            ? AppDaakiaType.ON_CLICK_HISTORY_NODE
+                            : AppDaakiaType.ON_CLICK_STORE_COLLECTION_NODE,
+                    newTabDataContext);
+        });
     }
 
     private DaakiaRightVerticalSplitPanel tabContent(GlobalContext globalContext) {

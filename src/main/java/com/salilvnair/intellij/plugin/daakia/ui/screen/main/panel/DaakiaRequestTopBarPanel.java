@@ -1,21 +1,18 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.*;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -125,17 +122,19 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
             daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext);
             daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
         });
-        subscriber().subscribe(event -> {
+        listen(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
-                sendButton.setEnabled(true);
-                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
-                eventPublisher().onReceivingResponse(daakiaEvent.daakiaContext(), daakiaEvent.daakiaContext().responseEntity());
-                daakiaService(DaakiaType.APP).execute(AppDaakiaType.ADD_HISTORY, dataContext);
-                globalEventPublisher().onAfterHistoryAdded();
-                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    sendButton.setEnabled(true);
+                    DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                    eventPublisher().onReceivingResponse(daakiaEvent.daakiaContext(), daakiaEvent.daakiaContext().responseEntity());
+                    daakiaService(DaakiaType.APP).execute(AppDaakiaType.ADD_HISTORY, dataContext);
+                    globalEventPublisher().onAfterHistoryAdded();
+                    daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
+                });
             }
         });
-        globalSubscriber().subscribe(event -> {
+        listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED)) {
                 refreshActionButtons();
             }
@@ -150,7 +149,6 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
     private boolean validateURL() {
         boolean validUrl = false;
         if(!urlTextField.getText().isEmpty()) {
-            Environment env = dataContext.globalContext().selectedEnvironment();
             String url = PostmanEnvironmentUtils.resolveVariables(dataContext.uiContext().urlTextField().getText(), dataContext);
             validUrl = UrlUtils.validateURL(url);
         }

@@ -6,12 +6,14 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInpu
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
+import com.intellij.openapi.editor.ex.EditorEx;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 
 public class UIContext {
     // request response components
@@ -48,7 +50,14 @@ public class UIContext {
     private RSyntaxTextArea preRequestScriptArea;
     private RSyntaxTextArea postRequestScriptArea;
 
+    /** Editor used to display debug logs */
+    private EditorEx debugLogEditor;
+  
     private boolean downloadResponse;
+
+    private boolean debugMode;
+
+    private boolean scriptLogEnabled;
 
 
 
@@ -264,5 +273,31 @@ public class UIContext {
 
     public void setDownloadResponse(boolean downloadResponse) {
         this.downloadResponse = downloadResponse;
+    }
+
+    public EditorEx debugLogEditor() {
+        return debugLogEditor;
+    }
+
+    public void setDebugLogEditor(EditorEx debugLogEditor) {
+        this.debugLogEditor = debugLogEditor;
+    }
+
+    public boolean debugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+        DaakiaSettings.getInstance().getState().debugMode = debugMode;
+    }
+
+    public boolean scriptLogEnabled() {
+        return scriptLogEnabled;
+    }
+
+    public void setScriptLogEnabled(boolean scriptLogEnabled) {
+        this.scriptLogEnabled = scriptLogEnabled;
+        DaakiaSettings.getInstance().getState().scriptLogEnabled = scriptLogEnabled;
     }
 }

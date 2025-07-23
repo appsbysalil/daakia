@@ -12,6 +12,7 @@ import java.awt.*;
 
 public class DaakiaMainFrame extends JFrame implements SwingComponent {
     private DaakiaMainPanel daakiaMainPanel;
+    private DataContext dataContext;
     public DaakiaMainFrame() {
         super("Daakia");
         init();
@@ -30,12 +31,16 @@ public class DaakiaMainFrame extends JFrame implements SwingComponent {
 
     @Override
     public void initComponents() {
-        DataContext dataContext = new DataContext(new GlobalContext());
+        dataContext = new DataContext(new GlobalContext());
         daakiaMainPanel = new DaakiaMainPanel(getRootPane(), dataContext);
     }
 
     @Override
     public void initChildrenLayout() {
         add(daakiaMainPanel, BorderLayout.CENTER);
+    }
+
+    public DataContext dataContext() {
+        return dataContext;
     }
 }

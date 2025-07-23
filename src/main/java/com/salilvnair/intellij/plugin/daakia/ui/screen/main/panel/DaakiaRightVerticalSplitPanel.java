@@ -58,14 +58,18 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
 
     @Override
     public void initListeners() {
-        subscriber().subscribe(event ->{
-            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
-                rightPanel.setVisible(false);
-                progressBar.setVisible(true);
+        listen(event -> {
+            if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
+                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
+                    rightPanel.setVisible(false);
+                    progressBar.setVisible(true);
+                });
             }
-            else if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
-                rightPanel.setVisible(true);
-                progressBar.setVisible(false);
+            else if (DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
+                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
+                    rightPanel.setVisible(true);
+                    progressBar.setVisible(false);
+                });
             }
         });
     }

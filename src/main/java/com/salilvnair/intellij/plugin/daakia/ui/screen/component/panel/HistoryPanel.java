@@ -60,7 +60,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     @Override
     public void initListeners() {
         initTreeListeners();
-        globalSubscriber().subscribe(event -> {
+        listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_AFTER_HISTORY_ADDED)) {
                 TreeUtils.expandAllNodes(historyTree);
             }
