@@ -43,14 +43,30 @@ If you encounter any issues or have suggestions for improvement, please don't he
 
 This plugin is distributed under the MIT License. See the LICENSE file for details.
 
-## Change log
+## Change log v2.0.4
 
-### Contributions by Codex
+## 🚀 Enhancements
 
-- Added SQLite persistence layer and DAO classes.
-- Created Postman import/export utilities for collections.
-- Implemented environment and variable data models with management UI.
-- Enhanced plugin with GraphQL request support.
-- Refined environment panel layout and text box alignment.
-- Added dynamic row management for environment variables.
-- Introduced placeholder-enabled `PasswordInputField` and updated authorization panel layout.
+### 🔧 Debug & Script Logging
+- `DataContext` now **loads persisted debug settings** and **automatically starts log capture**, ensuring continuity across sessions.
+- `UIContext` updates and persists user choices for:
+    - Debug mode
+    - Script logging
+      ...into `DaakiaSettings`.
+
+- `DaakiaSettingsState` now includes new fields for storing debug preferences.
+
+- **About Dialog** now:
+    - Remembers the Script/GraalVM checkbox state.
+    - Toggles debug mode based on the checkbox.
+
+### 🧵 UI & Tab Handling
+- Debug tab creation now executes on the **Event Dispatch Thread (EDT)**, showing captured logs immediately.
+- Tabs for **Environment**, **History**, and **Collection items** are now created directly on the **Swing thread**, ensuring they always appear without checking the current thread.
+- Updated `DaakiaTabbedMainPanel` to create tabs via `ApplicationManager.invokeLater` for thread-safe rendering.
+
+---
+
+✅ A more stable and user-friendly experience, especially for debugging and script-heavy users!
+
+

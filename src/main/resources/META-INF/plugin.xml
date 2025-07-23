@@ -66,6 +66,14 @@
             <li><b>Postman Compatibility:</b> Enhanced Postman import/export to include auth headers and script events.</li>
             <li><b>Persistence:</b> Script content is now saved with history and collection records for full reproducibility.</li>
           </ul>
+        v2.0.4
+          <ul>
+            <li>Persistent debug mode and script log settings via DaakiaSettings</li>
+            <li>About dialog now remembers Script/GraalVM checkbox state</li>
+            <li>Debug tab created on EDT, shows logs instantly</li>
+            <li>Tabs for History, Collection, and Environment are now always created on the Swing thread</li>
+            <li>Improved stability and UI responsiveness with ApplicationManager.invokeLater</li>
+          </ul>
     ]]>
     </change-notes>
 
