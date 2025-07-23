@@ -6,6 +6,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInpu
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
+import com.intellij.openapi.editor.ex.EditorEx;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.File;
@@ -48,10 +49,15 @@ public class UIContext {
     private RSyntaxTextArea preRequestScriptArea;
     private RSyntaxTextArea postRequestScriptArea;
 
-    /** Text area used to display debug logs */
-    private JTextArea debugTextArea;
+    /** Editor used to display debug logs */
+    private EditorEx debugLogEditor;
+
 
     private boolean downloadResponse;
+
+    private boolean debugMode;
+
+    private boolean scriptLogEnabled;
 
 
 
@@ -269,11 +275,27 @@ public class UIContext {
         this.downloadResponse = downloadResponse;
     }
 
-    public JTextArea debugTextArea() {
-        return debugTextArea;
+    public EditorEx debugLogEditor() {
+        return debugLogEditor;
     }
 
-    public void setDebugTextArea(JTextArea debugTextArea) {
-        this.debugTextArea = debugTextArea;
+    public void setDebugLogEditor(EditorEx debugLogEditor) {
+        this.debugLogEditor = debugLogEditor;
+    }
+
+    public boolean debugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
+
+    public boolean scriptLogEnabled() {
+        return scriptLogEnabled;
+    }
+
+    public void setScriptLogEnabled(boolean scriptLogEnabled) {
+        this.scriptLogEnabled = scriptLogEnabled;
     }
 }

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DebugLogManager;
+import com.intellij.openapi.editor.ex.EditorEx;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
@@ -132,6 +133,7 @@ public class DaakiaUtils {
                 Powered by open source software
                 License: MIT
                 Copyright © 2025
+                <br><br><br>
                 """;
         JCheckBox scriptCheck = new JCheckBox("Script/javascript/GraalVM");
         Object[] params = {message, scriptCheck};
@@ -139,18 +141,24 @@ public class DaakiaUtils {
         int res = JOptionPane.showOptionDialog(component, params, "About Daakia",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, DaakiaIcons.DaakiaIcon48,
                 options, options[0]);
-        if(res == 1) {
+        DataContext dataContext = null;
+        if(component instanceof com.salilvnair.intellij.plugin.daakia.ui.screen.main.frame.DaakiaMainFrame frame) {
+            dataContext = frame.dataContext();
+        }
+        else if(component instanceof com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel<?> panel) {
+            dataContext = panel.dataContext();
+        }
+        if(dataContext != null) {
+            dataContext.uiContext().setScriptLogEnabled(scriptCheck.isSelected());
+        }
+        if(res == 1 && scriptCheck.isSelected() && dataContext != null) {
             DebugLogManager.startCapture();
-            DataContext dataContext = null;
-            if(component instanceof com.salilvnair.intellij.plugin.daakia.ui.screen.main.frame.DaakiaMainFrame frame) {
-                dataContext = frame.dataContext();
+            dataContext.uiContext().setDebugMode(true);
+            EditorEx editor = dataContext.uiContext().debugLogEditor();
+            if(editor != null) {
+                editor.getDocument().setText(DebugLogManager.getLogs());
             }
-            else if(component instanceof com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel<?> panel) {
-                dataContext = panel.dataContext();
-            }
-            if(dataContext != null && dataContext.uiContext().debugTextArea() != null) {
-                dataContext.uiContext().debugTextArea().setText(DebugLogManager.getLogs());
-            }
+            dataContext.globalEventPublisher().onEnableDebugMode();
         }
     }
 

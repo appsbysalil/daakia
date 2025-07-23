@@ -127,6 +127,10 @@ public class DaakiaGlobalEventPublisher {
         publishSync(DaakiaEventType.ON_CLICK_EXPORT_POSTMAN);
     }
 
+    public void onEnableDebugMode() {
+        publishSync(DaakiaEventType.ON_ENABLE_DEBUG_MODE);
+    }
+
     // ------------------------
     // 🔽 Helper methods below
     // ------------------------

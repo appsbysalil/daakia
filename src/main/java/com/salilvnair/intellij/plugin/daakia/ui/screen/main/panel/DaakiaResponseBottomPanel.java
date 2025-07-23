@@ -8,6 +8,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseH
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.DebugLogPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DebugLogManager;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.intellij.openapi.editor.ex.EditorEx;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +19,7 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
     private ResponseHeaderPanel responseHeaderPanel;
     private ResponseBodyContainer responseBodyContainer;
     private DebugLogPanel debugLogPanel;
+    private boolean debugTabAdded = false;
 
     public DaakiaResponseBottomPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -58,11 +60,23 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
                 tabbedPane.setSelectedIndex(0);
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
-                JTextArea debugArea = uiContext().debugTextArea();
-                if(debugArea != null) {
-                    debugArea.setText(DebugLogManager.getLogs());
+                EditorEx editor = uiContext().debugLogEditor();
+                if(editor != null) {
+                    editor.getDocument().setText(DebugLogManager.getLogs());
                 }
             }
         });
+        listenGlobal(e -> {
+            if(DaakiaEvent.ofType(e, DaakiaEventType.ON_ENABLE_DEBUG_MODE)) {
+                enableDebugTab();
+            }
+        });
+    }
+
+    private void enableDebugTab() {
+        if(!debugTabAdded) {
+            tabbedPane.addTab("Debug Mode", null, debugLogPanel);
+            debugTabAdded = true;
+        }
     }
 }
