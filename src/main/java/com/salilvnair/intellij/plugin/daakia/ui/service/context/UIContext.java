@@ -51,7 +51,7 @@ public class UIContext {
 
     /** Editor used to display debug logs */
     private EditorEx debugLogEditor;
-
+  
     private boolean downloadResponse;
 
     private boolean debugMode;
