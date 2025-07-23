@@ -48,6 +48,9 @@ public class UIContext {
     private RSyntaxTextArea preRequestScriptArea;
     private RSyntaxTextArea postRequestScriptArea;
 
+    /** Text area used to display debug logs */
+    private JTextArea debugTextArea;
+
     private boolean downloadResponse;
 
 
@@ -264,5 +267,13 @@ public class UIContext {
 
     public void setDownloadResponse(boolean downloadResponse) {
         this.downloadResponse = downloadResponse;
+    }
+
+    public JTextArea debugTextArea() {
+        return debugTextArea;
+    }
+
+    public void setDebugTextArea(JTextArea debugTextArea) {
+        this.debugTextArea = debugTextArea;
     }
 }
