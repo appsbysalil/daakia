@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DebugLogManager;
+import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 import com.intellij.openapi.editor.ex.EditorEx;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
@@ -136,7 +137,7 @@ public class DaakiaUtils {
                 </html>
                 """;
         JCheckBox scriptCheck = new JCheckBox("Script/javascript/GraalVM");
-        scriptCheck.setSelected(false);
+        scriptCheck.setSelected(DaakiaSettings.getInstance().getState().scriptLogEnabled);
         Object[] params = {message, scriptCheck};
         Object[] options = {"Close", "Debug Mode"};
         int res = JOptionPane.showOptionDialog(component, params, "About Daakia",
@@ -151,15 +152,19 @@ public class DaakiaUtils {
         }
         if(dataContext != null) {
             dataContext.uiContext().setScriptLogEnabled(scriptCheck.isSelected());
-        }
-        if(res == 1 && scriptCheck.isSelected() && dataContext != null) {
-            DebugLogManager.startCapture();
-            dataContext.uiContext().setDebugMode(true);
-            EditorEx editor = dataContext.uiContext().debugLogEditor();
-            if(editor != null) {
-                editor.getDocument().setText(DebugLogManager.getLogs());
+            if(res == 1 && scriptCheck.isSelected()) {
+                DebugLogManager.startCapture();
+                dataContext.uiContext().setDebugMode(true);
+                EditorEx editor = dataContext.uiContext().debugLogEditor();
+                if(editor != null) {
+                    com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
+                            () -> editor.getDocument().setText(DebugLogManager.getLogs()));
+                }
+                dataContext.globalEventPublisher().onEnableDebugMode();
+            } else if(!scriptCheck.isSelected()) {
+                DebugLogManager.stopCapture();
+                dataContext.uiContext().setDebugMode(false);
             }
-            dataContext.globalEventPublisher().onEnableDebugMode();
         }
     }
 
