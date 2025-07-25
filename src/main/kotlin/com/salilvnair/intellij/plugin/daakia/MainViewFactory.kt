@@ -17,7 +17,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils
 class MainViewFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val rootPane = SwingUtilities.getRootPane(toolWindow.component)
-        val dataContext = DataContext(GlobalContext())
+        val dataContext = DataContext(project, GlobalContext())
         val mainPanel = DaakiaMainPanel(rootPane, dataContext)
 
         val openAsTabAction: AnAction = object : AnAction("About Daakia") {

@@ -1,21 +1,20 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
+import com.intellij.ide.highlighter.XmlFileType;
+import com.intellij.json.JsonFileType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.linter.JsonLintParser;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.RawBodyTypeDropdown;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
-    private RSyntaxTextArea requestTextArea;
-    private RTextScrollPane scrollPane;
+    private DaakiaEditorX requestTextArea;
 
     public RequestBodyPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -29,17 +28,8 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
 
     @Override
     public void initComponents() {
-        requestTextArea = new RSyntaxTextArea();
-        requestTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
-        requestTextArea.setCodeFoldingEnabled(true);
-        JsonLintParser jsonLintParser = new JsonLintParser();
-        requestTextArea.addParser(jsonLintParser);
+        requestTextArea = new DaakiaEditorX(JsonFileType.INSTANCE, dataContext.project());
         dataContext.uiContext().setRequestTextArea(requestTextArea);
-        scrollPane = new RTextScrollPane(requestTextArea);
-        scrollPane.setIconRowHeaderEnabled(true); // Enable icon row header for folding icons
-        scrollPane.setFoldIndicatorEnabled(true); // Enable fold indicators
-        scrollPane.setViewportView(requestTextArea);
-        scrollPane.setBorder(null);
     }
 
     @Override
@@ -49,16 +39,26 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
 
     @Override
     public void initChildrenLayout() {
-        add(scrollPane, BorderLayout.CENTER);
+        add(requestTextArea, BorderLayout.CENTER);
     }
 
     @Override
     public void initListeners() {
         listen(e -> {
             if(DaakiaEvent.ofType(e, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN)) {
-                if(requestTextArea.getText() != null && !requestTextArea.getText().isEmpty()) {
-                    String formattedText = JsonUtils.format(requestTextArea.getText());
+                if(requestTextArea.text() != null && !requestTextArea.text().isEmpty()) {
+                    String formattedText = JsonUtils.format(requestTextArea.text());
                     requestTextArea.setText(formattedText);
+                }
+            }
+            else if(DaakiaEvent.ofType(e, DaakiaEventType.ON_SELECT_RAW_BODY_TYPE)) {
+                // change DaakiaEditorX fileType based on selection
+                RawBodyTypeDropdown.RawType type = dataContext.uiContext().rawBodyType();
+                if (type == RawBodyTypeDropdown.RawType.JSON) {
+                    requestTextArea.updateFileType(JsonFileType.INSTANCE);
+                }
+                else if (type == RawBodyTypeDropdown.RawType.XML) {
+                    requestTextArea.updateFileType(XmlFileType.INSTANCE);
                 }
             }
         });

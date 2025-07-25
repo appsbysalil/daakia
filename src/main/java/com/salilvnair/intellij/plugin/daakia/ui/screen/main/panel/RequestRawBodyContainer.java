@@ -38,7 +38,7 @@ public class RequestRawBodyContainer extends BaseDaakiaPanel<RequestRawBodyConta
 
     @Override
     public void initChildrenLayout() {
-        add(requestBodyActionContainer, BorderLayout.NORTH);
+//        add(requestBodyActionContainer, BorderLayout.NORTH);
         add(requestBodyPanel, BorderLayout.CENTER);
     }
 

@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.RawBodyTypeDropdown;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import javax.swing.*;
@@ -13,6 +14,7 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
     private JPanel requestBodyContainer;
     private RequestRawBodyContainer requestRawBodyContainer;
     private RequestFormDataBodyContainer requestFormDataBodyContainer;
+    private RawBodyTypeDropdown rawTypeDropdown;
 
     public RequestBodyContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -26,6 +28,7 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
 
     @Override
     public void initComponents() {
+        rawTypeDropdown = new RawBodyTypeDropdown();
         requestRawBodyContainer = new RequestRawBodyContainer(rootPane, dataContext);
         requestFormDataBodyContainer = new RequestFormDataBodyContainer(rootPane, dataContext);
         requestBodyContainer = new JPanel();
@@ -40,6 +43,7 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
         group.add(formDataRequestBody);
         requestBodyTypeContainer.add(rawRequestBody);
         requestBodyTypeContainer.add(formDataRequestBody);
+        requestBodyTypeContainer.add(rawTypeDropdown);
     }
 
     @Override
@@ -57,6 +61,11 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
 
     @Override
     public void initListeners() {
+        rawTypeDropdown.addSelectionListener(() -> {
+            RawBodyTypeDropdown.RawType type = rawTypeDropdown.getSelectedType();
+            dataContext.uiContext().setRawBodyType(type);
+            eventPublisher().onSelectRawBodyType();
+        });
         // Add ActionListeners to radio buttons
         rawRequestBody.addActionListener(e -> {
             dataContext.uiContext().setRequestContentType("1");

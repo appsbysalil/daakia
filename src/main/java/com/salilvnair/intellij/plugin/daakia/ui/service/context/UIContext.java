@@ -1,27 +1,29 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
+import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.RawBodyTypeDropdown;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
-import com.intellij.openapi.editor.ex.EditorEx;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 
 public class UIContext {
     // request response components
     private Map<String, List<TextInputField>> headerTextFields;
     private Map<String, List<TextInputField>> formDataTextFields;
     private Map<String, File> formDataFileFields;
-    private RSyntaxTextArea requestTextArea;
-    private RSyntaxTextArea responseTextArea;
+    private DaakiaEditorX requestTextArea;
+    private DaakiaEditorX responseTextArea;
     private String requestContentType = "1";
     private ComboBox<String> requestTypes;
     private JTextField urlTextField;
@@ -31,6 +33,7 @@ public class UIContext {
     private JLabel statusLabel;
     private JLabel sizeLabel;
     private JLabel timeLabel;
+    private RawBodyTypeDropdown.RawType rawBodyType;
 
     //headers panel related components
     private JPanel headerScrollPanel;
@@ -69,19 +72,19 @@ public class UIContext {
         return headerTextFields;
     }
 
-    public RSyntaxTextArea requestTextArea() {
+    public DaakiaEditorX requestTextArea() {
         return requestTextArea;
     }
 
-    public void setRequestTextArea(RSyntaxTextArea requestTextArea) {
+    public void setRequestTextArea(DaakiaEditorX requestTextArea) {
         this.requestTextArea = requestTextArea;
     }
 
-    public RSyntaxTextArea responseTextArea() {
+    public DaakiaEditorX responseTextArea() {
         return responseTextArea;
     }
 
-    public void setResponseTextArea(RSyntaxTextArea responseTextArea) {
+    public void setResponseTextArea(DaakiaEditorX responseTextArea) {
         this.responseTextArea = responseTextArea;
     }
 
@@ -299,5 +302,13 @@ public class UIContext {
     public void setScriptLogEnabled(boolean scriptLogEnabled) {
         this.scriptLogEnabled = scriptLogEnabled;
         DaakiaSettings.getInstance().getState().scriptLogEnabled = scriptLogEnabled;
+    }
+
+    public RawBodyTypeDropdown.RawType rawBodyType() {
+        return rawBodyType;
+    }
+
+    public void setRawBodyType(RawBodyTypeDropdown.RawType rawBodyType) {
+        this.rawBodyType = rawBodyType;
     }
 }

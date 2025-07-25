@@ -90,7 +90,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
     }
 
     private void initNewEnvironmentTab(EventObject e) {
-        EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.globalContext()));
+        EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.project(), dataContext.globalContext()));
         ApplicationManager.getApplication().invokeLater(
                 () -> addPanelTab("Environment", DaakiaIcons.EnvironmentIcon, panel)
         );
@@ -99,7 +99,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
     private void initNewTabBySelectedNode(EventObject e) {
         DaakiaEvent daakiaEvent = DaakiaEvent.extract(e);
         DataContext selectedNodeDataContext = daakiaEvent.dataContext();
-        DataContext newTabDataContext = new DataContext(selectedNodeDataContext.globalContext());
+        DataContext newTabDataContext = new DataContext(dataContext.project(), selectedNodeDataContext.globalContext());
         DaakiaBaseStoreData storeData = DaakiaEvent.ofType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA) ? daakiaEvent.selectedDaakiaHistory() : daakiaEvent.selectedDaakiaStoreRecord();
         String requestType = storeData.getRequestType();
         String displayName = storeData.getDisplayName();
@@ -116,7 +116,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
     }
 
     private DaakiaRightVerticalSplitPanel tabContent(GlobalContext globalContext) {
-        return new DaakiaRightVerticalSplitPanel(getRootPane(), new DataContext(globalContext));
+        return new DaakiaRightVerticalSplitPanel(getRootPane(), new DataContext(dataContext.project(), globalContext));
     }
 
     private DaakiaRightVerticalSplitPanel tabContent(DataContext dataContext) {
