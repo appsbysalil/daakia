@@ -4,19 +4,15 @@ import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.CollectionStorePanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.HistoryPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
 

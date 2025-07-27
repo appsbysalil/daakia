@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
+import com.intellij.openapi.project.Project;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.core.Publisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaEventPublisher;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.provider.DaakiaGlobalEventPublisher;
@@ -17,11 +18,17 @@ public class DataContext {
     private UIContext uiContext;
     private Publisher<EventObject> publisher;
     private DaakiaEventPublisher eventPublisher;
+    private final Project project;
 
-    public DataContext(GlobalContext globalContext) {
+    public DataContext(Project project, GlobalContext globalContext) {
+        this(project, globalContext, null);
+    }
+
+    public DataContext(Project project, GlobalContext globalContext, UIContext uiContext) {
+        this.project = project;
         this.globalContext = globalContext;
         this.daakiaContext = new DaakiaContext();
-        this.uiContext = new UIContext();
+        this.uiContext = uiContext == null ? new UIContext() : uiContext;
         DaakiaSettings settings = DaakiaSettings.getInstance();
         this.uiContext.setDebugMode(settings.getState().debugMode);
         this.uiContext.setScriptLogEnabled(settings.getState().scriptLogEnabled);
@@ -73,5 +80,9 @@ public class DataContext {
 
     public GlobalContext globalContext() {
         return globalContext;
+    }
+
+    public Project project() {
+        return project;
     }
 }

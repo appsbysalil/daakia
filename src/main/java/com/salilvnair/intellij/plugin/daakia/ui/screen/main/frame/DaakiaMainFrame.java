@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.frame;
 
+import com.intellij.openapi.project.Project;
 import com.salilvnair.intellij.plugin.daakia.ui.core.awt.SwingComponent;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.DaakiaMainPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -13,8 +14,10 @@ import java.awt.*;
 public class DaakiaMainFrame extends JFrame implements SwingComponent {
     private DaakiaMainPanel daakiaMainPanel;
     private DataContext dataContext;
-    public DaakiaMainFrame() {
+    private final Project project;
+    public DaakiaMainFrame(Project project) {
         super("Daakia");
+        this.project = project;
         init();
     }
 
@@ -31,7 +34,7 @@ public class DaakiaMainFrame extends JFrame implements SwingComponent {
 
     @Override
     public void initComponents() {
-        dataContext = new DataContext(new GlobalContext());
+        dataContext = new DataContext(project, new GlobalContext());
         daakiaMainPanel = new DaakiaMainPanel(getRootPane(), dataContext);
     }
 

@@ -1,7 +1,15 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
-    id("org.jetbrains.intellij") version "1.17.2"
+    id("org.jetbrains.kotlin.jvm") version "2.1.0"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
+}
+
+sourceSets {
+    main {
+        resources.srcDirs("src/main/resources")
+    }
 }
 
 group = "com.salilvnair.jb.plugin"
@@ -9,6 +17,9 @@ version = "2.0.4"
 
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
     maven {
         name = "GraalVM"
         url = uri("https://maven.pkg.jetbrains.space/graalvm/p/graalvm/maven")
@@ -16,6 +27,14 @@ repositories {
 }
 
 dependencies {
+    intellijPlatform {
+        create("IC", "2025.1.1")
+        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
+
+        // Add necessary plugin dependencies for compilation here, example:
+        // bundledPlugin("com.intellij.java")
+        bundledPlugin("com.intellij.modules.json")
+    }
     implementation("org.springframework:spring-web:6.2.8")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1") {
         exclude("org.slf4j", "slf4j-api")
@@ -30,23 +49,30 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.32")
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
-intellij {
-    version.set("2024.3.2")
-    type.set("IC") // Target IDE Platform
+intellijPlatform {
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "250"
+            untilBuild = "253.*"
+        }
 
-    plugins.set(listOf(/* Plugin Dependencies */))
+        changeNotes = """
+      Initial version
+    """.trimIndent()
+    }
 }
 
 tasks {
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
+        sourceCompatibility = "21"
+        targetCompatibility = "21"
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
     }
 
     withType<JavaCompile> {

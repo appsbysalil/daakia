@@ -1,22 +1,20 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
+import com.intellij.json.JsonFileType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.FileUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.http.ResponseEntity;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
-    private RSyntaxTextArea responseTextArea;
-    private RTextScrollPane scrollPane;
+    private DaakiaEditorX responseTextArea;
 
     public ResponseBodyPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -30,16 +28,8 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
 
     @Override
     public void initComponents() {
-        responseTextArea = new RSyntaxTextArea();
-        responseTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
-        responseTextArea.setCodeFoldingEnabled(true);
-        responseTextArea.setEditable(false);
+        responseTextArea = new DaakiaEditorX(JsonFileType.INSTANCE, dataContext.project(), true);
         dataContext.uiContext().setResponseTextArea(responseTextArea);
-        scrollPane = new RTextScrollPane(responseTextArea);
-        scrollPane.setIconRowHeaderEnabled(true); // Enable icon row header for folding icons
-        scrollPane.setFoldIndicatorEnabled(true); // Enable fold indicators
-        scrollPane.setViewportView(responseTextArea);
-        scrollPane.setBorder(null);
     }
 
     @Override
@@ -49,7 +39,7 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
 
     @Override
     public void initChildrenLayout() {
-        add(scrollPane, BorderLayout.CENTER);
+        add(responseTextArea, BorderLayout.CENTER);
     }
 
     @Override

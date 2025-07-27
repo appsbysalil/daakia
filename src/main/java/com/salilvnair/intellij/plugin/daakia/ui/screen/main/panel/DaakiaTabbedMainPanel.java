@@ -12,8 +12,10 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.GlobalContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.RequestType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.LabelUtils;
 import com.intellij.openapi.application.ApplicationManager;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.ColorUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -90,7 +92,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
     }
 
     private void initNewEnvironmentTab(EventObject e) {
-        EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.globalContext()));
+        EnvironmentPanel panel = new EnvironmentPanel(getRootPane(), new DataContext(dataContext.project(), dataContext.globalContext()));
         ApplicationManager.getApplication().invokeLater(
                 () -> addPanelTab("Environment", DaakiaIcons.EnvironmentIcon, panel)
         );
@@ -99,7 +101,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
     private void initNewTabBySelectedNode(EventObject e) {
         DaakiaEvent daakiaEvent = DaakiaEvent.extract(e);
         DataContext selectedNodeDataContext = daakiaEvent.dataContext();
-        DataContext newTabDataContext = new DataContext(selectedNodeDataContext.globalContext());
+        DataContext newTabDataContext = new DataContext(dataContext.project(), selectedNodeDataContext.globalContext(), dataContext.uiContext());
         DaakiaBaseStoreData storeData = DaakiaEvent.ofType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA) ? daakiaEvent.selectedDaakiaHistory() : daakiaEvent.selectedDaakiaStoreRecord();
         String requestType = storeData.getRequestType();
         String displayName = storeData.getDisplayName();
@@ -116,31 +118,33 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
     }
 
     private DaakiaRightVerticalSplitPanel tabContent(GlobalContext globalContext) {
-        return new DaakiaRightVerticalSplitPanel(getRootPane(), new DataContext(globalContext));
+        return new DaakiaRightVerticalSplitPanel(getRootPane(), new DataContext(dataContext.project(), globalContext, dataContext.uiContext()));
     }
 
     private DaakiaRightVerticalSplitPanel tabContent(DataContext dataContext) {
         return new DaakiaRightVerticalSplitPanel(getRootPane(), dataContext);
     }
 
-    private JPanel tabPanel(String requestType, String tabTitle, JPanel contentPanel) {
+    private Object[] tabPanel(String requestType, String tabTitle, JPanel contentPanel) {
         JPanel pnlTab = new JPanel();
         pnlTab.setLayout(new BoxLayout(pnlTab, BoxLayout.X_AXIS));
         pnlTab.setOpaque(false);
-        String hexCode = "#10b981";
-        if("POST".equals(requestType)) {
-            hexCode ="#eab208";
-        }
-        JLabel lblTitle = new JLabel(LabelUtils.colorText(null, requestType, tabTitle, hexCode));
+        String hexCode = ColorUtils.hexCodeByRequestType(RequestType.findByType(requestType));
+        JLabel lblTitle = new JLabel(LabelUtils.coloredText(null, requestType, tabTitle, hexCode));
+        dataContext.uiContext().setLabelTitle(lblTitle);
         IconButton btnClose = initTabCloseButton();
         pnlTab.add(Box.createHorizontalGlue());
-        pnlTab.add(lblTitle);
+        pnlTab.add(dataContext.uiContext().labelTitle());
+        pnlTab.setToolTipText(tabTitle);
         pnlTab.add(Box.createHorizontalStrut(15));
         pnlTab.add(btnClose);
         pnlTab.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 selectTabByPanel(contentPanel);
+                System.out.println("Label ref dataContext.uiContext().labelTitle(): " + System.identityHashCode(dataContext.uiContext().labelTitle()));
+                System.out.println("Label ref lblTitle: " + System.identityHashCode(lblTitle));
+                System.out.println("Label ref pnlTab.getComponent(1): " + System.identityHashCode(pnlTab.getComponent(1)));
             }
 
             @Override
@@ -150,7 +154,7 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
                 }
             }
         });
-        return pnlTab;
+        return new Object[] { pnlTab, lblTitle, tabTitle };
     }
 
     private void selectTabByPanel(JPanel panel) {
@@ -223,15 +227,18 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         }
         int index = dynamicDaakiaTabbedPane.getTabCount() - 1;
         tabTitle = tabTitle == null ? "Untitled" : tabTitle;
-        JPanel pnlTab = tabPanel(requestType, tabTitle, tabC);
+        JPanel pnlTab = (JPanel) tabPanel(requestType, tabTitle, tabC)[0];
+        dataContext.uiContext().setTabTitle(tabTitle);
+        dataContext.uiContext().setSelectedPnlTab(pnlTab);
         dynamicDaakiaTabbedPane.insertTab(tabTitle, null, tabC, null, index);
         dynamicDaakiaTabbedPane.setSelectedIndex(index);
         dynamicDaakiaTabbedPane.setTabComponentAt(index, pnlTab);
+        dataContext.uiContext().setDynamicDaakiaTabbedPane(dynamicDaakiaTabbedPane);
     }
 
     public void addPanelTab(String tabTitle, Icon tabIcon, JPanel panel) {
         int index = dynamicDaakiaTabbedPane.getTabCount() - 1;
-        JPanel pnlTab = tabPanel("", tabTitle, panel);
+        JPanel pnlTab = (JPanel) tabPanel("", tabTitle, panel)[0];
         dynamicDaakiaTabbedPane.insertTab(tabTitle, tabIcon, panel, null, index);
         dynamicDaakiaTabbedPane.setSelectedIndex(index);
         dynamicDaakiaTabbedPane.setTabComponentAt(index, pnlTab);

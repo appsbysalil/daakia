@@ -9,9 +9,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.*;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.UrlUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -138,6 +136,11 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED)) {
                 refreshActionButtons();
             }
+        });
+
+        requestTypes.addActionListener(e -> {
+            String selectedRequestType = (String) requestTypes.getSelectedItem();
+            DaakiaUtils.changeTabColorAndText(uiContext().tabTitle(), selectedRequestType, dataContext);
         });
     }
 

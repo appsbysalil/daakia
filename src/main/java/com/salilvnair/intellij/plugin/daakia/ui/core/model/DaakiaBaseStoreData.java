@@ -159,6 +159,6 @@ public class DaakiaBaseStoreData {
             hexCode = "#6b21a8";
         }
         String displayText = displayName == null ? url: displayName;
-        return LabelUtils.colorText(null, requestType, "&nbsp;"+displayText, hexCode);
+        return LabelUtils.coloredText(null, requestType, "&nbsp;"+displayText, hexCode);
     }
 }
