@@ -7,6 +7,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.RequestType;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -184,6 +185,23 @@ public class DaakiaUtils {
                 };
             }
         };
+    }
+
+    public static void changeTabColorAndText(String tabTitle, String requestType, DataContext dataContext) {
+        String hexCode  = ColorUtils.hexCodeByRequestType(RequestType.findByType(requestType));
+        tabTitle = LabelUtils.trimLabel(tabTitle, 15);
+        dataContext.uiContext().setTabTitle(tabTitle);
+        JLabel lblTitle = new JLabel(LabelUtils.coloredText(null, requestType, tabTitle, hexCode));
+        int selectedIndex = dataContext.uiContext().dynamicDaakiaTabbedPane().getSelectedIndex();
+        Component tabComponentAt = dataContext.uiContext().dynamicDaakiaTabbedPane().getTabComponentAt(selectedIndex);
+        if(tabComponentAt instanceof JPanel pnlTab) {
+            Component component = pnlTab.getComponent(1);
+            pnlTab.remove(component);
+            pnlTab.add(lblTitle, 1);
+            dataContext.uiContext().setLabelTitle(lblTitle);
+            pnlTab.revalidate();
+            pnlTab.repaint();
+        }
     }
 
 }

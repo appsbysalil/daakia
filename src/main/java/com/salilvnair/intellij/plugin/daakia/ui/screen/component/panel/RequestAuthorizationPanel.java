@@ -17,6 +17,11 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
     private JPanel basicAuthTextboxPanel;
     private JPanel bearerTokenTextBoxPanel;
     private boolean maskPassword = true;
+    private boolean maskBearerToken = true;
+    private PasswordInputField passwordTextField;
+    private PasswordInputField bearerTokenTextField;
+    private IconButton passwordToggle;
+    private IconButton bearerToggle;
 
     public RequestAuthorizationPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -33,15 +38,15 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
         authTypes = new ComboBox<>(new String[]{"None","Basic Auth", "Bearer Token"});
         authPanel = new JPanel();
         TextInputField userNameTextField = new TextInputField("Username");
-        userNameTextField.setPreferredSize(new Dimension(600, 25));
+        userNameTextField.setPreferredSize(new Dimension(400, 35));
 
-        PasswordInputField passwordTextField = new PasswordInputField("Password");
-        passwordTextField.setPreferredSize(new Dimension(600, 25));
-        IconButton passwordToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(30,25));
+        passwordTextField = new PasswordInputField("Password");
+        passwordTextField.setPreferredSize(new Dimension(400, 35));
+        passwordToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,45));
 
-        PasswordInputField bearerTokenTextField = new PasswordInputField("Token");
-        bearerTokenTextField.setPreferredSize(new Dimension(600,25));
-        IconButton bearerToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(30,25));
+        bearerTokenTextField = new PasswordInputField("Token");
+        bearerTokenTextField.setPreferredSize(new Dimension(600,35));
+        bearerToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,45));
 
         basicAuthTextboxPanel = new JPanel();
         basicAuthTextboxPanel.setLayout(new BorderLayout());
@@ -90,9 +95,6 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
         uiContext().setUserNameTextField(userNameTextField);
         uiContext().setPasswordTextField(passwordTextField);
         uiContext().setBearerTokenTextField(bearerTokenTextField);
-
-        passwordToggle.addActionListener(e -> togglePasswordField(passwordTextField, passwordToggle));
-        bearerToggle.addActionListener(e -> togglePasswordField(bearerTokenTextField, bearerToggle));
     }
 
     @Override
@@ -122,10 +124,48 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
                 basicAuthTextboxPanel.setVisible(false);
             }
         });
+
+        passwordToggle.addActionListener(e -> togglePasswordField(passwordTextField, passwordToggle));
+        bearerToggle.addActionListener(e -> toggleBearerPasswordField(bearerTokenTextField, bearerToggle));
+
+        passwordTextField.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                onFocusPasswordField(passwordTextField, passwordToggle, maskPassword);
+            }
+        });
+        bearerTokenTextField.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                onFocusPasswordField(bearerTokenTextField, bearerToggle, maskBearerToken);
+            }
+        });
     }
 
     private void togglePasswordField(PasswordInputField field, IconButton button) {
+        maskPassword = !maskPassword;
+        button.setIcon(maskPassword ? DaakiaIcons.EyeIcon : DaakiaIcons.EyeOffIcon);
         if (maskPassword && field.containsText()) {
+            field.setEchoChar('•');
+
+        }
+        else {
+            field.setEchoChar((char) 0);
+        }
+    }
+
+    private void onFocusPasswordField(PasswordInputField field, IconButton button, boolean maskPassword) {
+        if (maskPassword && field.containsText()) {
+            field.setEchoChar('•');
+        }
+        else {
+            field.setEchoChar((char) 0);
+        }
+    }
+
+    private void toggleBearerPasswordField(PasswordInputField field, IconButton button) {
+        maskBearerToken = !maskBearerToken;
+        if (maskBearerToken && field.containsText()) {
             field.setEchoChar('•');
             button.setIcon(DaakiaIcons.EyeIcon);
         }
@@ -133,7 +173,6 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
             field.setEchoChar((char) 0);
             button.setIcon(DaakiaIcons.EyeOffIcon);
         }
-        maskPassword = !maskPassword;
     }
 
     private String passwordText(PasswordInputField field) {

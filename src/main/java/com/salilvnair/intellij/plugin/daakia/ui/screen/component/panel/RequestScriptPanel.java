@@ -1,17 +1,15 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.type.DaakiaJavaScriptFileType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rtextarea.RTextScrollPane;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class RequestScriptPanel extends BaseDaakiaPanel<RequestScriptPanel> {
-    private RSyntaxTextArea preRequestArea;
-    private RSyntaxTextArea postRequestArea;
+    private DaakiaEditorX preRequestArea;
+    private DaakiaEditorX postRequestArea;
 
     public RequestScriptPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -31,11 +29,8 @@ public class RequestScriptPanel extends BaseDaakiaPanel<RequestScriptPanel> {
         dataContext.uiContext().setPostRequestScriptArea(postRequestArea);
     }
 
-    private RSyntaxTextArea createScriptArea() {
-        RSyntaxTextArea area = new RSyntaxTextArea();
-        area.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
-        area.setCodeFoldingEnabled(true);
-        return area;
+    private DaakiaEditorX createScriptArea() {
+        return new DaakiaEditorX(DaakiaJavaScriptFileType.INSTANCE, dataContext.project());
     }
 
     @Override
@@ -49,12 +44,10 @@ public class RequestScriptPanel extends BaseDaakiaPanel<RequestScriptPanel> {
         add(labeledPanel("Post Request", postRequestArea));
     }
 
-    private JPanel labeledPanel(String label, RSyntaxTextArea area) {
+    private JPanel labeledPanel(String label, DaakiaEditorX area) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel(label), BorderLayout.NORTH);
-        RTextScrollPane scroll = new RTextScrollPane(area);
-        scroll.setBorder(null);
-        panel.add(scroll, BorderLayout.CENTER);
+        panel.add(area, BorderLayout.CENTER);
         return panel;
     }
 

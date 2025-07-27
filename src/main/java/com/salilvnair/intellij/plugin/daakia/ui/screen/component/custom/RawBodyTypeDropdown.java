@@ -13,7 +13,10 @@ import java.util.List;
 public class RawBodyTypeDropdown extends JPanel {
     public enum RawType {
         JSON("JSON"),
-        XML("XML");
+        XML("XML"),
+        HTML("HTML"),
+        TEXT("TEXT"),
+        ;
 
         private final String label;
 
@@ -34,7 +37,7 @@ public class RawBodyTypeDropdown extends JPanel {
         setOpaque(false);
         setBorder(JBUI.Borders.empty(5));
 
-        List<RawType> items = Arrays.asList(RawType.JSON, RawType.XML);
+        List<RawType> items = Arrays.asList(RawType.values());
 
         dropdown = new ComboBox<>(items.toArray(new RawType[0]));
         dropdown.setPreferredSize(new Dimension(100, 28));

@@ -191,25 +191,25 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
     private void addVariableRow(String key, String type, String initialVal, String currentVal) {
         String rowId = UUID.randomUUID().toString();
         TextInputField keyField = new TextInputField("Key");
-        keyField.setPreferredSize(new Dimension(300, 25));
-        keyField.setMaximumSize(new Dimension(300, 25));
+        keyField.setPreferredSize(new Dimension(180, 35));
+        keyField.setMaximumSize(new Dimension(180, 35));
         if(key != null) keyField.setText(key);
 
         ComboBox<String> typeCombo = new ComboBox<>(new String[]{"default", "secret"});
         typeCombo.setSelectedItem(type != null ? type : "default");
-        typeCombo.setPreferredSize(new Dimension(150, 25));
-        typeCombo.setMaximumSize(new Dimension(150, 25));
+        typeCombo.setPreferredSize(new Dimension(100, 35));
+        typeCombo.setMaximumSize(new Dimension(100, 35));
       
         PasswordInputField initialField = new PasswordInputField("Initial");
         if(initialVal != null) initialField.setText(initialVal);
-        initialField.setPreferredSize(new Dimension(400, 25));
-        initialField.setMaximumSize(new Dimension(400, 25));
+        initialField.setPreferredSize(new Dimension(300, 35));
+        initialField.setMaximumSize(new Dimension(300, 35));
         PasswordInputField currentField = new PasswordInputField("Current");
         if(currentVal != null) currentField.setText(currentVal);
-        currentField.setPreferredSize(new Dimension(400, 25));
-        currentField.setMaximumSize(new Dimension(400, 25));
+        currentField.setPreferredSize(new Dimension(300, 35));
+        currentField.setMaximumSize(new Dimension(300, 35));
 
-        IconButton deleteButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(30,25));
+        IconButton deleteButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(40,40));
 
         JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         rowPanel.add(keyField);

@@ -284,15 +284,17 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     public void updateFileType(FileType newFileType) {
         if (newFileType == null) newFileType = PlainTextFileType.INSTANCE;
         if (newFileType.equals(this.fileType)) return;
-
-        String text = text();
-        EditorFactory.getInstance().releaseEditor(editor);
-        remove(editor.getComponent());
-        this.fileType = newFileType;
-        createEditor("");
-        setText(text);
-        revalidate();
-        repaint();
+        FileType finalNewFileType = newFileType;
+        ApplicationManager.getApplication().invokeLater(() -> {
+            String text = text();
+            EditorFactory.getInstance().releaseEditor(editor);
+            remove(editor.getComponent());
+            this.fileType = finalNewFileType;
+            createEditor("");
+            setText(text);
+            revalidate();
+            repaint();
+        });
     }
 
     private void highlightSyntaxErrors() {

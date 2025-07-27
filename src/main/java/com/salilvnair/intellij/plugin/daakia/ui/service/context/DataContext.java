@@ -21,10 +21,14 @@ public class DataContext {
     private final Project project;
 
     public DataContext(Project project, GlobalContext globalContext) {
+        this(project, globalContext, null);
+    }
+
+    public DataContext(Project project, GlobalContext globalContext, UIContext uiContext) {
         this.project = project;
         this.globalContext = globalContext;
         this.daakiaContext = new DaakiaContext();
-        this.uiContext = new UIContext();
+        this.uiContext = uiContext == null ? new UIContext() : uiContext;
         DaakiaSettings settings = DaakiaSettings.getInstance();
         this.uiContext.setDebugMode(settings.getState().debugMode);
         this.uiContext.setScriptLogEnabled(settings.getState().scriptLogEnabled);

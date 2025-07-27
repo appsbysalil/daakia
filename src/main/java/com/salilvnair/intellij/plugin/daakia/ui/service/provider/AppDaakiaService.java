@@ -2,7 +2,6 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.*;
@@ -13,9 +12,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.*;
 import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
 import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
@@ -24,7 +21,6 @@ import org.springframework.util.MultiValueMap;
 import java.util.Base64;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -93,10 +89,10 @@ public class AppDaakiaService extends BaseDaakiaService {
         }
 
         if(httpStatus !=null) {
-            dataContext.uiContext().statusLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;Status: ", httpStatus.value() + " " + httpStatus.getReasonPhrase(), null, statusColor));
+            dataContext.uiContext().statusLabel().setText(LabelUtils.coloredText("&nbsp;&nbsp;Status: ", httpStatus.value() + " " + httpStatus.getReasonPhrase(), null, statusColor));
         }
-        dataContext.uiContext().sizeLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size: ", responseMetadata.getSizeText(), null, statusColor));
-        dataContext.uiContext().timeLabel().setText(LabelUtils.colorText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time: ", responseMetadata.getTimeTaken(), null, statusColor));
+        dataContext.uiContext().sizeLabel().setText(LabelUtils.coloredText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size: ", responseMetadata.getSizeText(), null, statusColor));
+        dataContext.uiContext().timeLabel().setText(LabelUtils.coloredText("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time: ", responseMetadata.getTimeTaken(), null, statusColor));
     }
 
     private void createResponseHeaders(DataContext dataContext, Object... objects) {
@@ -445,18 +441,18 @@ public class AppDaakiaService extends BaseDaakiaService {
         String rowId = UUID.randomUUID().toString();
 
         TextInputField headerKeyField = new TextInputField("Header "+(dataContext.uiContext().headerTextFields().size() + 1));
-        headerKeyField.setPreferredSize(new Dimension(300, 25));
+        headerKeyField.setPreferredSize(new Dimension(300, 35));
         headerKeyField.setText(headerKey);
 
         TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().headerTextFields().size() + 1));
-        headerValueField.setPreferredSize(new Dimension(320, 25));
+        headerValueField.setPreferredSize(new Dimension(320, 35));
         headerValueField.setText(headerValue);
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         headerPanel.add(headerKeyField);
         headerPanel.add(headerValueField);
 
-        IconButton deleteHeaderButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(30, 25));
+        IconButton deleteHeaderButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(40, 45));
         headerPanel.add(deleteHeaderButton);
         JPanel headersPanel = dataContext.uiContext().headersPanel();
         JPanel headerScrollPanel = dataContext.uiContext().headerScrollPanel();
@@ -486,20 +482,20 @@ public class AppDaakiaService extends BaseDaakiaService {
         String rowId = UUID.randomUUID().toString();
 
         TextInputField headerKeyField = new TextInputField("Key "+(dataContext.uiContext().formDataTextFields().size() + 1));
-        headerKeyField.setPreferredSize(new Dimension(200, 25));
+        headerKeyField.setPreferredSize(new Dimension(200, 35));
         headerKeyField.setText(headerKey);
 
         JPanel valuePanel = new JPanel();
 
         TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().formDataTextFields().size() + 1));
-        headerValueField.setPreferredSize(new Dimension(315, 25));
+        headerValueField.setPreferredSize(new Dimension(315, 35));
         headerValueField.setText(headerValue);
         valuePanel.add(headerValueField);
 
         JPanel uploadFileBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 10, 0));
         JButton uploadFile = new JButton("Choose File");
         JTextField filePathField = new JTextField("");
-        filePathField.setPreferredSize(new Dimension(180, 25));
+        filePathField.setPreferredSize(new Dimension(180, 35));
         uploadFileBtnPanel.add(uploadFile);
         uploadFileBtnPanel.add(filePathField);
         valuePanel.add(uploadFileBtnPanel);
@@ -520,9 +516,9 @@ public class AppDaakiaService extends BaseDaakiaService {
         ComboBox<String> formDataTypes = new ComboBox<>(new String[]{"File", "Text"});
         formDataTypes.setSelectedIndex(0);
         formDataKeyWithTypePanel.add(formDataTypes);
-        Border lineBorder = BorderFactory.createLineBorder(JBColor.BLACK, 1);
-        formDataKeyWithTypePanel.setBorder(lineBorder);
-        valuePanel.setBorder(lineBorder);
+//        Border lineBorder = BorderFactory.createLineBorder(JBColor.BLACK, 1);
+//        formDataKeyWithTypePanel.setBorder(lineBorder);
+//        valuePanel.setBorder(lineBorder);
         formDataRowPanel.add(formDataKeyWithTypePanel);
         formDataRowPanel.add(valuePanel);
 

@@ -34,7 +34,7 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
     public BaseDaakiaPanel(JRootPane rootPane, DataContext dataContext) {
         this.rootPane = rootPane;
         this.dataContext = dataContext;
-    }
+     }
 
 
     public void setDebugEnabled(boolean debugEnabled) {

@@ -8,6 +8,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.D
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
+import lombok.Setter;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Setter
 public class UIContext {
     // request response components
     private Map<String, List<TextInputField>> headerTextFields;
@@ -33,7 +35,11 @@ public class UIContext {
     private JLabel statusLabel;
     private JLabel sizeLabel;
     private JLabel timeLabel;
+    private JLabel labelTitle;
+    private String tabTitle;
+    private JPanel selectedPnlTab;
     private RawBodyTypeDropdown.RawType rawBodyType;
+    private JTabbedPane dynamicDaakiaTabbedPane;
 
     //headers panel related components
     private JPanel headerScrollPanel;
@@ -50,8 +56,8 @@ public class UIContext {
 
     private JProgressBar progressBar;
 
-    private RSyntaxTextArea preRequestScriptArea;
-    private RSyntaxTextArea postRequestScriptArea;
+    private DaakiaEditorX preRequestScriptArea;
+    private DaakiaEditorX postRequestScriptArea;
 
     /** Editor used to display debug logs */
     private EditorEx debugLogEditor;
@@ -76,172 +82,84 @@ public class UIContext {
         return requestTextArea;
     }
 
-    public void setRequestTextArea(DaakiaEditorX requestTextArea) {
-        this.requestTextArea = requestTextArea;
-    }
-
     public DaakiaEditorX responseTextArea() {
         return responseTextArea;
-    }
-
-    public void setResponseTextArea(DaakiaEditorX responseTextArea) {
-        this.responseTextArea = responseTextArea;
     }
 
     public ComboBox<String> requestTypes() {
         return requestTypes;
     }
 
-    public void setRequestTypes(ComboBox<String> requestTypes) {
-        this.requestTypes = requestTypes;
-    }
-
     public JTextField urlTextField() {
         return urlTextField;
-    }
-
-    public void setUrlTextField(JTextField urlTextField) {
-        this.urlTextField = urlTextField;
     }
 
     public ComboBox<Environment> environmentCombo() {
         return environmentCombo;
     }
 
-    public void setEnvironmentCombo(ComboBox<Environment> environmentCombo) {
-        this.environmentCombo = environmentCombo;
-    }
-
     public JPanel headerScrollPanel() {
         return headerScrollPanel;
-    }
-
-    public void setHeaderScrollPanel(JPanel headerScrollPanel) {
-        this.headerScrollPanel = headerScrollPanel;
     }
 
     public JPanel headersPanel() {
         return headersPanel;
     }
 
-    public void setHeadersPanel(JPanel headersPanel) {
-        this.headersPanel = headersPanel;
-    }
-
     public JLabel statusLabel() {
         return statusLabel;
-    }
-
-    public void setStatusLabel(JLabel statusLabel) {
-        this.statusLabel = statusLabel;
     }
 
     public JLabel sizeLabel() {
         return sizeLabel;
     }
 
-    public void setSizeLabel(JLabel sizeLabel) {
-        this.sizeLabel = sizeLabel;
-    }
-
     public JLabel timeLabel() {
         return timeLabel;
-    }
-
-    public void setTimeLabel(JLabel timeLabel) {
-        this.timeLabel = timeLabel;
     }
 
     public JTable responseHeaderTable() {
         return responseHeaderTable;
     }
 
-    public void setResponseHeaderTable(JTable responseHeaderTable) {
-        this.responseHeaderTable = responseHeaderTable;
-    }
-
     public DefaultTableModel responseHeaderTableModel() {
         return responseHeaderTableModel;
-    }
-
-    public void setResponseHeaderTableModel(DefaultTableModel responseHeaderTableModel) {
-        this.responseHeaderTableModel = responseHeaderTableModel;
     }
 
     public ComboBox<String> authTypes() {
         return authTypes;
     }
 
-    public void setAuthTypes(ComboBox<String> authTypes) {
-        this.authTypes = authTypes;
-    }
-
     public TextInputField userNameTextField() {
         return userNameTextField;
-    }
-
-    public void setUserNameTextField(TextInputField userNameTextField) {
-        this.userNameTextField = userNameTextField;
     }
 
     public PasswordInputField passwordTextField() {
         return passwordTextField;
     }
 
-    public void setPasswordTextField(PasswordInputField passwordTextField) {
-        this.passwordTextField = passwordTextField;
-    }
-
     public PasswordInputField bearerTokenTextField() {
         return bearerTokenTextField;
-    }
-
-    public void setBearerTokenTextField(PasswordInputField bearerTokenTextField) {
-        this.bearerTokenTextField = bearerTokenTextField;
     }
 
     public JProgressBar progressBar() {
         return progressBar;
     }
 
-    public void setProgressBar(JProgressBar progressBar) {
-        this.progressBar = progressBar;
-    }
-
-    public RSyntaxTextArea preRequestScriptArea() {
+    public DaakiaEditorX preRequestScriptArea() {
         return preRequestScriptArea;
     }
 
-    public void setPreRequestScriptArea(RSyntaxTextArea preRequestScriptArea) {
-        this.preRequestScriptArea = preRequestScriptArea;
-    }
-
-    public RSyntaxTextArea postRequestScriptArea() {
+    public DaakiaEditorX postRequestScriptArea() {
         return postRequestScriptArea;
-    }
-
-    public void setPostRequestScriptArea(RSyntaxTextArea postRequestScriptArea) {
-        this.postRequestScriptArea = postRequestScriptArea;
     }
 
     public JPanel formDataKeyValuesPanel() {
         return formDataKeyValuesPanel;
     }
 
-    public void setFormDataKeyValuesPanel(JPanel formDataKeyValuesPanel) {
-        this.formDataKeyValuesPanel = formDataKeyValuesPanel;
-    }
-
     public JPanel formDataScrollPanel() {
         return formDataScrollPanel;
-    }
-
-    public void setFormDataScrollPanel(JPanel formDataScrollPanel) {
-        this.formDataScrollPanel = formDataScrollPanel;
-    }
-
-    public void setFormDataTextFields(Map<String, List<TextInputField>> formDataTextFields) {
-        this.formDataTextFields = formDataTextFields;
     }
 
     public Map<String, List<TextInputField>> formDataTextFields() {
@@ -258,32 +176,16 @@ public class UIContext {
         return formDataFileFields;
     }
 
-    public void setFormDataFileFields(Map<String, File> formDataFileFields) {
-        this.formDataFileFields = formDataFileFields;
-    }
-
     public String requestContentType() {
         return requestContentType;
-    }
-
-    public void setRequestContentType(String requestContentType) {
-        this.requestContentType = requestContentType;
     }
 
     public boolean downloadResponse() {
         return downloadResponse;
     }
 
-    public void setDownloadResponse(boolean downloadResponse) {
-        this.downloadResponse = downloadResponse;
-    }
-
     public EditorEx debugLogEditor() {
         return debugLogEditor;
-    }
-
-    public void setDebugLogEditor(EditorEx debugLogEditor) {
-        this.debugLogEditor = debugLogEditor;
     }
 
     public boolean debugMode() {
@@ -308,7 +210,20 @@ public class UIContext {
         return rawBodyType;
     }
 
-    public void setRawBodyType(RawBodyTypeDropdown.RawType rawBodyType) {
-        this.rawBodyType = rawBodyType;
+    public JPanel selectedPnlTab() {
+        return selectedPnlTab;
     }
+
+    public String tabTitle() {
+        return tabTitle;
+    }
+
+    public JLabel labelTitle() {
+        return labelTitle;
+    }
+
+    public JTabbedPane dynamicDaakiaTabbedPane() {
+        return dynamicDaakiaTabbedPane;
+    }
+
 }

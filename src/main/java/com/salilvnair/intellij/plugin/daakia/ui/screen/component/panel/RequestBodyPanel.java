@@ -1,7 +1,9 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
+import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.json.JsonFileType;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.RawBodyTypeDropdown;
@@ -59,6 +61,12 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
                 }
                 else if (type == RawBodyTypeDropdown.RawType.XML) {
                     requestTextArea.updateFileType(XmlFileType.INSTANCE);
+                }
+                else if (type == RawBodyTypeDropdown.RawType.HTML) {
+                    requestTextArea.updateFileType(HtmlFileType.INSTANCE);
+                }
+                else if (type == RawBodyTypeDropdown.RawType.TEXT) {
+                    requestTextArea.updateFileType(PlainTextFileType.INSTANCE);
                 }
             }
         });
