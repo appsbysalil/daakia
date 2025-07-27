@@ -37,6 +37,8 @@ public class DaakiaUtils {
             if(node.getUserObject() instanceof DaakiaStoreRecord daakiaStoreRecord) {
                 parentNode.setRecord(daakiaStoreRecord);
                 parentNode.setCollection(false);
+            } else {
+                parentNode.setEmptyCollection(true);
             }
         }
 
@@ -63,6 +65,10 @@ public class DaakiaUtils {
                 convertCollectionStoreToTreeNode(childDaakiaStore, childNode);
                 rootNode.add(childNode);
             }
+        }
+        else if(daakiaStore.isEmptyCollection()) {
+            DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(daakiaStore.getName());
+            rootNode.add(childNode);
         }
         return rootNode;
     }

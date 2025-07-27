@@ -78,6 +78,7 @@ public class StoreDaakiaService extends BaseDaakiaService {
     private void saveRequest(DataContext dataContext) {
         DefaultMutableTreeNode rootNode = dataContext.sideNavContext().collectionStoreRootNode();
         DaakiaStore store = DaakiaUtils.convertTreeToCollectionStore(rootNode);
+        dataContext.sideNavContext().setDaakiaStore(store);
         new CollectionDao().saveStoreAsync(store);
     }
 
