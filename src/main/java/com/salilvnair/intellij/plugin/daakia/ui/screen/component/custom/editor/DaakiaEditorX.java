@@ -1,15 +1,20 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.find.EditorSearchSession;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.json.JsonFileType;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.ex.EditorPopupHandler;
 import com.intellij.openapi.editor.highlighter.EditorHighlighter;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.editor.markup.EffectType;
@@ -26,9 +31,14 @@ import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.type.DaakiaJavaScriptFileType;
+import com.salilvnair.intellij.plugin.daakia.ui.utils.FormatUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Custom editor supporting syntax highlighting, folding, gutter, and inline error highlighting.
@@ -38,6 +48,24 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     private FileType fileType;
     private final Project project;
     private final boolean viewOnly;
+
+    private final Set<String> allowedPopupMenuIds = Set.of(
+            "EditorPopupMenu1"
+    );
+
+    private final Set<String> allowedPopupMenuGroupIds = Set.of(
+            "FoldingGroup"
+    );
+
+    private final Set<String> allowedFoldingActionIds = Set.of(
+            "ExpandAllRegions", "CollapseAllRegions",
+            "EditorFold", "EditorUnfold"
+    );
+
+    private final Set<String> allowedContextMenuOptions = Set.of(
+            "$Cut", "$Copy", "$Paste", "Copy.Paste.Special",
+            "JsonCopyPointer", "CompareClipboardWithSelection"
+    );
 
     public DaakiaEditorX(FileType fileType, Project project) {
         this(fileType, project, false);
@@ -58,12 +86,13 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
             case XmlFileType xmlFileType -> createXmlEditor(initialText);
             case null, default -> createTextEditor(initialText);
         }
+        attachContextMenu();
     }
 
     private void createXmlEditor(String initialText) {
         ApplicationManager.getApplication().runWriteAction(() -> {
             FileType xmlFileType = XmlFileType.INSTANCE;
-            LightVirtualFile virtualFile = new LightVirtualFile("dummy.xml", xmlFileType, initialText);
+            LightVirtualFile virtualFile = new LightVirtualFile("response.xml", xmlFileType, initialText);
 
             PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
             if (psiFile == null) throw new IllegalStateException("XML PSI file is null");
@@ -103,7 +132,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     private void createHtmlEditor(String initialText) {
         ApplicationManager.getApplication().runWriteAction(() -> {
             FileType htmlFileType = HtmlFileType.INSTANCE;
-            LightVirtualFile virtualFile = new LightVirtualFile("dummy.html", htmlFileType, initialText);
+            LightVirtualFile virtualFile = new LightVirtualFile("response.html", htmlFileType, initialText);
 
             PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
             if (psiFile == null) throw new IllegalStateException("XML PSI file is null");
@@ -144,15 +173,14 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     private void createJsonEditor(String initialText) {
         ApplicationManager.getApplication().runWriteAction(() -> {
             FileType jsonFileType = JsonFileType.INSTANCE;
-            LightVirtualFile virtualFile = new LightVirtualFile("dummy.json", jsonFileType, initialText);
-
+            LightVirtualFile virtualFile = new LightVirtualFile("response.json", jsonFileType, initialText);
             PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
             if (psiFile == null) throw new IllegalStateException("PSI file is null");
-
             Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
             if (document == null) throw new IllegalStateException("Document from PSI file is null");
 
             editor = (EditorEx) EditorFactory.getInstance().createEditor(document, project, jsonFileType, false);
+            editor.installPopupHandler(EditorPopupHandler.NONE);
 
             editor.getSettings().setLineNumbersShown(true);
             editor.getSettings().setFoldingOutlineShown(true);
@@ -183,7 +211,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     private void createJsEditor(String initialText) {
         ApplicationManager.getApplication().runWriteAction(() -> {
             FileType jsFileType = DaakiaJavaScriptFileType.INSTANCE;
-            LightVirtualFile virtualFile = new LightVirtualFile("dummy.js", jsFileType, initialText);
+            LightVirtualFile virtualFile = new LightVirtualFile("response.js", jsFileType, initialText);
             PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
             if (psiFile == null) throw new IllegalStateException("JS PSI file is null");
 
@@ -224,7 +252,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     private void createTextEditor(String initialText) {
         FileType textFileType = fileType != null ? fileType : PlainTextFileType.INSTANCE;
         ApplicationManager.getApplication().runWriteAction(() -> {
-            LightVirtualFile virtualFile = new LightVirtualFile("dummy.txt", textFileType, initialText);
+            LightVirtualFile virtualFile = new LightVirtualFile("response.txt", textFileType, initialText);
 
             PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
             if (psiFile == null) throw new IllegalStateException("PSI file is null");
@@ -329,5 +357,85 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     // ✅ Optional: Trigger search inline (call from outside with shortcut or button)
     public void showSearch() {
         EditorSearchSession.start(editor, project);
+    }
+
+    private void attachContextMenu() {
+        ActionGroup actionGroup = createMergedActionGroup();
+        editor.getContentComponent().addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    ActionPopupMenu popupMenu = ActionManager.getInstance()
+                            .createActionPopupMenu(ActionPlaces.EDITOR_POPUP, actionGroup);
+                    popupMenu.getComponent().show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+    }
+
+    private void collectAllowedActions(AnAction action, DefaultActionGroup collector) {
+        ActionManager actionManager = ActionManager.getInstance();
+        if (action instanceof DefaultActionGroup group) {
+            for (AnAction child : group.getChildren(actionManager)) {
+                String id = actionManager.getId(action);
+                if(allowedPopupMenuGroupIds.contains(id)) {
+                    if(!collector.containsAction(action)) {
+                        collector.add(action);
+                    }
+                }
+                collectAllowedActions(child, collector);
+            }
+        }
+        else {
+            String id = actionManager.getId(action);
+            if (id != null && allowedFoldingActionIds.contains(id)) {
+                if(!collector.containsAction(action)) {
+                    collector.add(action);
+                }
+            }
+        }
+    }
+
+    private ActionGroup createMergedActionGroup() {
+        AnAction action = ActionManager.getInstance().getAction(IdeActions.GROUP_EDITOR_POPUP);
+        DefaultActionGroup mergedGroup = new DefaultActionGroup();
+
+        if (action instanceof DefaultActionGroup originalGroup) {
+            for (AnAction child : originalGroup.getChildren(ActionManager.getInstance())) {
+                String id = ActionManager.getInstance().getId(child);
+                if(id != null && !allowedContextMenuOptions.contains(id)) {
+                    continue;
+                }
+                if(!mergedGroup.containsAction(action)) {
+                    mergedGroup.add(child);
+                }
+            }
+        }
+
+        for (String groupId : allowedPopupMenuIds) {
+            AnAction groupAction = ActionManager.getInstance().getAction(groupId);
+            if (groupAction instanceof DefaultActionGroup group) {
+                collectAllowedActions(group, mergedGroup);
+            }
+        }
+
+        FormatUtils.formatterMap.forEach((ftClass, meta) -> {
+            if (ftClass.isInstance(fileType)) {
+                mergedGroup.addSeparator();
+                mergedGroup.add(new AnAction("Format", null, meta.icon()) {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e) {
+                        String text = editor.getDocument().getText();
+                        try {
+                            String formatted = meta.formatter().apply(text);
+                            WriteCommandAction.runWriteCommandAction(project, () -> editor.getDocument().setText(formatted));
+                        }
+                        catch (Exception ex) {
+                            JOptionPane.showMessageDialog(null, "Format Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+            }
+        });
+        return mergedGroup;
     }
 }

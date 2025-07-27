@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.util.xml.ui.EmptyPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
@@ -84,6 +85,7 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
 
         JPanel txtBoxPanel = new JPanel();
         txtBoxPanel.setLayout(new BoxLayout(txtBoxPanel, BoxLayout.Y_AXIS));
+        txtBoxPanel.add(Box.createRigidArea(new Dimension(10, 10)));
         txtBoxPanel.add(basicAuthTextboxPanel);
         txtBoxPanel.add(bearerTokenTextBoxPanel);
 
