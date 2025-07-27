@@ -58,19 +58,18 @@ public class DaakiaUtils {
     }
 
 
-    public static DefaultMutableTreeNode convertCollectionStoreToTreeNode(DaakiaStore daakiaStore, DefaultMutableTreeNode rootNode) {
-        if(daakiaStore.getChildren()!=null && !daakiaStore.getChildren().isEmpty()) {
+    public static DefaultMutableTreeNode convertCollectionStoreToTreeNode(DaakiaStore daakiaStore, DefaultMutableTreeNode treeNode) {
+        treeNode.setUserObject(daakiaStore.getRecord() == null ? daakiaStore.getName() : daakiaStore.getRecord());
+        treeNode.removeAllChildren();
+
+        if(daakiaStore.getChildren() != null && !daakiaStore.getChildren().isEmpty()) {
             for (DaakiaStore childDaakiaStore : daakiaStore.getChildren()) {
-                DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDaakiaStore.getRecord() == null ? childDaakiaStore.getName() : childDaakiaStore.getRecord());
+                DefaultMutableTreeNode childNode = new DefaultMutableTreeNode();
                 convertCollectionStoreToTreeNode(childDaakiaStore, childNode);
-                rootNode.add(childNode);
+                treeNode.add(childNode);
             }
         }
-        else if(daakiaStore.isEmptyCollection()) {
-            DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(daakiaStore.getName());
-            rootNode.add(childNode);
-        }
-        return rootNode;
+        return treeNode;
     }
 
     public static DefaultMutableTreeNode convertCollectionStoreToTreeNodeFilterBySearchText(DaakiaStore daakiaStore, DefaultMutableTreeNode collectionStoreRootNode, String searchText) {
