@@ -6,6 +6,7 @@ import com.intellij.ui.JBColor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RequestType;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
@@ -160,7 +161,8 @@ public class DaakiaUtils {
             if (res == 1 && scriptCheck.isSelected()) {
                 DebugLogManager.startCapture();
                 dataContext.uiContext().setDebugMode(true);
-                EditorEx editor = dataContext.uiContext().debugLogEditor();
+                DaakiaEditorX daakiaEditorX = dataContext.uiContext().debugLogEditor();
+                EditorEx editor = daakiaEditorX.editor();
                 if (editor != null) {
                     com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
                             () -> com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
@@ -168,7 +170,8 @@ public class DaakiaUtils {
                     );
                 }
                 dataContext.globalEventPublisher().onEnableDebugMode();
-            } else if (!scriptCheck.isSelected()) {
+            }
+            else if (!scriptCheck.isSelected()) {
                 DebugLogManager.stopCapture();
                 dataContext.uiContext().setDebugMode(false);
             }

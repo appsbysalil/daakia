@@ -82,6 +82,7 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
             requestRawBodyContainer.setVisible(true);
             requestFormDataBodyContainer.setVisible(false);
             addFormDataKeyValue.setVisible(false);
+            rawTypeDropdown.setVisible(true);
         });
 
         formDataRequestBody.addActionListener(e -> {
@@ -89,6 +90,7 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
             requestRawBodyContainer.setVisible(false);
             requestFormDataBodyContainer.setVisible(true);
             addFormDataKeyValue.setVisible(true);
+            rawTypeDropdown.setVisible(false);
         });
 
         addFormDataKeyValue.addActionListener(e -> {

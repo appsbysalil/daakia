@@ -60,7 +60,7 @@ public class UIContext {
     private DaakiaEditorX postRequestScriptArea;
 
     /** Editor used to display debug logs */
-    private EditorEx debugLogEditor;
+    private DaakiaEditorX debugLogEditor;
   
     private boolean downloadResponse;
 
@@ -184,7 +184,7 @@ public class UIContext {
         return downloadResponse;
     }
 
-    public EditorEx debugLogEditor() {
+    public DaakiaEditorX debugLogEditor() {
         return debugLogEditor;
     }
 

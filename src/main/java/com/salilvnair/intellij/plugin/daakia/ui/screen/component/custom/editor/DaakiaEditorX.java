@@ -1,6 +1,5 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.find.EditorSearchSession;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.highlighter.HtmlFileType;
@@ -36,8 +35,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseListener;
-import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -48,6 +45,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     private FileType fileType;
     private final Project project;
     private final boolean viewOnly;
+    private boolean logView;
 
     private final Set<String> allowedPopupMenuIds = Set.of(
             "EditorPopupMenu1"
@@ -62,9 +60,16 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
             "EditorFold", "EditorUnfold"
     );
 
-    private final Set<String> allowedContextMenuOptions = Set.of(
-            "$Cut", "$Copy", "$Paste", "Copy.Paste.Special",
-            "JsonCopyPointer", "CompareClipboardWithSelection"
+    private final Set<String> defaultContextMenuOptions = Set.of(
+            "$Cut", "$Copy", "$Paste"
+    );
+
+    private final Set<String> logViewContextMenuOptions = Set.of(
+            "$Copy"
+    );
+
+    private final Set<String> languageContextMenuOptions = Set.of(
+            "CompareClipboardWithSelection", "Copy.Paste.Special", "JsonCopyPointer"
     );
 
     public DaakiaEditorX(FileType fileType, Project project) {
@@ -75,6 +80,15 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
         super(new BorderLayout());
         this.viewOnly = viewOnly;
         this.fileType = fileType != null ? fileType : PlainTextFileType.INSTANCE;
+        this.project = project;
+        createEditor("");
+    }
+
+    public DaakiaEditorX(Project project, boolean logView) {
+        super(new BorderLayout());
+        this.viewOnly = true;
+        this.logView = logView;
+        this.fileType = PlainTextFileType.INSTANCE;
         this.project = project;
         createEditor("");
     }
@@ -360,7 +374,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     }
 
     private void attachContextMenu() {
-        ActionGroup actionGroup = createMergedActionGroup();
+        DefaultActionGroup actionGroup = createPopupMenuActions();
         editor.getContentComponent().addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
@@ -372,56 +386,37 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
         });
     }
 
-    private void collectAllowedActions(AnAction action, DefaultActionGroup collector) {
-        ActionManager actionManager = ActionManager.getInstance();
-        if (action instanceof DefaultActionGroup group) {
-            for (AnAction child : group.getChildren(actionManager)) {
-                String id = actionManager.getId(action);
-                if(allowedPopupMenuGroupIds.contains(id)) {
-                    if(!collector.containsAction(action)) {
-                        collector.add(action);
-                    }
-                }
-                collectAllowedActions(child, collector);
-            }
-        }
-        else {
-            String id = actionManager.getId(action);
-            if (id != null && allowedFoldingActionIds.contains(id)) {
-                if(!collector.containsAction(action)) {
-                    collector.add(action);
-                }
-            }
-        }
+    private DefaultActionGroup createPopupMenuActions() {
+        return createDefaultActionGroup();
     }
 
-    private ActionGroup createMergedActionGroup() {
-        AnAction action = ActionManager.getInstance().getAction(IdeActions.GROUP_EDITOR_POPUP);
-        DefaultActionGroup mergedGroup = new DefaultActionGroup();
-
-        if (action instanceof DefaultActionGroup originalGroup) {
-            for (AnAction child : originalGroup.getChildren(ActionManager.getInstance())) {
-                String id = ActionManager.getInstance().getId(child);
-                if(id != null && !allowedContextMenuOptions.contains(id)) {
-                    continue;
-                }
-                if(!mergedGroup.containsAction(action)) {
-                    mergedGroup.add(child);
-                }
-            }
+    private DefaultActionGroup createDefaultActionGroup() {
+        DefaultActionGroup actionGroup = new DefaultActionGroup();
+        if(logView) {
+            actionGroup = filterActionGroup(logViewContextMenuOptions, actionGroup);
+            createLogViewActionGroup(actionGroup);
         }
+        else {
+            actionGroup = filterActionGroup(defaultContextMenuOptions, actionGroup);
+            createEditorViewActionGroup(actionGroup);
+        }
+        return actionGroup;
+    }
 
+    private void createEditorViewActionGroup(DefaultActionGroup actionGroup) {
+        actionGroup = filterActionGroup(languageContextMenuOptions, actionGroup);
         for (String groupId : allowedPopupMenuIds) {
             AnAction groupAction = ActionManager.getInstance().getAction(groupId);
             if (groupAction instanceof DefaultActionGroup group) {
-                collectAllowedActions(group, mergedGroup);
+                createAllowedPopupMenuActionGroup(group, actionGroup);
             }
         }
 
+        DefaultActionGroup finalActionGroup = actionGroup;
         FormatUtils.formatterMap.forEach((ftClass, meta) -> {
             if (ftClass.isInstance(fileType)) {
-                mergedGroup.addSeparator();
-                mergedGroup.add(new AnAction("Format", null, meta.icon()) {
+                finalActionGroup.addSeparator();
+                finalActionGroup.add(new AnAction("Format", null, meta.icon()) {
                     @Override
                     public void actionPerformed(@NotNull AnActionEvent e) {
                         String text = editor.getDocument().getText();
@@ -436,6 +431,67 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
                 });
             }
         });
-        return mergedGroup;
+    }
+
+    private void createLogViewActionGroup(DefaultActionGroup actionGroup) {
+        actionGroup.addSeparator();
+        AnAction anAction = new AnAction("Clear All", null, AllIcons.General.Delete) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                WriteCommandAction.runWriteCommandAction(project, () -> editor.getDocument().setText(""));
+            }
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                String text = editor.getDocument().getText();
+                e.getPresentation().setEnabled(!text.trim().isEmpty());
+            }
+            @Override
+            public @NotNull ActionUpdateThread getActionUpdateThread() {
+                return ActionUpdateThread.EDT;
+            }
+        };
+        actionGroup.add(anAction);
+    }
+
+    private void createAllowedPopupMenuActionGroup(AnAction action, DefaultActionGroup defaultActionGroup) {
+        ActionManager actionManager = ActionManager.getInstance();
+        if (action instanceof DefaultActionGroup group) {
+            for (AnAction child : group.getChildren(actionManager)) {
+                String id = actionManager.getId(action);
+                if(allowedPopupMenuGroupIds.contains(id)) {
+                    if(!defaultActionGroup.containsAction(action)) {
+                        defaultActionGroup.add(action);
+                    }
+                }
+                createAllowedPopupMenuActionGroup(child, defaultActionGroup);
+            }
+        }
+        else {
+            String id = actionManager.getId(action);
+            if (id != null && allowedFoldingActionIds.contains(id)) {
+                if(!defaultActionGroup.containsAction(action)) {
+                    defaultActionGroup.add(action);
+                }
+            }
+        }
+    }
+
+
+    private DefaultActionGroup filterActionGroup(Set<String> allowedMenuOptions, DefaultActionGroup existingActionGroup) {
+        AnAction action = ActionManager.getInstance().getAction(IdeActions.GROUP_EDITOR_POPUP);
+        DefaultActionGroup defaultActionGroup = existingActionGroup == null ? new DefaultActionGroup() : existingActionGroup;
+
+        if (action instanceof DefaultActionGroup originalGroup) {
+            for (AnAction child : originalGroup.getChildren(ActionManager.getInstance())) {
+                String id = ActionManager.getInstance().getId(child);
+                if(id != null && !allowedMenuOptions.contains(id)) {
+                    continue;
+                }
+                if(!defaultActionGroup.containsAction(action)) {
+                    defaultActionGroup.add(child);
+                }
+            }
+        }
+        return defaultActionGroup;
     }
 }

@@ -1,7 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.util.xml.ui.EmptyPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
@@ -43,11 +42,11 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
 
         passwordTextField = new PasswordInputField("Password");
         passwordTextField.setPreferredSize(new Dimension(400, 35));
-        passwordToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,45));
+        passwordToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,35));
 
         bearerTokenTextField = new PasswordInputField("Token");
         bearerTokenTextField.setPreferredSize(new Dimension(600,35));
-        bearerToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,45));
+        bearerToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,35));
 
         basicAuthTextboxPanel = new JPanel();
         basicAuthTextboxPanel.setLayout(new BorderLayout());
@@ -167,13 +166,12 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
 
     private void toggleBearerPasswordField(PasswordInputField field, IconButton button) {
         maskBearerToken = !maskBearerToken;
+        button.setIcon(maskBearerToken ? DaakiaIcons.EyeIcon : DaakiaIcons.EyeOffIcon);
         if (maskBearerToken && field.containsText()) {
             field.setEchoChar('•');
-            button.setIcon(DaakiaIcons.EyeIcon);
         }
         else {
             field.setEchoChar((char) 0);
-            button.setIcon(DaakiaIcons.EyeOffIcon);
         }
     }
 
