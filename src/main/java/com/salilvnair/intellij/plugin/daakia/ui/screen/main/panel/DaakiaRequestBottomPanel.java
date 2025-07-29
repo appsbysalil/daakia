@@ -22,7 +22,7 @@ public class DaakiaRequestBottomPanel extends BaseDaakiaPanel<DaakiaRequestBotto
 
     public DaakiaRequestBottomPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -38,12 +38,6 @@ public class DaakiaRequestBottomPanel extends BaseDaakiaPanel<DaakiaRequestBotto
         requestBodyContainer = new RequestBodyContainer(rootPane, dataContext);
         requestScriptPanel = new RequestScriptPanel(rootPane, dataContext);
     }
-
-    @Override
-    public void initStyle() {
-        debugIfApplicable(this);
-    }
-
 
     @Override
     public void initChildrenLayout() {

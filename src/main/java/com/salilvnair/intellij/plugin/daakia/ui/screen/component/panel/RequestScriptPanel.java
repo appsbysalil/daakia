@@ -13,7 +13,7 @@ public class RequestScriptPanel extends BaseDaakiaPanel<RequestScriptPanel> {
 
     public RequestScriptPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -35,7 +35,6 @@ public class RequestScriptPanel extends BaseDaakiaPanel<RequestScriptPanel> {
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

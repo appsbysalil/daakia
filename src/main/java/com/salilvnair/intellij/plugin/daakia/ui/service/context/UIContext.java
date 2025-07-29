@@ -1,16 +1,14 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
-import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.RawBodyTypeDropdown;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 import lombok.Setter;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.File;
@@ -28,7 +26,7 @@ public class UIContext {
     private DaakiaEditorX responseTextArea;
     private String requestContentType = "1";
     private ComboBox<String> requestTypes;
-    private JTextField urlTextField;
+    private DaakiaAutoSuggestField urlTextField;
     private ComboBox<Environment> environmentCombo;
     private JTable responseHeaderTable;
     private DefaultTableModel responseHeaderTableModel;
@@ -60,7 +58,7 @@ public class UIContext {
     private DaakiaEditorX postRequestScriptArea;
 
     /** Editor used to display debug logs */
-    private EditorEx debugLogEditor;
+    private DaakiaEditorX debugLogEditor;
   
     private boolean downloadResponse;
 
@@ -90,7 +88,7 @@ public class UIContext {
         return requestTypes;
     }
 
-    public JTextField urlTextField() {
+    public DaakiaAutoSuggestField urlTextField() {
         return urlTextField;
     }
 
@@ -184,7 +182,7 @@ public class UIContext {
         return downloadResponse;
     }
 
-    public EditorEx debugLogEditor() {
+    public DaakiaEditorX debugLogEditor() {
         return debugLogEditor;
     }
 

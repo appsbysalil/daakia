@@ -18,7 +18,7 @@ public class RequestFormDataPanel extends BaseDaakiaPanel<RequestFormDataPanel> 
 
     public RequestFormDataPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -43,7 +43,6 @@ public class RequestFormDataPanel extends BaseDaakiaPanel<RequestFormDataPanel> 
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

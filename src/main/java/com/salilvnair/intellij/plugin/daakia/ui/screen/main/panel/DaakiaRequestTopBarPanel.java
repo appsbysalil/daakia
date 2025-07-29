@@ -3,14 +3,15 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.*;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.*;
-
+import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -19,24 +20,24 @@ import java.awt.event.MouseEvent;
 public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBarPanel> {
 
     private ComboBox<String> requestTypes;
-    private TextInputField urlTextField;
+    private DaakiaAutoSuggestField urlTextField;
     private JButton saveButton;
     private JButton sendButton;
 
     public DaakiaRequestTopBarPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
     public void initLayout() {
-        setLayout(new FlowLayout(FlowLayout.TRAILING, 5, 0));
+        setLayout(new FlowLayout(FlowLayout.LEADING, 5, 0));
     }
 
     @Override
     public void initComponents() {
         requestTypes = new ComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE", "GRAPHQL"});
-        urlTextField = new TextInputField("Enter URL");
+        urlTextField = new DaakiaAutoSuggestField("Enter URL", dataContext );
         sendButton = new JButton("Send");
         JPopupMenu dropdownMenu = new JPopupMenu();
 
@@ -89,7 +90,6 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
         sendButton.setIcon(AllIcons.Actions.Execute);
         saveButton.setIcon(DaakiaIcons.SaveIcon);
         sendButton.setEnabled(false);
@@ -98,18 +98,22 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
 
     @Override
     public void initChildrenLayout() {
+        TextFieldWithAutoCompletion<String> autoCompletionField = urlTextField.instance();
         add(requestTypes);
-        add(urlTextField);
+        add(autoCompletionField);
         add(sendButton);
         add(saveButton);
-        urlTextField.setPreferredSize(new Dimension(400, 32));
+        autoCompletionField.setPreferredSize(new Dimension(400, 32));
     }
 
     @Override
     public void initListeners() {
 
-        TextFieldUtils.addChangeListener(urlTextField, e -> {
-            refreshActionButtons();
+        DocumentUtils.addListener(urlTextField.instance(), new com.intellij.openapi.editor.event.DocumentListener() {
+            @Override
+            public void documentChanged(@NotNull com.intellij.openapi.editor.event.DocumentEvent event) {
+                refreshActionButtons();
+            }
         });
 
         sendButton.addActionListener(e -> {

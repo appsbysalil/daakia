@@ -18,7 +18,7 @@ public class DaakiaMainFrame extends JFrame implements SwingComponent {
     public DaakiaMainFrame(Project project) {
         super("Daakia");
         this.project = project;
-        init();
+        init(this);
     }
 
 

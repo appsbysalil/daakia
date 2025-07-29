@@ -28,7 +28,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     TextInputField searchTextField;
     public HistoryPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override

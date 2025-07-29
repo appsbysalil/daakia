@@ -35,7 +35,7 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
     public EnvironmentPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         this.globalContext = dataContext.globalContext();
-        init();
+        init(this);
     }
 
     @Override

@@ -10,7 +10,7 @@ public class PanelTemplate extends BaseDaakiaPanel<PanelTemplate> {
 
     public PanelTemplate(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override

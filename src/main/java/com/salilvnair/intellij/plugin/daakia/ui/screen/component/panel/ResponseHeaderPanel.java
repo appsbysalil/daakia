@@ -20,7 +20,7 @@ public class ResponseHeaderPanel extends BaseDaakiaPanel<ResponseHeaderPanel> {
 
     public ResponseHeaderPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override

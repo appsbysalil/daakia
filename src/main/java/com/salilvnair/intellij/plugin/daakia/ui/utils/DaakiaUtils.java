@@ -6,6 +6,7 @@ import com.intellij.ui.JBColor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RequestType;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
@@ -141,11 +142,11 @@ public class DaakiaUtils {
                 <br><br><br>
                 </html>
                 """;
-        JCheckBox scriptCheck = new JCheckBox("Console");
+        JCheckBox scriptCheck = new JCheckBox("Debug Mode");
         scriptCheck.setSelected(DaakiaSettings.getInstance().getState().scriptLogEnabled);
         Object[] params = {message, scriptCheck};
-        Object[] options = {"Close", "Debug Mode"};
-        int res = JOptionPane.showOptionDialog(component, params, "About Daakia",
+        Object[] options = {"Close"};
+        JOptionPane.showOptionDialog(component, params, "About Daakia",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, DaakiaIcons.DaakiaIcon48,
                 options, options[0]);
         DataContext dataContext = null;
@@ -157,10 +158,11 @@ public class DaakiaUtils {
         }
         if (dataContext != null) {
             dataContext.uiContext().setScriptLogEnabled(scriptCheck.isSelected());
-            if (res == 1 && scriptCheck.isSelected()) {
+            if (scriptCheck.isSelected()) {
                 DebugLogManager.startCapture();
                 dataContext.uiContext().setDebugMode(true);
-                EditorEx editor = dataContext.uiContext().debugLogEditor();
+                DaakiaEditorX daakiaEditorX = dataContext.uiContext().debugLogEditor();
+                EditorEx editor = daakiaEditorX.editor();
                 if (editor != null) {
                     com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
                             () -> com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
@@ -168,7 +170,8 @@ public class DaakiaUtils {
                     );
                 }
                 dataContext.globalEventPublisher().onEnableDebugMode();
-            } else if (!scriptCheck.isSelected()) {
+            }
+            else {
                 DebugLogManager.stopCapture();
                 dataContext.uiContext().setDebugMode(false);
             }

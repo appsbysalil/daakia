@@ -18,7 +18,7 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
 
     public ResponseBodyPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -34,7 +34,6 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

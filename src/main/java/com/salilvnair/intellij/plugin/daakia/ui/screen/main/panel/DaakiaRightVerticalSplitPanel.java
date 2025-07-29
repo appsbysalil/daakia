@@ -19,7 +19,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
 
     public DaakiaRightVerticalSplitPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -46,7 +46,6 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
         leftRightSplitPane.setUI(DaakiaUtils.thinDivider());
         leftRightSplitPane.setBorder(null);
     }

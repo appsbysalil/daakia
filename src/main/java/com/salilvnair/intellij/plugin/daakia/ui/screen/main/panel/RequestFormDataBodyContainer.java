@@ -10,7 +10,7 @@ public class RequestFormDataBodyContainer extends BaseDaakiaPanel<RequestFormDat
 
     public RequestFormDataBodyContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override

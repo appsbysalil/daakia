@@ -42,7 +42,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     public CollectionStorePanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -57,11 +57,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         searchPanel = new JPanel(new BorderLayout());
         searchTextField = new TextInputField("Search");
         searchPanel.add(searchTextField, BorderLayout.CENTER);
-    }
-
-    @Override
-    public void initStyle() {
-        super.initStyle();
     }
 
     @Override

@@ -15,7 +15,7 @@ public class RequestRawBodyContainer extends BaseDaakiaPanel<RequestRawBodyConta
 
     public RequestRawBodyContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override

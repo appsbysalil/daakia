@@ -14,7 +14,7 @@ public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRig
 
     public DaakiaRightVerticalSplitLeftPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -31,7 +31,6 @@ public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRig
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
         setMinimumSize(new Dimension(700, 0));
     }
 

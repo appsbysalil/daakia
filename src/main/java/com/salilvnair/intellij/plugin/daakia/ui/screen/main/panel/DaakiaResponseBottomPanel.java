@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseHeaderPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.DebugLogPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DebugLogManager;
@@ -23,7 +24,7 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
 
     public DaakiaResponseBottomPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -37,11 +38,6 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
         responseHeaderPanel = new ResponseHeaderPanel(rootPane, dataContext);
         responseBodyContainer = new ResponseBodyContainer(rootPane, dataContext);
         debugLogPanel = new DebugLogPanel(rootPane, dataContext);
-    }
-
-    @Override
-    public void initStyle() {
-        debugIfApplicable(this);
     }
 
 
@@ -64,7 +60,8 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
                 );
             }
             else if (DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
-                EditorEx editor = uiContext().debugLogEditor();
+                DaakiaEditorX daakiaEditorX = uiContext().debugLogEditor();
+                EditorEx editor = daakiaEditorX.editor();
                 if (editor != null) {
                     com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
                             () -> com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
@@ -86,7 +83,8 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
                 tabbedPane.addTab("Debug Mode", null, debugLogPanel);
                 debugTabAdded = true;
             }
-            EditorEx editor = uiContext().debugLogEditor();
+            DaakiaEditorX daakiaEditorX = uiContext().debugLogEditor();
+            EditorEx editor = daakiaEditorX.editor();
             if (editor != null) {
                 com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
                         () -> editor.getDocument().setText(DebugLogManager.getLogs()));
