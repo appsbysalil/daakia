@@ -12,7 +12,7 @@ public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRi
 
     public DaakiaRightVerticalSplitRightPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -25,12 +25,6 @@ public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRi
     public void initComponents() {
         topPanel = new DaakiaResponseTopPanel(rootPane, dataContext);
         bottomPanel = new DaakiaResponseBottomPanel(rootPane, dataContext);
-    }
-
-    @Override
-    public void initStyle() {
-        debugIfApplicable(this);
-
     }
 
     @Override

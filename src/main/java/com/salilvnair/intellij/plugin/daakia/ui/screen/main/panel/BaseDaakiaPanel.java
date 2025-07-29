@@ -26,8 +26,6 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
     protected final JRootPane rootPane;
     protected final DataContext dataContext;
 
-    protected boolean debugEnabled = false;
-
     private final List<Subscriber<EventObject>> localSubscribers = new ArrayList<>();
     private final List<Subscriber<EventObject>> globalSubscribers = new ArrayList<>();
 
@@ -37,10 +35,6 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
      }
 
 
-    public void setDebugEnabled(boolean debugEnabled) {
-        this.debugEnabled = debugEnabled;
-    }
-
     /**
      * Exposes the data context associated with this panel.
      */
@@ -48,8 +42,8 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
         return dataContext;
     }
 
-    protected void debugIfApplicable(Object instance) {
-        if(debugEnabled) {
+    public void debugIfApplicable(Object instance) {
+        if(dataContext.uiContext().debugMode()) {
             JBColor jbColor = generateRandomJBColor();
             TitledBorder titledBorder = BorderFactory.createTitledBorder(
                     BorderFactory.createLineBorder(jbColor, 2),
@@ -64,7 +58,7 @@ public abstract class BaseDaakiaPanel<T extends JBPanel<T>> extends JBPanel<T> i
     }
 
     protected void debugIfApplicable(JPanel panel, String name) {
-        if(debugEnabled) {
+        if(dataContext.uiContext().debugMode()) {
             JBColor jbColor = generateRandomJBColor();
             TitledBorder titledBorder = BorderFactory.createTitledBorder(
                     BorderFactory.createLineBorder(jbColor, 2),

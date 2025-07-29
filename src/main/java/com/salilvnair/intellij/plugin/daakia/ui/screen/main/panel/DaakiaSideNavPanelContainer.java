@@ -16,7 +16,7 @@ public class DaakiaSideNavPanelContainer extends BaseDaakiaPanel<DaakiaSideNavPa
 
     public DaakiaSideNavPanelContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override

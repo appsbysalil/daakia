@@ -5,9 +5,10 @@ package com.salilvnair.intellij.plugin.daakia.ui.core.awt;
  */
 public interface SwingComponent {
 
-    default void init() {
+    default void init(SwingComponent component) {
         initLayout();
         initComponents();
+        debugIfApplicable(component);
         initStyle();
         initListeners();
         initChildrenLayout();
@@ -16,6 +17,10 @@ public interface SwingComponent {
     default void initLayout() {}
 
     default void initStyle() {}
+
+    default void debugIfApplicable(Object instance) {
+
+    }
 
     default void initComponents() {}
 

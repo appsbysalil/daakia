@@ -25,7 +25,7 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
 
     public RequestAuthorizationPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -100,7 +100,6 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

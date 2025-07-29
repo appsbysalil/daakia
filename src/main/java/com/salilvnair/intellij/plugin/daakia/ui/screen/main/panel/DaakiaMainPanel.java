@@ -40,7 +40,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
 
     public DaakiaMainPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
         setVisible(true);
     }
 
@@ -85,7 +85,6 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
         setSize(1200, 600);
         leftRightSplitPane.setUI(DaakiaUtils.thinDivider());
         leftRightSplitPane.setBorder(null);

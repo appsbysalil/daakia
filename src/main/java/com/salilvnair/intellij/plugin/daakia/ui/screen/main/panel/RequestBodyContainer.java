@@ -20,7 +20,7 @@ public class RequestBodyContainer extends BaseDaakiaPanel<RequestBodyContainer> 
 
     public RequestBodyContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override

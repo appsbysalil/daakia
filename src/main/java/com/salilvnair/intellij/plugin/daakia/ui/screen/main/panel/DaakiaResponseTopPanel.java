@@ -18,7 +18,7 @@ public class DaakiaResponseTopPanel extends BaseDaakiaPanel<DaakiaResponseTopPan
 
     public DaakiaResponseTopPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -36,11 +36,6 @@ public class DaakiaResponseTopPanel extends BaseDaakiaPanel<DaakiaResponseTopPan
         uiContext().setStatusLabel(statusLabel);
         uiContext().setSizeLabel(sizeLabel);
         uiContext().setTimeLabel(timeLabel);
-    }
-
-    @Override
-    public void initStyle() {
-        super.initStyle();
     }
 
     @Override

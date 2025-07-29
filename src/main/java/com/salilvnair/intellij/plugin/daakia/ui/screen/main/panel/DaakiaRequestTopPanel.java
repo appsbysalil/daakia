@@ -13,7 +13,7 @@ public class DaakiaRequestTopPanel extends BaseDaakiaPanel<DaakiaRequestTopPanel
 
     public DaakiaRequestTopPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -27,12 +27,6 @@ public class DaakiaRequestTopPanel extends BaseDaakiaPanel<DaakiaRequestTopPanel
         topBarHeaderButtonContainer.setLayout(new BoxLayout(topBarHeaderButtonContainer, BoxLayout.Y_AXIS));
         topBarPanel = new DaakiaRequestTopBarPanel(rootPane, dataContext);
         daakiaRequestAddHeaderButtonPanel = new DaakiaRequestAddHeaderButtonPanel(rootPane, dataContext);
-    }
-
-    @Override
-    public void initStyle() {
-        debugIfApplicable(this);
-        debugIfApplicable(daakiaRequestAddHeaderButtonPanel, "addHeaderButtonPanel");
     }
 
     @Override

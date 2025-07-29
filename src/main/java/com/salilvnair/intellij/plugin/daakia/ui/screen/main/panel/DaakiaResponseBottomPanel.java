@@ -24,7 +24,7 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
 
     public DaakiaResponseBottomPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -38,11 +38,6 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
         responseHeaderPanel = new ResponseHeaderPanel(rootPane, dataContext);
         responseBodyContainer = new ResponseBodyContainer(rootPane, dataContext);
         debugLogPanel = new DebugLogPanel(rootPane, dataContext);
-    }
-
-    @Override
-    public void initStyle() {
-        debugIfApplicable(this);
     }
 
 

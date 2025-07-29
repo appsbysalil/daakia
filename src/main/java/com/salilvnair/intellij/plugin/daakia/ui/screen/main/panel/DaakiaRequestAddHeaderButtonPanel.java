@@ -12,7 +12,7 @@ public class DaakiaRequestAddHeaderButtonPanel extends BaseDaakiaPanel<DaakiaReq
 
     public DaakiaRequestAddHeaderButtonPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -27,7 +27,6 @@ public class DaakiaRequestAddHeaderButtonPanel extends BaseDaakiaPanel<DaakiaReq
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
         addHeaderButton.setIcon(AllIcons.Actions.AddList);
     }
 

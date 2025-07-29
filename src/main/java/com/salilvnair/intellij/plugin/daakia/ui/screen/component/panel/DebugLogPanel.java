@@ -18,7 +18,7 @@ public class DebugLogPanel extends BaseDaakiaPanel<DebugLogPanel> {
 
     public DebugLogPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -34,7 +34,6 @@ public class DebugLogPanel extends BaseDaakiaPanel<DebugLogPanel> {
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

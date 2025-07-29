@@ -18,7 +18,7 @@ public class RequestHeaderPanel extends BaseDaakiaPanel<RequestHeaderPanel> {
 
     public RequestHeaderPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -43,7 +43,6 @@ public class RequestHeaderPanel extends BaseDaakiaPanel<RequestHeaderPanel> {
 
     @Override
     public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

@@ -10,7 +10,7 @@ public class ResponseBodyContainer extends BaseDaakiaPanel<ResponseBodyContainer
 
     public ResponseBodyContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
@@ -21,11 +21,6 @@ public class ResponseBodyContainer extends BaseDaakiaPanel<ResponseBodyContainer
     @Override
     public void initComponents() {
         responseBodyPanel = new ResponseBodyPanel(rootPane, dataContext);
-    }
-
-    @Override
-    public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

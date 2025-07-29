@@ -22,17 +22,12 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
 
     DaakiaSideNavPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
-        init();
+        init(this);
     }
 
     @Override
     public void initLayout() {
         setLayout(new BorderLayout());
-    }
-
-    @Override
-    public void initStyle() {
-        debugIfApplicable(this);
     }
 
     @Override

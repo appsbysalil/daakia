@@ -142,11 +142,11 @@ public class DaakiaUtils {
                 <br><br><br>
                 </html>
                 """;
-        JCheckBox scriptCheck = new JCheckBox("Console");
+        JCheckBox scriptCheck = new JCheckBox("Debug Mode");
         scriptCheck.setSelected(DaakiaSettings.getInstance().getState().scriptLogEnabled);
         Object[] params = {message, scriptCheck};
-        Object[] options = {"Close", "Debug Mode"};
-        int res = JOptionPane.showOptionDialog(component, params, "About Daakia",
+        Object[] options = {"Close"};
+        JOptionPane.showOptionDialog(component, params, "About Daakia",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, DaakiaIcons.DaakiaIcon48,
                 options, options[0]);
         DataContext dataContext = null;
@@ -158,7 +158,7 @@ public class DaakiaUtils {
         }
         if (dataContext != null) {
             dataContext.uiContext().setScriptLogEnabled(scriptCheck.isSelected());
-            if (res == 1 && scriptCheck.isSelected()) {
+            if (scriptCheck.isSelected()) {
                 DebugLogManager.startCapture();
                 dataContext.uiContext().setDebugMode(true);
                 DaakiaEditorX daakiaEditorX = dataContext.uiContext().debugLogEditor();
@@ -171,7 +171,7 @@ public class DaakiaUtils {
                 }
                 dataContext.globalEventPublisher().onEnableDebugMode();
             }
-            else if (!scriptCheck.isSelected()) {
+            else {
                 DebugLogManager.stopCapture();
                 dataContext.uiContext().setDebugMode(false);
             }
