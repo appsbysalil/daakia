@@ -13,6 +13,8 @@ import lombok.Setter;
 public class DaakiaBaseStoreData {
     protected Integer id;
     protected String uuid;
+    /** indicator if this entry is active. default is "Y" */
+    protected String active = "Y";
     protected String displayName;
     protected String requestType;
     protected String url;
@@ -36,6 +38,14 @@ public class DaakiaBaseStoreData {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getActive() {
+        return active;
+    }
+
+    public void setActive(String active) {
+        this.active = active;
     }
 
     public String getDisplayName() {

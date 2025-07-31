@@ -14,6 +14,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
+import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -128,11 +129,24 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem renameMenuItem = new JMenuItem("Rename");
         renameMenuItem.addActionListener(e -> renameSelectedTreeItem(daakiaHistory));
+        JMenuItem deleteMenuItem = new JMenuItem("Delete");
+        deleteMenuItem.addActionListener(e -> deleteHistoryItem(daakiaHistory));
         popupMenu.add(renameMenuItem);
+        popupMenu.add(deleteMenuItem);
         popupMenu.show(component, x, y);
     }
 
     private void renameSelectedTreeItem(DaakiaHistory selectedItem) {
         globalEventPublisher().onRightClickRenameHistoryDataNode(selectedItem);
+    }
+
+    private void deleteHistoryItem(DaakiaHistory item) {
+        item.setActive("N");
+        globalEventPublisher().onDeleteHistoryNode(item);
+        DefaultTreeModel model = (DefaultTreeModel) historyTree.getModel();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) historyTree.getLastSelectedPathComponent();
+        if(node != null) {
+            model.removeNodeFromParent(node);
+        }
     }
 }

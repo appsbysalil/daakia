@@ -83,6 +83,19 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
                 sideNavContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.ON_RIGHT_CLICK_RENAME_HISTORY_NODE, dataContext);
             }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_DELETE_HISTORY_NODE)) {
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                sideNavContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
+                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.MARK_HISTORY_ENTRY_FOR_DELETION, dataContext);
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RESTORE_HISTORY_NODE)) {
+                DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
+                sideNavContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
+                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.RESTORE_HISTORY_ENTRY, dataContext);
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_RESTORE_COLLECTIONS)) {
+                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.RESTORE_STORE_COLLECTIONS, dataContext);
+            }
         });
     }
 
