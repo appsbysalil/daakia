@@ -39,9 +39,11 @@ public class DaakiaDatabase {
 
     private void init() {
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS history_records (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT)");
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS collection_records (id INTEGER PRIMARY KEY, data TEXT)");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS history_records (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT, active TEXT DEFAULT 'Y')");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS collection_records (id INTEGER PRIMARY KEY, data TEXT, active TEXT DEFAULT 'Y')");
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS environment_records (id INTEGER PRIMARY KEY, data TEXT)");
+            try { stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'"); } catch (SQLException ignore) {}
+            try { stmt.executeUpdate("ALTER TABLE collection_records ADD COLUMN active TEXT DEFAULT 'Y'"); } catch (SQLException ignore) {}
         }
         catch (SQLException ignore) {}
         migrateIfNecessary();
