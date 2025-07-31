@@ -71,6 +71,7 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
             DaakiaUtils.convertCollectionStoreToTreeNode(store, colRoot);
         }
         collectionTrashTree.setModel(new DefaultTreeModel(colRoot));
+        collectionTrashTree.setRootVisible(false);
         TreeUtils.expandAllNodes(collectionTrashTree);
     }
 }

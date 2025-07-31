@@ -109,13 +109,14 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
 
         deleteMenuItem.addActionListener(e -> {
+            DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();
             TreePath[] selectionPaths = collectionStoreTree.getSelectionPaths();
             if(selectionPaths == null) {
                 selectionPaths = new TreePath[]{ collectionStoreTree.getSelectionPath() };
             }
             for (TreePath selectionPath : selectionPaths) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
-                if (selectedNode != null && selectedNode != rootNode) {
+                if (selectedNode != null && selectedNode != latestRootNode) {
                     DefaultTreeModel model = (DefaultTreeModel) collectionStoreTree.getModel();
                     model.removeNodeFromParent(selectedNode);
                 }
@@ -125,9 +126,11 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         });
 
 
-        collectionStoreTree.addTreeSelectionListener( e -> {
+
+        collectionStoreTree.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
-            deleteMenuItem.setEnabled(selectedNode != null && selectedNode != rootNode);
+            deleteMenuItem.setEnabled(selectedNode != null && selectedNode != latestRootNode);
         });
 
         IconButton moreIconButton = new IconButton(AllIcons.Actions.More, new Dimension(40,0));
@@ -142,9 +145,10 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         TreeUtils.expandAllNodes(collectionStoreTree);
 
         addButton.addActionListener(actionEvent -> {
+            DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
             if(node == null) {
-                node = rootNode;
+                node = latestRootNode;
             }
             String newName = (String) JOptionPane
                     .showInputDialog(

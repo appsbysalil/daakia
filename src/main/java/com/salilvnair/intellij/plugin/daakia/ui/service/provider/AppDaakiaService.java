@@ -139,15 +139,16 @@ public class AppDaakiaService extends BaseDaakiaService {
         new CollectionDao().loadStoreAsync(daakiaStore -> {
             if(daakiaStore != null) {
                 DefaultMutableTreeNode rootNode = DaakiaUtils.convertCollectionStoreToTreeNode(daakiaStore, new DefaultMutableTreeNode("Collections"));
+                dataContext.sideNavContext().setCollectionStoreRootNode(rootNode);
                 Tree tree = dataContext.sideNavContext().collectionStoreTree();
                 if(tree != null) {
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                     ApplicationManager.getApplication().invokeLater(() -> {
-                        model.setRoot(rootNode);
+                        DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();
+                        model.setRoot(latestRootNode);
                         model.reload();
                     });
                 }
-                dataContext.sideNavContext().setCollectionStoreRootNode(rootNode);
                 dataContext.sideNavContext().setDaakiaStore(daakiaStore);
             }
         });

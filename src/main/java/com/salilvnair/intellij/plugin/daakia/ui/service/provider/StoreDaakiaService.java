@@ -36,6 +36,11 @@ public class StoreDaakiaService extends BaseDaakiaService {
                 saveRequest(dataContext);
             });
         }
+        else if(StoreDaakiaType.MARK_REQUEST_IN_STORE_COLLECTION_FOR_DELETION.equals(type)) {
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                markRequestForDeletion(dataContext);
+            });
+        }
         else if(StoreDaakiaType.LOAD_STORE_COLLECTIONS.equals(type)) {
             ApplicationManager.getApplication().executeOnPooledThread(() -> {
                 loadRequest(dataContext);
@@ -46,6 +51,10 @@ public class StoreDaakiaService extends BaseDaakiaService {
         return dataContext.daakiaContext();
     }
 
+    private void markRequestForDeletion(DataContext dataContext) {
+        saveRequest(dataContext);
+        new CollectionDao().markActiveAsync(false);
+    }
 
 
     private void loadHistory(DataContext dataContext) {

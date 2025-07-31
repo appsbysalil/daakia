@@ -25,7 +25,7 @@ public class CollectionDao {
 
     public DaakiaStore loadInactiveStore() {
         try (Connection conn = DaakiaDatabase.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT data FROM collection_records WHERE id=1 AND active='N'")) {
+            PreparedStatement ps = conn.prepareStatement("SELECT data FROM collection_records WHERE id=1 AND active='N'")) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String json = rs.getString("data");
@@ -38,13 +38,37 @@ public class CollectionDao {
     }
 
     public void saveStore(DaakiaStore store) {
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "INSERT INTO collection_records(id,data,active) VALUES(1,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data, active=excluded.active")) {
-            ps.setString(1, JsonUtils.pojoToJson(store));
-            ps.setString(2, "Y");
-            ps.executeUpdate();
+        try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+            boolean exists;
+            try (PreparedStatement check = conn.prepareStatement("SELECT COUNT(*) FROM collection_records WHERE id=1")) {
+                ResultSet rs = check.executeQuery();
+                exists = rs.next() && rs.getInt(1) > 0;
+            }
+            if (exists) {
+                try (PreparedStatement ps = conn.prepareStatement("UPDATE collection_records SET data=?, active=? WHERE id=1")) {
+                    ps.setString(1, JsonUtils.pojoToJson(store));
+                    ps.setString(2,  "Y");
+                    ps.executeUpdate();
+                }
+            } else {
+                try (PreparedStatement ps = conn.prepareStatement("INSERT INTO collection_records(id,data,active) VALUES(1,?, 'Y')")) {
+                    ps.setString(1, JsonUtils.pojoToJson(store));
+                    ps.executeUpdate();
+                }
+            }
         } catch (Exception ignore) {}
+    }
+
+    public void markActive(boolean active) {
+        try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("UPDATE collection_records SET active=? WHERE id=1");
+            ps.setString(1, active ? "Y" : "N");
+            ps.executeUpdate();
+        } catch (SQLException ignore) {}
+    }
+
+    public void markActiveAsync(boolean active) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> markActive(active));
     }
 
     public void loadStoreAsync(java.util.function.Consumer<DaakiaStore> callback) {
@@ -61,6 +85,4 @@ public class CollectionDao {
             saveStore(store);
         });
     }
-
-
 }

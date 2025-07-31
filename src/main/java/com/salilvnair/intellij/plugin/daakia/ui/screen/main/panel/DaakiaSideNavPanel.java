@@ -59,10 +59,13 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
                 sideNavContext().setSelectedDaakiaHistory(daakiaEvent.selectedDaakiaHistory());
                 globalEventPublisher().onLoadSelectedHistoryData(dataContext, daakiaEvent.selectedDaakiaHistory());
             }
-            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_ADD_NEW_COLLECTION) ||
-                    DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_DELETE_COLLECTIONS)) {
+            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_ADD_NEW_COLLECTION)) {
                 //persist the user collections
                 daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
+            }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_DELETE_COLLECTIONS)) {
+                //persist the user collections
+                daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.MARK_REQUEST_IN_STORE_COLLECTION_FOR_DELETION, dataContext);
             }
             else if(DaakiaEvent.ofAnyType(event, DaakiaEventType.ON_SELECT_STORE_COLLECTION_NODE, DaakiaEventType.ON_DBL_CLICK_STORE_COLLECTION_NODE)) {
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);
