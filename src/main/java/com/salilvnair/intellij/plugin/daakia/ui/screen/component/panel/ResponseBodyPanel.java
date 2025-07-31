@@ -33,10 +33,6 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
     }
 
     @Override
-    public void initStyle() {
-    }
-
-    @Override
     public void initChildrenLayout() {
         add(responseTextArea, BorderLayout.CENTER);
     }

@@ -42,10 +42,6 @@ public class RequestFormDataPanel extends BaseDaakiaPanel<RequestFormDataPanel> 
     }
 
     @Override
-    public void initStyle() {
-    }
-
-    @Override
     public void initChildrenLayout() {
         formDataKeyValuesPanel.setLayout(new BoxLayout(formDataKeyValuesPanel, BoxLayout.Y_AXIS));
         formDataScrollPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));

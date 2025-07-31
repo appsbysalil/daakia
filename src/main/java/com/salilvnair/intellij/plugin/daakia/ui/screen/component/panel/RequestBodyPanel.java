@@ -35,10 +35,6 @@ public class RequestBodyPanel extends BaseDaakiaPanel<RequestBodyPanel> {
     }
 
     @Override
-    public void initStyle() {
-    }
-
-    @Override
     public void initChildrenLayout() {
         add(requestTextArea, BorderLayout.CENTER);
     }

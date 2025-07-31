@@ -3,6 +3,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.ui.UIUtil;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
@@ -12,6 +13,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.BasicBut
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.CollectionStoreTreeCellRenderer;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.HistoryTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
@@ -34,7 +36,6 @@ import java.io.File;
 
 public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> {
     private JScrollPane scrollPane;
-    private JPanel collectionStoreTreePanel;
     private Tree collectionStoreTree;
     private DefaultTreeModel collectionStoreTreeModel;
     private JPanel searchPanel;
@@ -52,7 +53,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     @Override
     public void initComponents() {
-        collectionStoreTreePanel = dynamicTree(this);
+        JPanel collectionStoreTreePanel = dynamicTree(this);
         scrollPane = new JBScrollPane(collectionStoreTreePanel);
         searchPanel = new JPanel(new BorderLayout());
         searchTextField = new TextInputField("Search");
@@ -72,7 +73,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             TextInputField textInputField = (TextInputField) e.getSource();
             if(textInputField.containsText()) {
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.SEARCH_COLLECTION, dataContext, searchTextField.getText());
-                TreeUtils.expandAllNodes(collectionStoreTree);
             }
         });
         listenGlobal(event -> {
@@ -91,6 +91,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         collectionStoreTreeModel = new DefaultTreeModel(rootNode);
         collectionStoreTree = new Tree(collectionStoreTreeModel);
         collectionStoreTree.setCellRenderer(new CollectionStoreTreeCellRenderer());
+        collectionStoreTree.setOpaque(false);
+        collectionStoreTree.setBackground(UIUtil.getTreeBackground());
         JPanel panel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JBScrollPane(collectionStoreTree);
         JPanel buttonPanel = new JPanel(new BorderLayout());
@@ -113,7 +115,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             }
             for (TreePath selectionPath : selectionPaths) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
-//            DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) collectionStoreTree.getModel().getRoot();
                 if (selectedNode != null && selectedNode != rootNode) {
                     DefaultTreeModel model = (DefaultTreeModel) collectionStoreTree.getModel();
                     model.removeNodeFromParent(selectedNode);
@@ -126,7 +127,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
         collectionStoreTree.addTreeSelectionListener( e -> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
-//            DefaultMutableTreeNode root = (DefaultMutableTreeNode) collectionStoreTree.getModel().getRoot();
             deleteMenuItem.setEnabled(selectedNode != null && selectedNode != rootNode);
         });
 

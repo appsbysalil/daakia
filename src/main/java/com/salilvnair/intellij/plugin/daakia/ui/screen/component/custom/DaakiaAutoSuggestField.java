@@ -6,6 +6,8 @@ import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+
+import java.awt.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,14 @@ public class DaakiaAutoSuggestField {
     public DaakiaAutoSuggestField(String placeholder, DataContext dataContext) {
         List<String> suggestions = loadHistory();
         this.textField = new PlaceholderTextFieldWithAutoCompletion(dataContext.project(), placeholder, suggestions, true, null);
+    }
+
+    public DaakiaAutoSuggestField(String placeholder, List<String> suggestions,  DataContext dataContext) {
+        this.textField = new PlaceholderTextFieldWithAutoCompletion(dataContext.project(), placeholder, suggestions, true, null);
+    }
+
+    public void setPreferredSize(Dimension preferredSize) {
+        textField.setPreferredSize(preferredSize);
     }
 
     public TextFieldWithAutoCompletion<String> instance() {

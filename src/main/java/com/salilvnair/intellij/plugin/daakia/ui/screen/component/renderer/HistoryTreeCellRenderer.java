@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer;
 
+import com.intellij.util.ui.UIUtil;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 
 import javax.swing.*;
@@ -18,6 +19,8 @@ public class HistoryTreeCellRenderer extends DefaultTreeCellRenderer {
                 label.setText(((DaakiaHistory) userObject).render());
             }
         }
+        setBackgroundNonSelectionColor(UIUtil.getTreeBackground());
+        setTextNonSelectionColor(UIUtil.getLabelForeground());
         setIcon(null);
         return label;
     }

@@ -42,10 +42,6 @@ public class RequestHeaderPanel extends BaseDaakiaPanel<RequestHeaderPanel> {
     }
 
     @Override
-    public void initStyle() {
-    }
-
-    @Override
     public void initChildrenLayout() {
         headersPanel.setLayout(new BoxLayout(headersPanel, BoxLayout.Y_AXIS));
         headerScrollPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
