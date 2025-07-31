@@ -2,6 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.ui.UIUtil;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
@@ -45,7 +46,6 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     public void initComponents() {
         initTreeNode();
         scrollPane = new JBScrollPane(historyTree);
-        historyTree.setCellRenderer(new HistoryTreeCellRenderer());
         searchPanel = new JPanel(new BorderLayout());
         searchTextField = new TextInputField("Search");
         searchPanel.add(searchTextField, BorderLayout.CENTER);
@@ -81,6 +81,9 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         DefaultTreeModel historyTreeModel = new DefaultTreeModel(root);
         historyTree = new Tree(historyTreeModel);
         historyTree.setRootVisible(false);
+        historyTree.setOpaque(false);
+        historyTree.setBackground(UIUtil.getTreeBackground());
+        historyTree.setCellRenderer(new HistoryTreeCellRenderer());
         TreeUtils.expandAllNodes(historyTree);
         sideNavContext().setHistoryTree(historyTree);
         sideNavContext().setHistoryTreeModel(historyTreeModel);

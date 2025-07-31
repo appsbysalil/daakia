@@ -1,21 +1,24 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HttpHeaders;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.treeStructure.Tree;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.*;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.*;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.*;
 import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
 import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import java.util.Base64;
@@ -63,7 +66,9 @@ public class AppDaakiaService extends BaseDaakiaService {
             loadApplicableDaakiaUiComponentsOnClickStoreCollectionNode(type, dataContext, objects);
         }
         else if(AppDaakiaType.CREATE_REQUEST_HEADER.equals(type)) {
-            createHeader(dataContext, (String) objects[0], (String) objects[1]);
+            ApplicationManager.getApplication().invokeLater(() -> {
+                createHeader(dataContext, (String) objects[0], (String) objects[1]);
+            });
         }
         else if(AppDaakiaType.CREATE_FORM_DATA.equals(type)) {
             createFormData(dataContext, (String) objects[0], (String) objects[1]);
@@ -83,9 +88,9 @@ public class AppDaakiaService extends BaseDaakiaService {
     private void createResponseStatus(DataContext dataContext, Object... objects) {
         ResponseMetadata responseMetadata = dataContext.daakiaContext().responseMetadata();
         HttpStatus httpStatus = dataContext.daakiaContext().httpStatus();
-        String statusColor = "#10b97e";
+        String statusColor = ColorUtils.HexCode.EMERALD.hex();
         if(httpStatus !=null && httpStatus.isError()) {
-            statusColor = "#ef4444";
+            statusColor = ColorUtils.HexCode.CRIMSON.hex();
         }
 
         if(httpStatus !=null) {
@@ -217,23 +222,24 @@ public class AppDaakiaService extends BaseDaakiaService {
     private void createRequestHeaders(DataContext dataContext, Object... objects) {
         MultiValueMap<String, String> requestHeaders = dataContext.daakiaContext().requestHeaders();
         requestHeaders.forEach((key, values) -> {
-            createHeader(dataContext, key, values.get(0));
+            createHeader(dataContext, key, values.getFirst());
         });
     }
 
     private void loadAuthorizationPanel(MultiValueMap<String, String> requestHeaders, DataContext dataContext) {
-        if(requestHeaders.containsKey("Authorization")) {
-            String value = requestHeaders.getFirst("Authorization");
+        if(requestHeaders.containsKey(AuthorizationType.Constant.AUTHORIZATION)) {
+            String value = requestHeaders.getFirst(AuthorizationType.Constant.AUTHORIZATION);
             if(value != null) {
-                if(value.startsWith("Bearer ")) {
-                    dataContext.uiContext().authTypes().setSelectedItem("Bearer Token");
+                if(value.startsWith(AuthorizationType.Constant.BEARER_SPACE)) {
+                    dataContext.uiContext().authTypes().setSelectedItem(AuthorizationType.BEARER_TOKEN.type());
                     dataContext.uiContext().bearerTokenTextField().setText(value.substring(7));
-                } else if(value.startsWith("Basic ")) {
+                }
+                else if(value.startsWith(AuthorizationType.Constant.BASIC_SPACE)) {
                     try {
                         String decoded = new String(Base64.getDecoder().decode(value.substring(6)));
                         String[] parts = decoded.split(":",2);
                         if(parts.length==2) {
-                            dataContext.uiContext().authTypes().setSelectedItem("Basic Auth");
+                            dataContext.uiContext().authTypes().setSelectedItem(AuthorizationType.BASIC_AUTH.type());
                             dataContext.uiContext().userNameTextField().setText(parts[0]);
                             dataContext.uiContext().passwordTextField().setText(parts[1]);
                         }
@@ -261,6 +267,7 @@ public class AppDaakiaService extends BaseDaakiaService {
                     ApplicationManager.getApplication().invokeLater(() -> {
                         treeModel.setRoot(rootNode);
                         treeModel.reload();
+                        TreeUtils.expandAllNodes(collectionStoreTree);
                     });
                 }
             });
@@ -439,18 +446,17 @@ public class AppDaakiaService extends BaseDaakiaService {
 
     private void createHeader(DataContext dataContext, String headerKey, String headerValue) {
         String rowId = UUID.randomUUID().toString();
-
-        TextInputField headerKeyField = new TextInputField("Header "+(dataContext.uiContext().headerTextFields().size() + 1));
+        DaakiaAutoSuggestField headerKeyField = new DaakiaAutoSuggestField("Header "+(dataContext.uiContext().headerTextFields().size() + 1), HttpHeaderKey.headerKeys(), dataContext);
         headerKeyField.setPreferredSize(new Dimension(300, 35));
         headerKeyField.setText(headerKey);
 
-        TextInputField headerValueField = new TextInputField("Value "+(dataContext.uiContext().headerTextFields().size() + 1));
+        DaakiaAutoSuggestField headerValueField = new DaakiaAutoSuggestField("Value "+(dataContext.uiContext().headerTextFields().size() + 1), HttpHeaderValue.headerValues(), dataContext);
         headerValueField.setPreferredSize(new Dimension(320, 35));
         headerValueField.setText(headerValue);
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        headerPanel.add(headerKeyField);
-        headerPanel.add(headerValueField);
+        headerPanel.add(headerKeyField.instance());
+        headerPanel.add(headerValueField.instance());
 
         IconButton deleteHeaderButton = new IconButton(DaakiaIcons.DeleteIcon, new Dimension(40, 45));
         headerPanel.add(deleteHeaderButton);
@@ -459,7 +465,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         headersPanel.add(headerPanel);
         headersPanel.revalidate();
         headersPanel.repaint();
-        List<TextInputField> headerKeyValFields = List.of(headerKeyField, headerValueField);
+        List<DaakiaAutoSuggestField> headerKeyValFields = List.of(headerKeyField, headerValueField);
         dataContext.uiContext().headerTextFields().put(rowId, headerKeyValFields);
         headerScrollPanel.setVisible(true);
 

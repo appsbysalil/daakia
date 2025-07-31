@@ -33,10 +33,6 @@ public class DebugLogPanel extends BaseDaakiaPanel<DebugLogPanel> {
     }
 
     @Override
-    public void initStyle() {
-    }
-
-    @Override
     public void initChildrenLayout() {
         add(logEditor, BorderLayout.CENTER);
     }

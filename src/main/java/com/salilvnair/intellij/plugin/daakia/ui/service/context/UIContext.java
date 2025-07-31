@@ -19,7 +19,7 @@ import java.util.Map;
 @Setter
 public class UIContext {
     // request response components
-    private Map<String, List<TextInputField>> headerTextFields;
+    private Map<String, List<DaakiaAutoSuggestField>> headerTextFields;
     private Map<String, List<TextInputField>> formDataTextFields;
     private Map<String, File> formDataFileFields;
     private DaakiaEditorX requestTextArea;
@@ -69,7 +69,7 @@ public class UIContext {
 
 
 
-    public Map<String, List<TextInputField>> headerTextFields() {
+    public Map<String, List<DaakiaAutoSuggestField>> headerTextFields() {
         if (headerTextFields == null) {
             headerTextFields =  new HashMap<>();
         }

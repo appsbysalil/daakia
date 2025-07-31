@@ -34,10 +34,6 @@ public class RequestScriptPanel extends BaseDaakiaPanel<RequestScriptPanel> {
     }
 
     @Override
-    public void initStyle() {
-    }
-
-    @Override
     public void initChildrenLayout() {
         add(labeledPanel("Pre Request", preRequestArea));
         add(labeledPanel("Post Request", postRequestArea));

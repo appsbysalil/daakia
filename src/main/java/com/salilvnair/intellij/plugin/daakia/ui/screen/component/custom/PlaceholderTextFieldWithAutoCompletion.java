@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.ui.JBColor;
@@ -15,6 +16,14 @@ import java.util.List;
 
 public class PlaceholderTextFieldWithAutoCompletion extends TextFieldWithAutoCompletion<String> {
     private final String placeholder;
+
+    public void setText(String text) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            ApplicationManager.getApplication().runWriteAction(() -> {
+                getDocument().setText(text);
+            });
+        });
+    }
 
     public PlaceholderTextFieldWithAutoCompletion(Project project, String placeholder, List<String> variants, boolean autoComplete, String initialText) {
         super(project, new DaakiaTextFieldCompletionProvider(variants), true, initialText);

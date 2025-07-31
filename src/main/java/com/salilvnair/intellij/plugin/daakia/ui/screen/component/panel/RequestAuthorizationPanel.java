@@ -7,7 +7,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInpu
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.PasswordInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.AuthorizationType;
 import javax.swing.*;
 import java.awt.*;
 
@@ -35,16 +35,16 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
 
     @Override
     public void initComponents() {
-        authTypes = new ComboBox<>(new String[]{"None","Basic Auth", "Bearer Token"});
+        authTypes = new ComboBox<>(AuthorizationType.types());
         authPanel = new JPanel();
-        TextInputField userNameTextField = new TextInputField("Username");
+        TextInputField userNameTextField = new TextInputField(AuthorizationType.Constant.USERNAME);
         userNameTextField.setPreferredSize(new Dimension(400, 35));
 
-        passwordTextField = new PasswordInputField("Password");
+        passwordTextField = new PasswordInputField(AuthorizationType.Constant.PASSWORD);
         passwordTextField.setPreferredSize(new Dimension(400, 35));
         passwordToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,35));
 
-        bearerTokenTextField = new PasswordInputField("Token");
+        bearerTokenTextField = new PasswordInputField(AuthorizationType.Constant.TOKEN);
         bearerTokenTextField.setPreferredSize(new Dimension(600,35));
         bearerToggle = new IconButton(DaakiaIcons.EyeIcon, new Dimension(40,35));
 
@@ -75,7 +75,7 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
 
         bearerTokenTextBoxPanel.add(bearerTokenContainer, BorderLayout.NORTH);
 
-        JLabel authTypeLabel = new JLabel("Authentication Type");
+        JLabel authTypeLabel = new JLabel(AuthorizationType.Constant.AUTHORIZATION_TYPE);
         JPanel authTypeHeaderPanel = new JPanel();
         authTypeHeaderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         authTypeHeaderPanel.add(authTypeLabel);
@@ -99,10 +99,6 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
     }
 
     @Override
-    public void initStyle() {
-    }
-
-    @Override
     public void initChildrenLayout() {
         add(authPanel, BorderLayout.CENTER);
     }
@@ -111,15 +107,15 @@ public class RequestAuthorizationPanel extends BaseDaakiaPanel<RequestAuthorizat
     public void initListeners() {
         authTypes.addActionListener(e -> {
             maskPassword = true; // Reset mask state when auth type changes
-            if ("None".equals(authTypes.getSelectedItem())) {
+            if (AuthorizationType.NONE.type().equals(authTypes.getSelectedItem())) {
                 basicAuthTextboxPanel.setVisible(false);
                 bearerTokenTextBoxPanel.setVisible(false);
             }
-            else if ("Basic Auth".equals(authTypes.getSelectedItem())) {
+            else if (AuthorizationType.BASIC_AUTH.type().equals(authTypes.getSelectedItem())) {
                 basicAuthTextboxPanel.setVisible(true);
                 bearerTokenTextBoxPanel.setVisible(false);
             }
-            else if ("Bearer Token".equals(authTypes.getSelectedItem())) {
+            else if (AuthorizationType.BEARER_TOKEN.type().equals(authTypes.getSelectedItem())) {
                 bearerTokenTextBoxPanel.setVisible(true);
                 basicAuthTextboxPanel.setVisible(false);
             }
