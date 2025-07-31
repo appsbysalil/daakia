@@ -77,6 +77,22 @@ public class DaakiaGlobalEventPublisher {
         publishSync(event);
     }
 
+    public void onDeleteHistoryNode(DaakiaHistory history) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DELETE_HISTORY_NODE);
+        event.setSelectedDaakiaHistory(history);
+        publishSync(event);
+    }
+
+    public void onRestoreHistoryNode(DaakiaHistory history) {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RESTORE_HISTORY_NODE);
+        event.setSelectedDaakiaHistory(history);
+        publishSync(event);
+    }
+
+    public void onRestoreCollections() {
+        publishSync(DaakiaEventType.ON_RESTORE_COLLECTIONS);
+    }
+
     public void onSelectStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_SELECT_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);

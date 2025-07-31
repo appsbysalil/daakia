@@ -114,9 +114,11 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             if(selectionPaths == null) {
                 selectionPaths = new TreePath[]{ collectionStoreTree.getSelectionPath() };
             }
+            DaakiaStore rootStore = sideNavContext().daakiaStore();
             for (TreePath selectionPath : selectionPaths) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                 if (selectedNode != null && selectedNode != latestRootNode) {
+                    markNodeInactive(rootStore, selectedNode);
                     DefaultTreeModel model = (DefaultTreeModel) collectionStoreTree.getModel();
                     model.removeNodeFromParent(selectedNode);
                 }
@@ -320,5 +322,19 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 JOptionPane.showMessageDialog(this, "Failed to export: " + ex.getMessage());
             }
         }
+    }
+
+    private void markNodeInactive(DaakiaStore root, DefaultMutableTreeNode node) {
+        Object obj = node.getUserObject();
+        if(obj instanceof DaakiaStore storeObj) {
+            markByUuid(root, storeObj.getUuid());
+        }
+        else if(obj instanceof DaakiaStoreRecord rec) {
+            markByUuid(root, rec.getUuid());
+        }
+    }
+
+    private void markByUuid(DaakiaStore store, String uuid) {
+        DaakiaUtils.updateActiveStatusByUuid(store, uuid, false);
     }
 }
