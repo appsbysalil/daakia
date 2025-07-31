@@ -23,7 +23,6 @@ public class HistoryDao {
                 try {
                     DaakiaHistory h = JsonUtils.jsonToPojo(json, DaakiaHistory.class);
                     h.setId(rs.getInt("id"));
-                    h.setActive("Y");
                     list.add(h);
                 } catch (Exception ignore) {}
             }
@@ -42,7 +41,6 @@ public class HistoryDao {
                 try {
                     DaakiaHistory h = JsonUtils.jsonToPojo(json, DaakiaHistory.class);
                     h.setId(rs.getInt("id"));
-                    h.setActive("N");
                     list.add(h);
                 } catch (Exception ignore) {}
             }
@@ -59,7 +57,6 @@ public class HistoryDao {
             try (PreparedStatement ps = conn.prepareStatement("INSERT INTO history_records(data,active) VALUES(?,?)")) {
                 for (DaakiaHistory h : flat) {
                     try {
-                        h.setActive("Y");
                         ps.setString(1, JsonUtils.pojoToJson(h));
                         ps.setString(2, "Y");
                         ps.executeUpdate();

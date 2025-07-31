@@ -33,17 +33,9 @@ public class DaakiaUtils {
 
     public static DaakiaStore convertTreeToCollectionStore(DaakiaStore parentNode, DefaultMutableTreeNode node) {
         parentNode.setName(node.getUserObject() != null ? node.getUserObject().toString(): "");
-        if(parentNode.getUuid() == null) {
-            parentNode.setUuid(java.util.UUID.randomUUID().toString());
-        }
-        parentNode.setActive("Y");
         parentNode.setCollection(true);
         if(node.isLeaf()) {
             if(node.getUserObject() instanceof DaakiaStoreRecord daakiaStoreRecord) {
-                daakiaStoreRecord.setActive("Y");
-                if(daakiaStoreRecord.getUuid() == null) {
-                    daakiaStoreRecord.setUuid(java.util.UUID.randomUUID().toString());
-                }
                 parentNode.setRecord(daakiaStoreRecord);
                 parentNode.setCollection(false);
             } else {
@@ -66,94 +58,16 @@ public class DaakiaUtils {
         return parentNode;
     }
 
-    public static void mergeInactiveNodes(DaakiaStore target, DaakiaStore source) {
-        if(source.getChildren() == null) {
-            return;
-        }
-        if(target.getChildren() == null) {
-            target.setChildren(new ArrayList<>());
-        }
-        for(DaakiaStore srcChild : source.getChildren()) {
-            DaakiaStore matching = findChildByUuid(target, srcChild.getUuid());
-            if(matching == null) {
-                if("N".equals(srcChild.getActive())) {
-                    target.getChildren().add(srcChild);
-                    continue;
-                }
-                matching = srcChild;
-                target.getChildren().add(matching);
-            }
-            mergeInactiveNodes(matching, srcChild);
-        }
-    }
-
-    private static DaakiaStore findChildByUuid(DaakiaStore parent, String uuid) {
-        if(parent.getChildren() == null || uuid == null) {
-            return null;
-        }
-        for(DaakiaStore c : parent.getChildren()) {
-            if(uuid.equals(c.getUuid())) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Update active status for the node matching the uuid.
-     */
-    public static void updateActiveStatusByUuid(DaakiaStore store, String uuid, boolean active) {
-        if(store == null || uuid == null) return;
-        if(uuid.equals(store.getUuid())) {
-            store.setActive(active ? "Y" : "N");
-        }
-        if(store.getRecord()!=null && uuid.equals(store.getRecord().getUuid())) {
-            store.getRecord().setActive(active ? "Y" : "N");
-        }
-        if(store.getChildren()!=null) {
-            for(DaakiaStore child : store.getChildren()) {
-                updateActiveStatusByUuid(child, uuid, active);
-            }
-        }
-    }
-
 
     public static DefaultMutableTreeNode convertCollectionStoreToTreeNode(DaakiaStore daakiaStore, DefaultMutableTreeNode treeNode) {
-        treeNode.setUserObject(daakiaStore.getRecord() == null ? daakiaStore : daakiaStore.getRecord());
+        treeNode.setUserObject(daakiaStore.getRecord() == null ? daakiaStore.getName() : daakiaStore.getRecord());
         treeNode.removeAllChildren();
 
         if(daakiaStore.getChildren() != null && !daakiaStore.getChildren().isEmpty()) {
             for (DaakiaStore childDaakiaStore : daakiaStore.getChildren()) {
-                if(!"N".equals(childDaakiaStore.getActive())) {
-                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode();
-                    convertCollectionStoreToTreeNode(childDaakiaStore, childNode);
-                    treeNode.add(childNode);
-                }
-            }
-        }
-        return treeNode;
-    }
-
-    public static DefaultMutableTreeNode convertCollectionStoreToTreeNodeOnlyInactive(DaakiaStore daakiaStore, DefaultMutableTreeNode treeNode) {
-        if("N".equals(daakiaStore.getActive())) {
-            treeNode.setUserObject(daakiaStore.getRecord() == null ? daakiaStore : daakiaStore.getRecord());
-        }
-        treeNode.removeAllChildren();
-
-        if(daakiaStore.getChildren() != null && !daakiaStore.getChildren().isEmpty()) {
-            for (DaakiaStore childDaakiaStore : daakiaStore.getChildren()) {
-                if("N".equals(childDaakiaStore.getActive())) {
-                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode();
-                    convertCollectionStoreToTreeNodeOnlyInactive(childDaakiaStore, childNode);
-                    treeNode.add(childNode);
-                } else {
-                    // still traverse to check if any children inactive
-                    DefaultMutableTreeNode temp = new DefaultMutableTreeNode();
-                    convertCollectionStoreToTreeNodeOnlyInactive(childDaakiaStore, temp);
-                    if(temp.getChildCount()>0) {
-                        treeNode.add(temp);
-                    }
-                }
+                DefaultMutableTreeNode childNode = new DefaultMutableTreeNode();
+                convertCollectionStoreToTreeNode(childDaakiaStore, childNode);
+                treeNode.add(childNode);
             }
         }
         return treeNode;
@@ -162,14 +76,11 @@ public class DaakiaUtils {
     public static DefaultMutableTreeNode convertCollectionStoreToTreeNodeFilterBySearchText(DaakiaStore daakiaStore, DefaultMutableTreeNode collectionStoreRootNode, String searchText) {
         if(daakiaStore.getChildren()!=null && !daakiaStore.getChildren().isEmpty()) {
             for (DaakiaStore childDaakiaStore : daakiaStore.getChildren()) {
-                if("N".equals(childDaakiaStore.getActive())) {
-                    continue;
-                }
                 if((childDaakiaStore.getRecord() == null)
                     || (childDaakiaStore.getRecord()!=null &&
                         (childDaakiaStore.getRecord().getUrl()!=null && childDaakiaStore.getRecord().getUrl().contains(searchText) || childDaakiaStore.getRecord().getDisplayName()!=null && childDaakiaStore.getRecord().getDisplayName().contains(searchText)))
                 ) {
-                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDaakiaStore.getRecord() == null ? childDaakiaStore : childDaakiaStore.getRecord());
+                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDaakiaStore.getRecord() == null ? childDaakiaStore.getName() : childDaakiaStore.getRecord());
                     convertCollectionStoreToTreeNodeFilterBySearchText(childDaakiaStore, childNode, searchText);
                     if(childNode.getChildCount() > 0 || (childNode.getUserObject() !=null && childNode.getUserObject() instanceof DaakiaStoreRecord)) {
                         collectionStoreRootNode.add(childNode);

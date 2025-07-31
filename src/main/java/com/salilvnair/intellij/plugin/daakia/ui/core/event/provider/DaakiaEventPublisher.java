@@ -90,23 +90,6 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
-    public void onDeleteHistoryNode(DaakiaHistory history) {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_DELETE_HISTORY_NODE);
-        event.setSelectedDaakiaHistory(history);
-        publisher.publish(event);
-    }
-
-    public void onRestoreHistoryNode(DaakiaHistory history) {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RESTORE_HISTORY_NODE);
-        event.setSelectedDaakiaHistory(history);
-        publisher.publish(event);
-    }
-
-    public void onRestoreCollections() {
-        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_RESTORE_COLLECTIONS);
-        publisher.publish(event);
-    }
-
     public void onClickStoreCollectionNode(DaakiaStoreRecord selectedStoreRecord) {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_SELECT_STORE_COLLECTION_NODE);
         event.setSelectedDaakiaStoreRecord(selectedStoreRecord);

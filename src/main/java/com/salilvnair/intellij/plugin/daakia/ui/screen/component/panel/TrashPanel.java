@@ -12,8 +12,6 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPane
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -56,32 +54,6 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
     @Override
     public void initListeners() {
         loadTrashData();
-        historyTrashTree.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseReleased(java.awt.event.MouseEvent e) {
-                if (javax.swing.SwingUtilities.isRightMouseButton(e)) {
-                    Object obj = TreeUtils.extractSelectedNodeUserObject(historyTrashTree, e);
-                    if(obj instanceof DaakiaHistory history) {
-                        showHistoryPopup(e.getComponent(), e.getX(), e.getY(), history);
-                    }
-                }
-            }
-        });
-
-        collectionTrashTree.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseReleased(java.awt.event.MouseEvent e) {
-                if (javax.swing.SwingUtilities.isRightMouseButton(e)) {
-                    Object obj = TreeUtils.extractSelectedNodeUserObject(collectionTrashTree, e);
-                    if(obj instanceof DaakiaStore store) {
-                        showCollectionPopup(e.getComponent(), e.getX(), e.getY(), store.getUuid());
-                    }
-                    else if(obj instanceof DaakiaStoreRecord rec) {
-                        showCollectionPopup(e.getComponent(), e.getX(), e.getY(), rec.getUuid());
-                    }
-                }
-            }
-        });
     }
 
     private void loadTrashData() {
@@ -93,43 +65,13 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         historyTrashTree.setModel(new DefaultTreeModel(historyRoot));
         TreeUtils.expandAllNodes(historyTrashTree);
 
-        DaakiaStore store = new CollectionDao().loadStore();
+        DaakiaStore store = new CollectionDao().loadInactiveStore();
         DefaultMutableTreeNode colRoot = new DefaultMutableTreeNode("Collections");
         if(store != null) {
-            DaakiaUtils.convertCollectionStoreToTreeNodeOnlyInactive(store, colRoot);
+            DaakiaUtils.convertCollectionStoreToTreeNode(store, colRoot);
         }
         collectionTrashTree.setModel(new DefaultTreeModel(colRoot));
         collectionTrashTree.setRootVisible(false);
         TreeUtils.expandAllNodes(collectionTrashTree);
-    }
-
-    private void showHistoryPopup(Component c, int x, int y, DaakiaHistory history) {
-        JPopupMenu menu = new JPopupMenu();
-        JMenuItem restore = new JMenuItem("Restore");
-        restore.addActionListener(e -> restoreHistory(history));
-        menu.add(restore);
-        menu.show(c, x, y);
-    }
-
-    private void restoreHistory(DaakiaHistory history) {
-        globalEventPublisher().onRestoreHistoryNode(history);
-        daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_HISTORY, dataContext);
-        loadTrashData();
-    }
-
-    private void showCollectionPopup(Component c, int x, int y, String uuid) {
-        JPopupMenu menu = new JPopupMenu();
-        JMenuItem restore = new JMenuItem("Restore");
-        restore.addActionListener(e -> restoreCollection(uuid));
-        menu.add(restore);
-        menu.show(c, x, y);
-    }
-
-    private void restoreCollection(String uuid) {
-        DaakiaStore rootStore = sideNavContext().daakiaStore();
-        DaakiaUtils.updateActiveStatusByUuid(rootStore, uuid, true);
-        daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
-        globalEventPublisher().onRestoreCollections();
-        loadTrashData();
     }
 }

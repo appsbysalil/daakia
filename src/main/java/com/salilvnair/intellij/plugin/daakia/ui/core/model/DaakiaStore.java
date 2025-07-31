@@ -9,9 +9,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DaakiaStore {
     private String name;
-    private String uuid;
-    /** indicator if this entry is active. default is "Y" */
-    private String active = "Y";
     private DaakiaStoreRecord record;
     private boolean collection;
     private boolean emptyCollection;
@@ -23,22 +20,6 @@ public class DaakiaStore {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public String getActive() {
-        return active;
-    }
-
-    public void setActive(String active) {
-        this.active = active;
     }
 
     public DaakiaStoreRecord getRecord() {
@@ -71,10 +52,5 @@ public class DaakiaStore {
 
     public void setEmptyCollection(boolean emptyCollection) {
         this.emptyCollection = emptyCollection;
-    }
-
-    @Override
-    public String toString() {
-        return name != null ? name : "";
     }
 }

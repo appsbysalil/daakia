@@ -8,9 +8,6 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.StoreDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
-import com.salilvnair.intellij.plugin.daakia.ui.service.factory.DaakiaFactory;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
@@ -49,21 +46,6 @@ public class StoreDaakiaService extends BaseDaakiaService {
                 loadRequest(dataContext);
             });
         }
-        else if(StoreDaakiaType.MARK_HISTORY_ENTRY_FOR_DELETION.equals(type)) {
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                markHistoryForDeletion(dataContext);
-            });
-        }
-        else if(StoreDaakiaType.RESTORE_HISTORY_ENTRY.equals(type)) {
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                restoreHistoryEntry(dataContext);
-            });
-        }
-        else if(StoreDaakiaType.RESTORE_STORE_COLLECTIONS.equals(type)) {
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                saveRequest(dataContext);
-            });
-        }
 
 
         return dataContext.daakiaContext();
@@ -71,6 +53,7 @@ public class StoreDaakiaService extends BaseDaakiaService {
 
     private void markRequestForDeletion(DataContext dataContext) {
         saveRequest(dataContext);
+        new CollectionDao().markActiveAsync(false);
     }
 
 
@@ -103,31 +86,9 @@ public class StoreDaakiaService extends BaseDaakiaService {
 
     private void saveRequest(DataContext dataContext) {
         DefaultMutableTreeNode rootNode = dataContext.sideNavContext().collectionStoreRootNode();
-        DaakiaStore newStore = DaakiaUtils.convertTreeToCollectionStore(rootNode);
-        DaakiaStore existing = dataContext.sideNavContext().daakiaStore();
-        if(existing != null) {
-            DaakiaUtils.mergeInactiveNodes(newStore, existing);
-        }
-        dataContext.sideNavContext().setDaakiaStore(newStore);
-        new CollectionDao().saveStoreAsync(newStore);
-    }
-
-    private void markHistoryForDeletion(DataContext dataContext) {
-        DaakiaHistory h = dataContext.sideNavContext().selectedDaakiaHistory();
-        if(h != null) {
-            new HistoryDao().markActiveAsync(h.getId(), false);
-        }
-    }
-
-    private void restoreHistoryEntry(DataContext dataContext) {
-        DaakiaHistory h = dataContext.sideNavContext().selectedDaakiaHistory();
-        if(h != null) {
-            new HistoryDao().markActiveAsync(h.getId(), true);
-            loadHistory(dataContext);
-            ApplicationManager.getApplication().invokeLater(() ->
-                DaakiaFactory.generate(DaakiaType.APP).execute(AppDaakiaType.INIT_HISTORY, dataContext)
-            );
-        }
+        DaakiaStore store = DaakiaUtils.convertTreeToCollectionStore(rootNode);
+        dataContext.sideNavContext().setDaakiaStore(store);
+        new CollectionDao().saveStoreAsync(store);
     }
 
 }
