@@ -73,4 +73,20 @@ public final class TreeUtils {
         return selectedNode;
     }
 
+    public static DefaultMutableTreeNode deepCopy(DefaultMutableTreeNode original) {
+        if (original == null) return null;
+
+        // Create new node with same user object
+        DefaultMutableTreeNode copy = new DefaultMutableTreeNode(original.getUserObject());
+
+        // Recursively copy children
+        Enumeration<?> children = original.children();
+        while (children.hasMoreElements()) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+            copy.add(deepCopy(child));
+        }
+
+        return copy;
+    }
+
 }

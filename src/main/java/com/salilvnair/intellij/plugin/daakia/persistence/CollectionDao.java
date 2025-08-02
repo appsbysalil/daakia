@@ -2,12 +2,29 @@ package com.salilvnair.intellij.plugin.daakia.persistence;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
+import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
-
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.sql.*;
 
 /** DAO for collection/store records */
 public class CollectionDao {
+
+    private DbTreeStoreService dbTreeStoreService;
+
+    private volatile DbTreeStoreService treeStoreService;
+
+    public DbTreeStoreService dbTreeStoreService(Connection conn) {
+        if (treeStoreService == null) {
+            synchronized (this) {
+                if (treeStoreService == null) {
+                    treeStoreService = new DbTreeStoreService(conn);
+                }
+            }
+        }
+        return treeStoreService;
+    }
+
 
     public DaakiaStore loadStore() {
         try (Connection conn = DaakiaDatabase.getInstance().getConnection();
@@ -35,6 +52,16 @@ public class CollectionDao {
             }
         } catch (SQLException ignore) {}
         return null;
+    }
+
+    public void saveStoreNew(DataContext dataContext) {
+        DefaultMutableTreeNode root = dataContext.sideNavContext().collectionStoreRootNode();
+        try(Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+            dbTreeStoreService(conn).saveTree(root);
+        }
+        catch (Exception e) {
+            System.out.println("Error saving store tree: " + e.getMessage());
+        }
     }
 
     public void saveStore(DaakiaStore store) {
@@ -71,18 +98,29 @@ public class CollectionDao {
         ApplicationManager.getApplication().executeOnPooledThread(() -> markActive(active));
     }
 
-    public void loadStoreAsync(java.util.function.Consumer<DaakiaStore> callback) {
+    public void loadStoreAsync(DataContext dataContext, java.util.function.Consumer<DefaultMutableTreeNode> callback) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            DaakiaStore daakiaStore = loadStore();
-            if (callback != null) {
-                ApplicationManager.getApplication().invokeLater(() -> callback.accept(daakiaStore));
+            try(Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+                DefaultMutableTreeNode root = dbTreeStoreService(conn).loadTree(true);
+
+                // Cache into context
+                dataContext.sideNavContext().setCollectionStoreRootNode(root);
+
+                if (callback != null) {
+                    ApplicationManager.getApplication().invokeLater(() -> callback.accept(root));
+                }
+            }
+            catch (SQLException e) {
+                System.out.println("Error loading store tree: " + e.getMessage());
             }
         });
     }
 
-    public void saveStoreAsync(DaakiaStore store) {
+
+    public void saveStoreAsync(DataContext dataContext) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            saveStore(store);
+//            saveStore(store);
+            saveStoreNew(dataContext);
         });
     }
 }
