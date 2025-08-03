@@ -82,6 +82,9 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN)) {
                 exportPostmanCollection();
             }
+            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_REFRESH_COLLECTION_STORE_PANEL)) {
+                daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
+            }
         });
     }
 

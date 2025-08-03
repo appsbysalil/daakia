@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.treeStructure.Tree;
@@ -28,6 +29,8 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
     private Tree historyTrashTree;
     private Tree collectionTrashTree;
     private JPanel collectionStoreTreePanel;
+    private JButton restoreButton;
+    private JButton deletePermanentlyButton;
 
     public TrashPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -45,6 +48,10 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         historyTrashTree = new Tree();
         collectionTrashTree = new Tree();
         collectionStoreTreePanel = new JPanel(new BorderLayout());
+        restoreButton = createActionButton("Restore", new JBColor(new Color(0, 120, 215), new Color(0, 120, 215)));
+        deletePermanentlyButton = createActionButton("Delete Permanently", new JBColor(new Color(200, 55, 55), new Color(200, 55, 55)));
+        restoreButton.setEnabled(false);
+        deletePermanentlyButton.setEnabled(false);
         tabbedPane.addTab("History", new JBScrollPane(historyTrashTree));
         tabbedPane.addTab("Collection", collectionStoreTreePanel);
     }
@@ -52,6 +59,10 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
     @Override
     public void initChildrenLayout() {
         add(tabbedPane, BorderLayout.CENTER);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(restoreButton);
+        buttonPanel.add(deletePermanentlyButton);
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
     @Override
@@ -62,6 +73,10 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
                 loadTrashData();
             }
         });
+        collectionTrashTree.addTreeSelectionListener(e -> updateActionButtonsState());
+        tabbedPane.addChangeListener(e -> updateActionButtonsState());
+        restoreButton.addActionListener(e -> restoreSelectedNode());
+        deletePermanentlyButton.addActionListener(e -> deleteSelectedNode());
     }
 
     private void loadTrashData() {
@@ -98,6 +113,7 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         TreeUtils.expandAllNodes(collectionTrashTree);
         DefaultTreeModel collectionTrashTreeModel = (DefaultTreeModel) collectionTrashTree.getModel();
         collectionTrashTreeModel.reload();
+        updateActionButtonsState();
     }
 
     private DefaultMutableTreeNode filterInactiveNodes(DefaultMutableTreeNode node) {
@@ -117,5 +133,45 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
             return filteredNode;
         }
         return null;
+    }
+
+    private JButton createActionButton(String text, JBColor color) {
+        JButton button = new JButton(text);
+        button.setBackground(color);
+        button.setForeground(JBColor.WHITE);
+        button.setOpaque(true);
+        button.setBorderPainted(false);
+        return button;
+    }
+
+    private void updateActionButtonsState() {
+        boolean collectionTab = tabbedPane.getSelectedComponent() == collectionStoreTreePanel;
+        boolean hasSelection = collectionTrashTree.getLastSelectedPathComponent() != null;
+        restoreButton.setEnabled(collectionTab && hasSelection);
+        deletePermanentlyButton.setEnabled(collectionTab && hasSelection);
+    }
+
+    private void restoreSelectedNode() {
+        DefaultMutableTreeNode selected = (DefaultMutableTreeNode) collectionTrashTree.getLastSelectedPathComponent();
+        if (selected != null && selected.getUserObject() instanceof DaakiaBaseStoreData base) {
+            new CollectionDao().markNodeActiveAsync(base.getUuid(), () -> {
+                globalEventPublisher().onRefreshTrashPanel();
+                globalEventPublisher().onRefreshCollectionStorePanel();
+            });
+        }
+    }
+
+    private void deleteSelectedNode() {
+        DefaultMutableTreeNode selected = (DefaultMutableTreeNode) collectionTrashTree.getLastSelectedPathComponent();
+        if (selected != null && selected.getUserObject() instanceof DaakiaBaseStoreData base) {
+            int res = JOptionPane.showConfirmDialog(this, "Are you sure? This action cannot be undone.",
+                    "Delete Permanently", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (res == JOptionPane.YES_OPTION) {
+                new CollectionDao().deleteNodeAsync(base.getUuid(), () -> {
+                    globalEventPublisher().onRefreshTrashPanel();
+                    globalEventPublisher().onRefreshCollectionStorePanel();
+                });
+            }
+        }
     }
 }
