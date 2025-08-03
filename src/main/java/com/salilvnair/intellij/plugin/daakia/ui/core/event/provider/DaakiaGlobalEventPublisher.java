@@ -107,6 +107,10 @@ public class DaakiaGlobalEventPublisher {
         publishSync(DaakiaEventType.ON_REFRESH_TRASH_PANEL);
     }
 
+    public void onRefreshCollectionStorePanel() {
+        publishSync(DaakiaEventType.ON_REFRESH_COLLECTION_STORE_PANEL);
+    }
+
     public void onClickSideNavVisibilityToggler() {
         publishSync(DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER);
     }
