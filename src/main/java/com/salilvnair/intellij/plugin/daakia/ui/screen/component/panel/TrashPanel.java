@@ -6,6 +6,8 @@ import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.UIUtil;
 import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
 import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
+import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.CollectionStoreTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
@@ -54,6 +56,11 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
     @Override
     public void initListeners() {
         loadTrashData();
+        listenGlobal(event -> {
+            if (DaakiaEvent.ofType(event, DaakiaEventType.ON_REFRESH_TRASH_PANEL)) {
+                loadTrashData();
+            }
+        });
     }
 
     private void loadTrashData() {
@@ -65,7 +72,7 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         historyTrashTree.setModel(new DefaultTreeModel(historyRoot));
         TreeUtils.expandAllNodes(historyTrashTree);
 
-        new CollectionDao().loadStoreAsync(dataContext, defaultMutableTreeNode -> {
+        new CollectionDao().loadStoreAsync(dataContext, false, defaultMutableTreeNode -> {
             // Callback to handle after loading store
             dynamicTree(defaultMutableTreeNode, collectionStoreTreePanel);
         });

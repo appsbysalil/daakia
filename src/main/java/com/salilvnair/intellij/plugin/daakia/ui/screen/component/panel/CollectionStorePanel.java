@@ -106,9 +106,18 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         deleteMenuItem.setEnabled(false);
         moreOptionsMenu.add(deleteMenuItem);
 
-
         deleteMenuItem.addActionListener(e -> {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
+            if (selectedNode != null) {
+                DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+                if (parent != null) {
+                    collectionStoreTreeModel.removeNodeFromParent(selectedNode);
+                    collectionStoreTreeModel.reload(parent);
+                    TreeUtils.expandAllNodes(collectionStoreTree);
+                }
+            }
             globalEventPublisher().onClickDeleteCollections();
+            globalEventPublisher().onRefreshTrashPanel();
         });
 
 
