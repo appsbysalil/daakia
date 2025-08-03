@@ -99,12 +99,18 @@ public class CollectionDao {
     }
 
     public void loadStoreAsync(DataContext dataContext, java.util.function.Consumer<DefaultMutableTreeNode> callback) {
+        loadStoreAsync(dataContext, true, callback);
+    }
+
+    public void loadStoreAsync(DataContext dataContext, boolean onlyActive, java.util.function.Consumer<DefaultMutableTreeNode> callback) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try(Connection conn = DaakiaDatabase.getInstance().getConnection()) {
-                DefaultMutableTreeNode root = dbTreeStoreService(conn).loadTree(true);
+                DefaultMutableTreeNode root = dbTreeStoreService(conn).loadTree(onlyActive);
 
-                // Cache into context
-                dataContext.sideNavContext().setCollectionStoreRootNode(root);
+                // Cache into context only when active tree is requested
+                if (onlyActive) {
+                    dataContext.sideNavContext().setCollectionStoreRootNode(root);
+                }
 
                 if (callback != null) {
                     ApplicationManager.getApplication().invokeLater(() -> callback.accept(root));
