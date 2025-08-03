@@ -224,7 +224,17 @@ public class DbTreeStoreService {
     // MARK NODE INACTIVE
     // ============================
     public void markNodeInactive(String uuid) throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("UPDATE collection_records SET active = 0 WHERE uuid = ?")) {
+        // Update the node and all its descendants to inactive using a recursive CTE
+        String sql = """
+            WITH RECURSIVE descendants(id) AS (
+                SELECT id FROM collection_records WHERE uuid = ?
+                UNION ALL
+                SELECT c.id FROM collection_records c
+                JOIN descendants d ON c.parent_id = d.id
+            )
+            UPDATE collection_records SET active = 0 WHERE id IN (SELECT id FROM descendants)
+            """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, uuid);
             ps.executeUpdate();
         }

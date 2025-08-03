@@ -98,6 +98,17 @@ public class CollectionDao {
         ApplicationManager.getApplication().executeOnPooledThread(() -> markActive(active));
     }
 
+    public void markNodeInactiveAsync(String uuid) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+                dbTreeStoreService(conn).markNodeInactive(uuid);
+            }
+            catch (SQLException e) {
+                System.out.println("Error marking node inactive: " + e.getMessage());
+            }
+        });
+    }
+
     public void loadStoreAsync(DataContext dataContext, java.util.function.Consumer<DefaultMutableTreeNode> callback) {
         loadStoreAsync(dataContext, true, callback);
     }
