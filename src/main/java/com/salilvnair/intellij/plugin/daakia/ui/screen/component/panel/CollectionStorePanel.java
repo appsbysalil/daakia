@@ -7,6 +7,7 @@ import com.intellij.util.ui.UIUtil;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreCollection;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
@@ -108,7 +109,12 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
         deleteMenuItem.addActionListener(e -> {
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
+            DaakiaBaseStoreData storeData = null;
             if (selectedNode != null) {
+                Object userObject = selectedNode.getUserObject();
+                if(userObject instanceof DaakiaBaseStoreData baseStoreData) {
+                    storeData = baseStoreData;
+                }
                 DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
                 if (parent != null) {
                     collectionStoreTreeModel.removeNodeFromParent(selectedNode);
@@ -117,7 +123,13 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 }
             }
             globalEventPublisher().onClickDeleteCollections();
-            globalEventPublisher().onRefreshTrashPanel();
+            if(storeData != null) {
+                String uuid = storeData.getUuid();
+                new CollectionDao().markNodeInactiveAsync(uuid, () -> globalEventPublisher().onRefreshTrashPanel());
+            }
+            else {
+                globalEventPublisher().onRefreshTrashPanel();
+            }
         });
 
 
