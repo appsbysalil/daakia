@@ -8,6 +8,7 @@ import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
 import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.CollectionStoreTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
@@ -73,11 +74,13 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         TreeUtils.expandAllNodes(historyTrashTree);
 
         new CollectionDao().loadStoreAsync(dataContext, false, defaultMutableTreeNode -> {
-            // Callback to handle after loading store
-            dynamicTree(defaultMutableTreeNode, collectionStoreTreePanel);
+            DefaultMutableTreeNode inactiveRoot = filterInactiveNodes(defaultMutableTreeNode);
+            if (inactiveRoot == null) {
+                inactiveRoot = new DefaultMutableTreeNode("Collections");
+            }
+            dynamicTree(inactiveRoot, collectionStoreTreePanel);
         });
     }
-
 
     public void dynamicTree(DefaultMutableTreeNode defaultMutableTreeNode, JPanel collectionStoreTreePanel) {
         collectionTrashTree.setModel(new DefaultTreeModel(defaultMutableTreeNode));
@@ -86,7 +89,7 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         collectionTrashTree.setBackground(UIUtil.getTreeBackground());
         JScrollPane scrollPane = new JBScrollPane(collectionTrashTree);
 
-
+        collectionStoreTreePanel.removeAll();
         collectionStoreTreePanel.add(scrollPane, BorderLayout.CENTER);
         // Hide the root node
         collectionTrashTree.setRootVisible(false);
@@ -94,7 +97,25 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         // Expand all nodes in the collectionStoreTree
         TreeUtils.expandAllNodes(collectionTrashTree);
         DefaultTreeModel collectionTrashTreeModel = (DefaultTreeModel) collectionTrashTree.getModel();
-        dataContext.sideNavContext().setCollectionStoreRootNode(defaultMutableTreeNode);
         collectionTrashTreeModel.reload();
+    }
+
+    private DefaultMutableTreeNode filterInactiveNodes(DefaultMutableTreeNode node) {
+        Object userObject = node.getUserObject();
+        boolean inactive = userObject instanceof DaakiaBaseStoreData base && !base.isActive();
+
+        DefaultMutableTreeNode filteredNode = new DefaultMutableTreeNode(userObject);
+        for (int i = 0; i < node.getChildCount(); i++) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+            DefaultMutableTreeNode filteredChild = filterInactiveNodes(child);
+            if (filteredChild != null) {
+                filteredNode.add(filteredChild);
+            }
+        }
+
+        if (inactive || filteredNode.getChildCount() > 0) {
+            return filteredNode;
+        }
+        return null;
     }
 }

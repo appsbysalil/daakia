@@ -46,7 +46,12 @@ public class StoreDaakiaService extends BaseDaakiaService {
 
     private void markRequestForDeletion(DataContext dataContext) {
         saveRequest(dataContext);
-        new CollectionDao().markActiveAsync(false);
+        if (dataContext.sideNavContext().selectedDaakiaStoreRecord() != null) {
+            String uuid = dataContext.sideNavContext().selectedDaakiaStoreRecord().getUuid();
+            if (uuid != null) {
+                new CollectionDao().markNodeInactiveAsync(uuid);
+            }
+        }
     }
 
 
