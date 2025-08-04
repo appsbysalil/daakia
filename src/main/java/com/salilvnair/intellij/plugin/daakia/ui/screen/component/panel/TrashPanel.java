@@ -61,7 +61,7 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
     @Override
     public void initChildrenLayout() {
         add(tabbedPane, BorderLayout.CENTER);
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
         buttonPanel.add(restoreButton);
         buttonPanel.add(deletePermanentlyButton);
         JPanel bottomPanel = new JPanel(new BorderLayout());

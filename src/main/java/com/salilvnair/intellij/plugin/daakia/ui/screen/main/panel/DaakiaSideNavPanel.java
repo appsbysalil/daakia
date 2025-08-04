@@ -1,5 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
@@ -40,7 +41,7 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
         trashPanel = new TrashPanel(rootPane, dataContext);
         tabbedPane.addTab("  ", DaakiaIcons.HistoryIcon, historyPanel);
         tabbedPane.addTab("  ", DaakiaIcons.CollectionIcon, collectionStorePanel);
-        tabbedPane.addTab("  ", DaakiaIcons.DeleteIcon, trashPanel);
+        tabbedPane.addTab("  ", AllIcons.General.Delete, trashPanel);
         tabbedPane.setToolTipTextAt(0, "History");
         tabbedPane.setToolTipTextAt(1, "Collection");
         tabbedPane.setToolTipTextAt(2, "Trash");
