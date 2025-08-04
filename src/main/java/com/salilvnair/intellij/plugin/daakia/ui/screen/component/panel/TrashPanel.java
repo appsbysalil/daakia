@@ -1,6 +1,6 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
-import com.intellij.ui.JBColor;
+import com.intellij.icons.AllIcons;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.treeStructure.Tree;
@@ -9,8 +9,10 @@ import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
 import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
+import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.BasicButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.renderer.CollectionStoreTreeCellRenderer;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -29,8 +31,8 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
     private Tree historyTrashTree;
     private Tree collectionTrashTree;
     private JPanel collectionStoreTreePanel;
-    private JButton restoreButton;
-    private JButton deletePermanentlyButton;
+    private BasicButton restoreButton;
+    private BasicButton deletePermanentlyButton;
 
     public TrashPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -48,8 +50,8 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         historyTrashTree = new Tree();
         collectionTrashTree = new Tree();
         collectionStoreTreePanel = new JPanel(new BorderLayout());
-        restoreButton = createActionButton("Restore", new JBColor(new Color(0, 120, 215), new Color(0, 120, 215)));
-        deletePermanentlyButton = createActionButton("Delete Permanently", new JBColor(new Color(200, 55, 55), new Color(200, 55, 55)));
+        restoreButton = new BasicButton("Restore", AllIcons.Actions.Rollback);
+        deletePermanentlyButton = new BasicButton("Delete Permanently", DaakiaIcons.DeleteIcon);
         restoreButton.setEnabled(false);
         deletePermanentlyButton.setEnabled(false);
         tabbedPane.addTab("History", new JBScrollPane(historyTrashTree));
@@ -59,10 +61,12 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
     @Override
     public void initChildrenLayout() {
         add(tabbedPane, BorderLayout.CENTER);
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 0));
         buttonPanel.add(restoreButton);
         buttonPanel.add(deletePermanentlyButton);
-        add(buttonPanel, BorderLayout.SOUTH);
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(buttonPanel, BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
     @Override
@@ -133,15 +137,6 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
             return filteredNode;
         }
         return null;
-    }
-
-    private JButton createActionButton(String text, JBColor color) {
-        JButton button = new JButton(text);
-        button.setBackground(color);
-        button.setForeground(JBColor.WHITE);
-        button.setOpaque(true);
-        button.setBorderPainted(false);
-        return button;
     }
 
     private void updateActionButtonsState() {
