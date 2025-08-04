@@ -245,16 +245,25 @@ public class DbTreeStoreService {
     // ============================
     public void markNodeActive(String uuid) throws SQLException {
         String sql = """
-            WITH RECURSIVE descendants(id) AS (
+            WITH RECURSIVE ancestors(id) AS (
+                SELECT parent_id FROM collection_records WHERE uuid = ?
+                UNION ALL
+                SELECT c.parent_id FROM collection_records c
+                JOIN ancestors a ON c.id = a.id
+            ),
+            descendants(id) AS (
                 SELECT id FROM collection_records WHERE uuid = ?
                 UNION ALL
                 SELECT c.id FROM collection_records c
                 JOIN descendants d ON c.parent_id = d.id
             )
-            UPDATE collection_records SET active = 1 WHERE id IN (SELECT id FROM descendants)
+            UPDATE collection_records SET active = 1
+            WHERE id IN (SELECT id FROM descendants)
+               OR id IN (SELECT id FROM ancestors WHERE id IS NOT NULL)
             """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, uuid);
+            ps.setString(2, uuid);
             ps.executeUpdate();
         }
     }
