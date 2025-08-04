@@ -244,17 +244,115 @@ public class DbTreeStoreService {
     // MARK NODE ACTIVE
     // ============================
     public void markNodeActive(String uuid) throws SQLException {
+        connection.setAutoCommit(false);
+        try {
+            Integer id = null;
+            Integer parentId = null;
+            String name = null;
+            String type = null;
+
+            String infoSql = "SELECT id, parent_id, name, type FROM collection_records WHERE uuid = ?";
+            try (PreparedStatement ps = connection.prepareStatement(infoSql)) {
+                ps.setString(1, uuid);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        id = rs.getInt("id");
+                        parentId = rs.getObject("parent_id") != null ? rs.getInt("parent_id") : null;
+                        name = rs.getString("name");
+                        type = rs.getString("type");
+                    }
+                }
+            }
+
+            if (id != null && "COLLECTION".equalsIgnoreCase(type) && parentId != null) {
+                Integer existingId = null;
+                String dupSql = "SELECT id FROM collection_records WHERE parent_id = ? AND name = ? AND type = 'COLLECTION' AND active = 1";
+                try (PreparedStatement ps = connection.prepareStatement(dupSql)) {
+                    ps.setInt(1, parentId);
+                    ps.setString(2, name);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            existingId = rs.getInt(1);
+                        }
+                    }
+                }
+
+                if (existingId != null) {
+                    String mergeSql = """
+                        WITH RECURSIVE to_move(id) AS (
+                            SELECT id FROM collection_records WHERE parent_id = ?
+                            UNION ALL
+                            SELECT c.id FROM collection_records c JOIN to_move d ON c.parent_id = d.id
+                        )
+                        UPDATE collection_records
+                        SET parent_id = CASE WHEN parent_id = ? THEN ? ELSE parent_id END,
+                            active = 1
+                        WHERE id IN (SELECT id FROM to_move)
+                        """;
+                    try (PreparedStatement ps = connection.prepareStatement(mergeSql)) {
+                        ps.setInt(1, id);
+                        ps.setInt(2, id);
+                        ps.setInt(3, existingId);
+                        ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = connection.prepareStatement("DELETE FROM collection_records WHERE id = ?")) {
+                        ps.setInt(1, id);
+                        ps.executeUpdate();
+                    }
+                    activateAncestors(existingId);
+                    connection.commit();
+                    return;
+                }
+            }
+
+            activateNodeWithRelatives(uuid);
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+    private void activateNodeWithRelatives(String uuid) throws SQLException {
         String sql = """
-            WITH RECURSIVE descendants(id) AS (
+            WITH RECURSIVE ancestors(id) AS (
+                SELECT parent_id FROM collection_records WHERE uuid = ?
+                UNION ALL
+                SELECT c.parent_id FROM collection_records c
+                JOIN ancestors a ON c.id = a.id
+            ),
+            descendants(id) AS (
                 SELECT id FROM collection_records WHERE uuid = ?
                 UNION ALL
                 SELECT c.id FROM collection_records c
                 JOIN descendants d ON c.parent_id = d.id
             )
-            UPDATE collection_records SET active = 1 WHERE id IN (SELECT id FROM descendants)
+            UPDATE collection_records SET active = 1
+            WHERE id IN (SELECT id FROM descendants)
+               OR id IN (SELECT id FROM ancestors WHERE id IS NOT NULL)
             """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, uuid);
+            ps.setString(2, uuid);
+            ps.executeUpdate();
+        }
+    }
+
+    private void activateAncestors(int id) throws SQLException {
+        String sql = """
+            WITH RECURSIVE ancestors(id) AS (
+                SELECT parent_id FROM collection_records WHERE id = ?
+                UNION ALL
+                SELECT c.parent_id FROM collection_records c
+                JOIN ancestors a ON c.id = a.id
+            )
+            UPDATE collection_records SET active = 1
+            WHERE id IN (SELECT id FROM ancestors WHERE id IS NOT NULL)
+            """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
