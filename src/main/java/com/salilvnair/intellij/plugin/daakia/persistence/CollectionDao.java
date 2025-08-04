@@ -116,6 +116,34 @@ public class CollectionDao {
         });
     }
 
+    public void markNodeActiveAsync(String uuid, Runnable onComplete) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+                dbTreeStoreService(conn).markNodeActive(uuid);
+            }
+            catch (SQLException e) {
+                System.out.println("Error marking node active: " + e.getMessage());
+            }
+            if(onComplete != null) {
+                ApplicationManager.getApplication().invokeLater(onComplete);
+            }
+        });
+    }
+
+    public void deleteNodeAsync(String uuid, Runnable onComplete) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+                dbTreeStoreService(conn).deleteNode(uuid);
+            }
+            catch (SQLException e) {
+                System.out.println("Error deleting node: " + e.getMessage());
+            }
+            if(onComplete != null) {
+                ApplicationManager.getApplication().invokeLater(onComplete);
+            }
+        });
+    }
+
     public void loadStoreAsync(DataContext dataContext, java.util.function.Consumer<DefaultMutableTreeNode> callback) {
         loadStoreAsync(dataContext, true, callback);
     }

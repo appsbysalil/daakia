@@ -239,4 +239,42 @@ public class DbTreeStoreService {
             ps.executeUpdate();
         }
     }
+
+    // ============================
+    // MARK NODE ACTIVE
+    // ============================
+    public void markNodeActive(String uuid) throws SQLException {
+        String sql = """
+            WITH RECURSIVE descendants(id) AS (
+                SELECT id FROM collection_records WHERE uuid = ?
+                UNION ALL
+                SELECT c.id FROM collection_records c
+                JOIN descendants d ON c.parent_id = d.id
+            )
+            UPDATE collection_records SET active = 1 WHERE id IN (SELECT id FROM descendants)
+            """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid);
+            ps.executeUpdate();
+        }
+    }
+
+    // ============================
+    // DELETE NODE PERMANENTLY
+    // ============================
+    public void deleteNode(String uuid) throws SQLException {
+        String sql = """
+            WITH RECURSIVE descendants(id) AS (
+                SELECT id FROM collection_records WHERE uuid = ?
+                UNION ALL
+                SELECT c.id FROM collection_records c
+                JOIN descendants d ON c.parent_id = d.id
+            )
+            DELETE FROM collection_records WHERE id IN (SELECT id FROM descendants)
+            """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid);
+            ps.executeUpdate();
+        }
+    }
 }
