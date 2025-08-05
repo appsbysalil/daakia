@@ -77,7 +77,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         });
         listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN)) {
-                importPostmanCollection1();
+                importPostmanCollection();
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN)) {
                 exportPostmanCollection();
@@ -248,10 +248,11 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void importPostmanCollectionToRootNode(DefaultMutableTreeNode node, DaakiaStore store) {
         try {
-            DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode();
+            DaakiaUtils.convertCollectionStoreToTreeNode(store, newNode);
+            node.add(newNode);
             SwingUtilities.invokeLater(() -> {
-                collectionStoreTreeModel.setRoot(node);
-                collectionStoreTreeModel.reload();
+                collectionStoreTreeModel.reload(node);
                 TreeUtils.expandAllNodes(collectionStoreTree);
             });
             sideNavContext().setCollectionStoreRootNode(node);
@@ -263,9 +264,11 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void importPostmanCollectionToNode(DefaultMutableTreeNode node, DaakiaStore store) {
         try {
-            DaakiaUtils.convertCollectionStoreToTreeNode(store, node);
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode();
+            DaakiaUtils.convertCollectionStoreToTreeNode(store, newNode);
+            node.add(newNode);
             SwingUtilities.invokeLater(() -> {
-                collectionStoreTreeModel.reload();
+                collectionStoreTreeModel.reload(node);
                 TreeUtils.expandAllNodes(collectionStoreTree);
             });
         }
@@ -274,7 +277,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         }
     }
 
-    private void importPostmanCollection1() {
+    private void importPostmanCollection() {
         JFileChooser chooser = new JFileChooser();
         int res = chooser.showOpenDialog(this);
         if (res == JFileChooser.APPROVE_OPTION) {
@@ -324,8 +327,11 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         int res = chooser.showSaveDialog(this);
         if (res == JFileChooser.APPROVE_OPTION) {
             try {
-                DefaultMutableTreeNode root = (DefaultMutableTreeNode) collectionStoreTreeModel.getRoot();
-                DaakiaStore store = DaakiaUtils.convertTreeToCollectionStore(root);
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
+                if (selectedNode == null || selectedNode.getUserObject() instanceof DaakiaStoreRecord) {
+                    selectedNode = (DefaultMutableTreeNode) collectionStoreTreeModel.getRoot();
+                }
+                DaakiaStore store = DaakiaUtils.convertTreeToCollectionStore(selectedNode);
                 String json = PostmanUtils.toPostmanJson(store);
                 File file = chooser.getSelectedFile();
                 JsonUtils.writeJsonToFile(json, file);
