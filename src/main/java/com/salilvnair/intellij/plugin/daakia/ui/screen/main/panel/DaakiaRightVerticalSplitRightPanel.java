@@ -14,6 +14,7 @@ public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRi
     private JPanel headerPanel;
     private IconButton hideShowButton;
     private JPanel bodyPanel;
+    private boolean hideShowToggled = false;
 
     public DaakiaRightVerticalSplitRightPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -29,7 +30,7 @@ public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRi
     @Override
     public void initComponents() {
         headerPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
-        hideShowButton = new IconButton(AllIcons.General.LayoutEditorPreview, new Dimension(40,40));
+        hideShowButton = new IconButton(AllIcons.General.ArrowRight, new Dimension(40,40));
         bodyPanel = new JPanel(new BorderLayout());
         topPanel = new DaakiaResponseTopPanel(rootPane, dataContext);
         bottomPanel = new DaakiaResponseBottomPanel(rootPane, dataContext);
@@ -37,7 +38,8 @@ public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRi
 
     @Override
     public void initChildrenLayout() {
-        headerPanel.add(hideShowButton);
+        // let me comment it out for now
+//        headerPanel.add(hideShowButton);
         bodyPanel.add(topPanel, BorderLayout.NORTH);
         bodyPanel.add(bottomPanel, BorderLayout.CENTER);
         add(headerPanel, BorderLayout.NORTH);
@@ -48,6 +50,8 @@ public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRi
     public void initListeners() {
         hideShowButton.addActionListener(e -> {
             globalEventPublisher().onClickResponsePanelVisibilityToggler();
+            hideShowToggled = !hideShowToggled;
+            hideShowButton.setIcon(hideShowToggled ? AllIcons.General.ArrowLeft : AllIcons.General.ArrowRight);
         });
     }
 }
