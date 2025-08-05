@@ -248,9 +248,13 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void importPostmanCollectionToRootNode(DefaultMutableTreeNode node, DaakiaStore store) {
         try {
-            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode();
-            DaakiaUtils.convertCollectionStoreToTreeNode(store, newNode);
-            node.add(newNode);
+            if (store.getChildren() != null) {
+                for (DaakiaStore child : store.getChildren()) {
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode();
+                    DaakiaUtils.convertCollectionStoreToTreeNode(child, newNode);
+                    node.add(newNode);
+                }
+            }
             SwingUtilities.invokeLater(() -> {
                 collectionStoreTreeModel.reload(node);
                 TreeUtils.expandAllNodes(collectionStoreTree);
@@ -264,9 +268,13 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void importPostmanCollectionToNode(DefaultMutableTreeNode node, DaakiaStore store) {
         try {
-            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode();
-            DaakiaUtils.convertCollectionStoreToTreeNode(store, newNode);
-            node.add(newNode);
+            if (store.getChildren() != null) {
+                for (DaakiaStore child : store.getChildren()) {
+                    DefaultMutableTreeNode newNode = new DefaultMutableTreeNode();
+                    DaakiaUtils.convertCollectionStoreToTreeNode(child, newNode);
+                    node.add(newNode);
+                }
+            }
             SwingUtilities.invokeLater(() -> {
                 collectionStoreTreeModel.reload(node);
                 TreeUtils.expandAllNodes(collectionStoreTree);
