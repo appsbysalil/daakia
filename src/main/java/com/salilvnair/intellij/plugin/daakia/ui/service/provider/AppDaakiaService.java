@@ -197,6 +197,11 @@ public class AppDaakiaService extends BaseDaakiaService {
         String headersJsonString = CryptoUtils.decrypt(baseStoreData.getHeaders());
         String responseHeadersJsonString = baseStoreData.getResponseHeaders();
         MultiValueMap<String, String> requestHeaders = JsonUtils.jsonStringToMultivaluedMap(headersJsonString);
+        // Remove duplicate header values such as multiple Content-Type entries
+        for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
+            List<String> uniqueValues = new ArrayList<>(new LinkedHashSet<>(entry.getValue()));
+            entry.setValue(uniqueValues);
+        }
         MultiValueMap<String, String> responseHeaders = JsonUtils.jsonStringToMultivaluedMap(responseHeadersJsonString);
         dataContext.daakiaContext().setRequestHeaders(requestHeaders);
         dataContext.daakiaContext().setResponseHeaders(responseHeaders);
