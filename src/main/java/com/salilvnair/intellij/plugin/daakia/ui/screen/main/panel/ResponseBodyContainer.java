@@ -1,5 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
+import com.intellij.icons.AllIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseBodyPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import javax.swing.*;
@@ -7,6 +9,8 @@ import java.awt.*;
 
 public class ResponseBodyContainer extends BaseDaakiaPanel<ResponseBodyContainer> {
     private ResponseBodyPanel responseBodyPanel;
+    private JPanel headerPanel;
+    private IconButton hideShowButton;
 
     public ResponseBodyContainer(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -21,10 +25,22 @@ public class ResponseBodyContainer extends BaseDaakiaPanel<ResponseBodyContainer
     @Override
     public void initComponents() {
         responseBodyPanel = new ResponseBodyPanel(rootPane, dataContext);
+        headerPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+        hideShowButton = new IconButton(AllIcons.General.LayoutEditorPreview, new Dimension(40,40));
     }
 
     @Override
     public void initChildrenLayout() {
+        headerPanel.add(hideShowButton);
+        add(headerPanel, BorderLayout.NORTH);
         add(responseBodyPanel, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void initListeners() {
+        hideShowButton.addActionListener(e -> {
+            responseBodyPanel.setVisible(!responseBodyPanel.isVisible());
+            revalidate();
+        });
     }
 }
