@@ -18,6 +18,6 @@ public class DaakiaStore {
     private List<DaakiaStore> children;
 
     public boolean ofTypeCollection() {
-        return collection.isCollection();
+        return collection != null && collection.isCollection();
     }
 }
