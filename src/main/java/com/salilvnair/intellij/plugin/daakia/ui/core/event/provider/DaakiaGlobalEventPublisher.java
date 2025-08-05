@@ -115,6 +115,14 @@ public class DaakiaGlobalEventPublisher {
         publishSync(DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER);
     }
 
+    public void onClickRequestPanelVisibilityToggler() {
+        publishSync(DaakiaEventType.ON_CLICK_REQUEST_PANEL_VISIBILITY_TOGGLER);
+    }
+
+    public void onClickResponsePanelVisibilityToggler() {
+        publishSync(DaakiaEventType.ON_CLICK_RESPONSE_PANEL_VISIBILITY_TOGGLER);
+    }
+
     public void onOpenEnvironmentManager() {
         publishSync(DaakiaEventType.ON_OPEN_ENVIRONMENT_MANAGER);
     }

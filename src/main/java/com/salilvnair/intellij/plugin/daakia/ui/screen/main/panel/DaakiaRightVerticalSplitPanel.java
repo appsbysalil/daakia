@@ -71,5 +71,25 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
                 });
             }
         });
+        listenGlobal(event -> {
+            if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_REQUEST_PANEL_VISIBILITY_TOGGLER)) {
+                int width = leftRightSplitPane.getWidth();
+                if (leftRightSplitPane.getDividerLocation() <= 42) {
+                    leftRightSplitPane.setDividerLocation(width / 2);
+                }
+                else {
+                    leftRightSplitPane.setDividerLocation(42);
+                }
+            }
+            else if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_RESPONSE_PANEL_VISIBILITY_TOGGLER)) {
+                int width = leftRightSplitPane.getWidth();
+                if (width - leftRightSplitPane.getDividerLocation() <= 42) {
+                    leftRightSplitPane.setDividerLocation(width / 2);
+                }
+                else {
+                    leftRightSplitPane.setDividerLocation(width - 42);
+                }
+            }
+        });
     }
 }

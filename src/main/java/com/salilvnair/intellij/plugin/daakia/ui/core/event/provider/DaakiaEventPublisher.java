@@ -133,6 +133,16 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+    public void onClickRequestPanelVisibilityToggler() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_REQUEST_PANEL_VISIBILITY_TOGGLER);
+        publisher.publish(event);
+    }
+
+    public void onClickResponsePanelVisibilityToggler() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_RESPONSE_PANEL_VISIBILITY_TOGGLER);
+        publisher.publish(event);
+    }
+
     public void onClickRequestBodyFormatter() {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_REQUEST_BODY_FORMATTER_BTN);
         publisher.publish(event);
