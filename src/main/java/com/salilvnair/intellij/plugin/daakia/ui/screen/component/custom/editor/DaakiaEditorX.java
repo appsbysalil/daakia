@@ -425,7 +425,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
                             WriteCommandAction.runWriteCommandAction(project, () -> editor.getDocument().setText(formatted));
                         }
                         catch (Exception ex) {
-                            JOptionPane.showMessageDialog(null, "Format Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            System.out.println("Format Error: " + ex.getMessage());
                         }
                     }
                 });
