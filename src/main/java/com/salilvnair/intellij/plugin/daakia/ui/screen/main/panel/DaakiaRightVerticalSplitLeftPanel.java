@@ -1,5 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
+import com.intellij.icons.AllIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 
 import javax.swing.*;
@@ -9,6 +11,9 @@ public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRig
 
     private DaakiaRequestTopPanel requestTopPanel;
     private DaakiaRequestBottomPanel requestBottomPanel;
+    private JPanel headerPanel;
+    private IconButton hideShowButton;
+    private JPanel bodyPanel;
 
 
 
@@ -25,6 +30,9 @@ public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRig
 
     @Override
     public void initComponents() {
+        headerPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+        hideShowButton = new IconButton(AllIcons.General.LayoutEditorPreview, new Dimension(40,40));
+        bodyPanel = new JPanel(new BorderLayout());
         requestTopPanel = new DaakiaRequestTopPanel(rootPane, dataContext);
         requestBottomPanel = new DaakiaRequestBottomPanel(rootPane, dataContext);
     }
@@ -36,12 +44,17 @@ public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRig
 
     @Override
     public void initChildrenLayout() {
-        add(requestTopPanel, BorderLayout.NORTH);
-        add(requestBottomPanel, BorderLayout.CENTER);
+        headerPanel.add(hideShowButton);
+        bodyPanel.add(requestTopPanel, BorderLayout.NORTH);
+        bodyPanel.add(requestBottomPanel, BorderLayout.CENTER);
+        add(headerPanel, BorderLayout.NORTH);
+        add(bodyPanel, BorderLayout.CENTER);
     }
 
     @Override
     public void initListeners() {
-        super.initListeners();
+        hideShowButton.addActionListener(e -> {
+            globalEventPublisher().onClickRequestPanelVisibilityToggler();
+        });
     }
 }

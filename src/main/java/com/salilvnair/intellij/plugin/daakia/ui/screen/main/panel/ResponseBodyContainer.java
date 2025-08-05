@@ -38,9 +38,6 @@ public class ResponseBodyContainer extends BaseDaakiaPanel<ResponseBodyContainer
 
     @Override
     public void initListeners() {
-        hideShowButton.addActionListener(e -> {
-            responseBodyPanel.setVisible(!responseBodyPanel.isVisible());
-            revalidate();
-        });
+        super.initListeners();
     }
 }
