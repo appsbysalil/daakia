@@ -47,9 +47,6 @@ public class DaakiaRightVerticalSplitRightPanel extends BaseDaakiaPanel<DaakiaRi
     @Override
     public void initListeners() {
         hideShowButton.addActionListener(e -> {
-            bodyPanel.setVisible(!bodyPanel.isVisible());
-            revalidate();
-            repaint();
             globalEventPublisher().onClickResponsePanelVisibilityToggler();
         });
     }

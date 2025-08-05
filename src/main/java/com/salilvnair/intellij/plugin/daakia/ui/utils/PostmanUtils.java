@@ -62,6 +62,7 @@ public final class PostmanUtils {
             DaakiaStoreRecord record = new DaakiaStoreRecord();
             record.setUuid(UUID.randomUUID().toString());
             record.setDisplayName(store.getName());
+            record.setCreatedDate(DateUtils.todayAsString());
             JsonNode req = itemNode.get("request");
             if (req != null) {
                 record.setRequestType(req.path("method").asText());
