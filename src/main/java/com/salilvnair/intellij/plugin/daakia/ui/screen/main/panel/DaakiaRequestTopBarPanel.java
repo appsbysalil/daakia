@@ -7,6 +7,7 @@ import com.intellij.ui.TextFieldWithAutoCompletion;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.*;
@@ -120,9 +121,7 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
             sendAction();
         });
         saveButton.addActionListener(e -> {
-            eventPublisher().onClickSave();
-            daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext);
-            daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
+            handleSaveAction();
         });
         listen(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
@@ -146,6 +145,17 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
             String selectedRequestType = (String) requestTypes.getSelectedItem();
             DaakiaUtils.changeTabColorAndText(uiContext().tabTitle(), selectedRequestType, dataContext);
         });
+    }
+
+    private void handleSaveAction() {
+        ResponseMetadata responseMetadata = dataContext.daakiaContext().responseMetadata();
+        if(responseMetadata == null) {
+            JOptionPane.showMessageDialog(this, "Please Send the request and save.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        eventPublisher().onClickSave();
+        daakiaService(DaakiaType.APP).execute(AppDaakiaType.UPDATE_STORE_COLLECTION_NODE, dataContext);
+        daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_REQUEST_IN_STORE_COLLECTION, dataContext);
     }
 
     private void refreshActionButtons() {
