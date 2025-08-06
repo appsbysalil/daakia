@@ -4,6 +4,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
+import javax.swing.tree.DefaultMutableTreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.File;
 import java.sql.*;
@@ -122,10 +123,10 @@ public class DaakiaDatabase {
                         String json = JsonUtils.readJsonFromFile(storeFile);
                         DaakiaStore store = JsonUtils.jsonToPojo(json, DaakiaStore.class);
                         if (store != null) {
-                            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO collection_records(id,data) VALUES(1,?)")) {
-                                ps.setString(1, JsonUtils.pojoToJson(store));
-                                ps.executeUpdate();
-                            }
+                            DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+                            DaakiaUtils.convertCollectionStoreToTreeNode(store, root);
+                            DbTreeStoreService treeService = new DbTreeStoreService(conn);
+                            treeService.saveTree(root);
                         }
                     }
                     catch (Exception ignore) {}
