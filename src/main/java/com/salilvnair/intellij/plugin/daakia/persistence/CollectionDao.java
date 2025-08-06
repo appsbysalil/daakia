@@ -10,21 +10,6 @@ import java.sql.*;
 /** DAO for collection/store records */
 public class CollectionDao {
 
-    private DbTreeStoreService dbTreeStoreService;
-
-    private volatile DbTreeStoreService treeStoreService;
-
-    public DbTreeStoreService dbTreeStoreService(Connection conn) {
-        if (treeStoreService == null) {
-            synchronized (this) {
-                if (treeStoreService == null) {
-                    treeStoreService = new DbTreeStoreService(conn);
-                }
-            }
-        }
-        return treeStoreService;
-    }
-
 
     public DaakiaStore loadStore() {
         try (Connection conn = DaakiaDatabase.getInstance().getConnection();
@@ -57,7 +42,7 @@ public class CollectionDao {
     public void saveStoreNew(DataContext dataContext) {
         DefaultMutableTreeNode root = dataContext.sideNavContext().collectionStoreRootNode();
         try(Connection conn = DaakiaDatabase.getInstance().getConnection()) {
-            dbTreeStoreService(conn).saveTree(root);
+            new DbTreeStoreService(conn).saveTree(root);
         }
         catch (Exception e) {
             System.out.println("Error saving store tree: " + e.getMessage());
@@ -105,7 +90,7 @@ public class CollectionDao {
     public void markNodeInactiveAsync(String uuid, Runnable onComplete) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
-                dbTreeStoreService(conn).markNodeInactive(uuid);
+                new DbTreeStoreService(conn).markNodeInactive(uuid);
             }
             catch (SQLException e) {
                 System.out.println("Error marking node inactive: " + e.getMessage());
@@ -119,7 +104,7 @@ public class CollectionDao {
     public void markNodeActiveAsync(String uuid, Runnable onComplete) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
-                dbTreeStoreService(conn).markNodeActive(uuid);
+                new DbTreeStoreService(conn).markNodeActive(uuid);
             }
             catch (SQLException e) {
                 System.out.println("Error marking node active: " + e.getMessage());
@@ -133,7 +118,7 @@ public class CollectionDao {
     public void deleteNodeAsync(String uuid, Runnable onComplete) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
-                dbTreeStoreService(conn).deleteNode(uuid);
+                new DbTreeStoreService(conn).deleteNode(uuid);
             }
             catch (SQLException e) {
                 System.out.println("Error deleting node: " + e.getMessage());
@@ -151,7 +136,7 @@ public class CollectionDao {
     public void loadStoreAsync(DataContext dataContext, boolean onlyActive, java.util.function.Consumer<DefaultMutableTreeNode> callback) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try(Connection conn = DaakiaDatabase.getInstance().getConnection()) {
-                DefaultMutableTreeNode root = dbTreeStoreService(conn).loadTree(onlyActive);
+                DefaultMutableTreeNode root = new DbTreeStoreService(conn).loadTree(onlyActive);
 
                 // Cache into context only when active tree is requested
                 if (onlyActive) {
