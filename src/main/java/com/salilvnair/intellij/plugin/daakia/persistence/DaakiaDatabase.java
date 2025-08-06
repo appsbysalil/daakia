@@ -5,30 +5,35 @@ import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.sql.*;
 import java.util.*;
 
 /**
- * Simple SQLite database helper used by the plugin.
+ * SQLite database helper for Daakia plugin (stateless + safer)
  */
 public class DaakiaDatabase {
+
     private static final DaakiaDatabase INSTANCE = new DaakiaDatabase();
     private final String dbPath;
+
     static {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            System.err.println("SQLite driver not found: " + e.getMessage());
         }
     }
+
     private DaakiaDatabase() {
         String userHomePath = System.getProperty("user.home");
-        File dir = new File(userHomePath + File.separator + ".salilvnair" + File.separator + "daakia");
+        File dir = new File(userHomePath, ".salilvnair" + File.separator + "daakia");
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        this.dbPath = dir.getAbsolutePath() + File.separator + "daakia.db";
+        this.dbPath = new File(dir, "daakia.db").getAbsolutePath();
         init();
     }
 
@@ -38,100 +43,142 @@ public class DaakiaDatabase {
 
     private void init() {
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS history_records (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT, active TEXT DEFAULT 'Y')");
             stmt.executeUpdate("""
-                            CREATE TABLE IF NOT EXISTS collection_records (
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                parent_id INTEGER,
-                                name TEXT,
-                                type TEXT,             -- 'COLLECTION' or 'RECORD'
-                                active BOOLEAN DEFAULT 1,
-                                collection_name TEXT,   -- if collection
-                                url TEXT,               -- if record
-                                request_type TEXT,
-                                headers TEXT,
-                                response_headers TEXT,
-                                request_body TEXT,
-                                response_body TEXT,
-                                pre_request_script TEXT,
-                                post_request_script TEXT,
-                                created_date TEXT,
-                                size_text TEXT,
-                                time_taken TEXT,
-                                status_code INTEGER,
-                                uuid TEXT UNIQUE
-                            )
-                    """);
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS environment_records (id INTEGER PRIMARY KEY, data TEXT)");
-            try { stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'"); } catch (SQLException ignore) {}
+                CREATE TABLE IF NOT EXISTS history_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data TEXT,
+                    active TEXT DEFAULT 'Y'
+                )
+            """);
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS collection_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    parent_id INTEGER,
+                    name TEXT,
+                    type TEXT,             -- 'COLLECTION' or 'RECORD'
+                    active BOOLEAN DEFAULT 1,
+                    collection_name TEXT,   -- if collection
+                    url TEXT,               -- if record
+                    request_type TEXT,
+                    headers TEXT,
+                    response_headers TEXT,
+                    request_body TEXT,
+                    response_body TEXT,
+                    pre_request_script TEXT,
+                    post_request_script TEXT,
+                    created_date TEXT,
+                    size_text TEXT,
+                    time_taken TEXT,
+                    status_code INTEGER,
+                    uuid TEXT UNIQUE
+                )
+            """);
+            stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS environment_records (
+                    id INTEGER PRIMARY KEY,
+                    data TEXT
+                )
+            """);
+
+            // Try adding missing column for older DBs
+            try {
+                stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'");
+            } catch (SQLException ignore) {
+                // column exists already
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error initializing database: " + e.getMessage());
         }
-        catch (SQLException ignore) {
-            System.out.println("Error initializing database: " + ignore.getMessage());
-        }
+
         migrateIfNecessary();
     }
 
     public Connection getConnection() throws SQLException {
-//        Enumeration<Driver> drivers = DriverManager.getDrivers();
-//        while (drivers.hasMoreElements()) {
-//            System.out.println("Driver found: " + drivers.nextElement());
-//        }
         try {
             return DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-        }
-        catch (SQLException e) {
-            // retry after forcing registration
+        } catch (SQLException e) {
             DriverManager.registerDriver(new org.sqlite.JDBC());
             return DriverManager.getConnection("jdbc:sqlite:" + dbPath);
         }
     }
 
+    /**
+     * Migration for old JSON-based storage to DB tree structure
+     */
     private void migrateIfNecessary() {
-        // migrate history if table empty and file exists
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM history_records");
-            boolean historyEmpty = rs.next() && rs.getInt(1) == 0;
-            rs.close();
-            rs = stmt.executeQuery("SELECT COUNT(*) FROM collection_records");
-            boolean storeEmpty = rs.next() && rs.getInt(1) == 0;
-            rs.close();
+        try (Connection conn = getConnection()) {
+            boolean historyEmpty;
+            boolean storeEmpty;
+
+            try (Statement stmt = conn.createStatement()) {
+                historyEmpty = isEmpty(stmt, "history_records");
+                storeEmpty = isEmpty(stmt, "collection_records");
+            }
+
             if (historyEmpty) {
-                File historyFile = DaakiaUtils.historyFile();
-                if (historyFile.exists()) {
-                    try {
-                        String json = JsonUtils.readJsonFromFile(historyFile);
-                        Map<String, List<DaakiaHistory>> data = JsonUtils.jsonToPojo(json, new TypeReference<>() {});
-                        if (data != null) {
-                            List<DaakiaHistory> flat = new ArrayList<>();
-                            data.values().forEach(flat::addAll);
-                            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO history_records(data) VALUES(?)")) {
-                                for (DaakiaHistory h : flat) {
-                                    ps.setString(1, JsonUtils.pojoToJson(h));
-                                    ps.executeUpdate();
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ignore) {}
-                }
+                migrateHistory(conn);
             }
             if (storeEmpty) {
-                File storeFile = DaakiaUtils.storeFile();
-                if (storeFile.exists()) {
-                    try {
-                        String json = JsonUtils.readJsonFromFile(storeFile);
-                        DaakiaStore store = JsonUtils.jsonToPojo(json, DaakiaStore.class);
-                        if (store != null) {
-                            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO collection_records(id,data) VALUES(1,?)")) {
-                                ps.setString(1, JsonUtils.pojoToJson(store));
-                                ps.executeUpdate();
-                            }
-                        }
-                    }
-                    catch (Exception ignore) {}
+                migrateStore(conn);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Migration failed: " + e.getMessage());
+        }
+    }
+
+    private boolean isEmpty(Statement stmt, String table) throws SQLException {
+        try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + table)) {
+            return rs.next() && rs.getInt(1) == 0;
+        }
+    }
+
+    private void migrateHistory(Connection conn) {
+        File historyFile = DaakiaUtils.historyFile();
+        if (!historyFile.exists()) return;
+
+        try {
+            String json = JsonUtils.readJsonFromFile(historyFile);
+            Map<String, List<DaakiaHistory>> data = JsonUtils.jsonToPojo(json, new TypeReference<>() {});
+            if (data == null || data.isEmpty()) return;
+
+            List<DaakiaHistory> flat = new ArrayList<>();
+            data.values().forEach(flat::addAll);
+
+            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO history_records(data) VALUES(?)")) {
+                for (DaakiaHistory h : flat) {
+                    ps.setString(1, JsonUtils.pojoToJson(h));
+                    ps.executeUpdate();
                 }
             }
+
+            System.out.println("[Daakia] Migrated history records: " + flat.size());
+
+        } catch (Exception e) {
+            System.err.println("Error migrating history: " + e.getMessage());
         }
-        catch (SQLException ignore) {}
+    }
+
+    private void migrateStore(Connection conn) {
+        File storeFile = DaakiaUtils.storeFile();
+        if (!storeFile.exists()) return;
+
+        try {
+            String json = JsonUtils.readJsonFromFile(storeFile);
+            DaakiaStore store = JsonUtils.jsonToPojo(json, DaakiaStore.class);
+            if (store == null) return;
+
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+            DaakiaUtils.convertCollectionStoreToTreeNode(store, root);
+
+            DbTreeStoreService treeService = new DbTreeStoreService();
+            treeService.saveTree(conn, root);
+
+            System.out.println("[Daakia] Migrated store to DB successfully.");
+
+        } catch (Exception e) {
+            System.err.println("Error migrating store: " + e.getMessage());
+        }
     }
 }
