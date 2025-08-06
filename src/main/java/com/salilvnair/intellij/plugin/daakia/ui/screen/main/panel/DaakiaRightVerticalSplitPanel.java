@@ -6,7 +6,10 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVerticalSplitPanel> {
 
@@ -57,6 +60,9 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
 
     @Override
     public void initListeners() {
+
+        initDividerDoubleClickListener();
+
         listen(event -> {
             if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
                 com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
@@ -88,6 +94,40 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
                 }
                 else {
                     leftRightSplitPane.setDividerLocation(width -30);
+                }
+            }
+        });
+    }
+
+    private void initDividerDoubleClickListener() {
+        Component divider = ((BasicSplitPaneUI) leftRightSplitPane.getUI()).getDivider();
+
+        divider.addMouseListener(new MouseAdapter() {
+            int toggleState = 0;
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    SwingUtilities.invokeLater(() -> {
+                        int width = leftRightSplitPane.getWidth();
+                        switch (toggleState) {
+                            case 0 -> {
+                                // 1st double click → Maximize left
+                                leftRightSplitPane.setDividerLocation(0);
+                                toggleState = 1;
+                            }
+                            case 1 -> {
+                                // 2nd double click → Center
+                                leftRightSplitPane.setDividerLocation(width / 2);
+                                toggleState = 2;
+                            }
+                            case 2 -> {
+                                // 3rd double click → Maximize right
+                                leftRightSplitPane.setDividerLocation(width);
+                                toggleState = 0;
+                            }
+                        }
+                    });
                 }
             }
         });

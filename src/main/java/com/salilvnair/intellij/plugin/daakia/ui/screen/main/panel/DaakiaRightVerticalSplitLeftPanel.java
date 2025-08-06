@@ -40,7 +40,7 @@ public class DaakiaRightVerticalSplitLeftPanel extends BaseDaakiaPanel<DaakiaRig
 
     @Override
     public void initStyle() {
-        setMinimumSize(new Dimension(700, 0));
+//        setMinimumSize(new Dimension(700, 0));
     }
 
     @Override
