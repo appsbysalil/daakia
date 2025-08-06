@@ -38,7 +38,7 @@ public class RequestHeaderPanel extends BaseDaakiaPanel<RequestHeaderPanel> {
     }
 
     private void initDefaultHeaders() {
-        daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_REQUEST_HEADER, dataContext, "Content-Type", "application/json");
+        //daakiaService(DaakiaType.APP).execute(AppDaakiaType.CREATE_REQUEST_HEADER, dataContext, "Content-Type", "application/json");
     }
 
     @Override

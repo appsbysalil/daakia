@@ -12,19 +12,30 @@ import java.util.UUID;
 
 public class DbTreeStoreService {
 
-    private final Connection connection;
-
-    public DbTreeStoreService(Connection connection) {
-        this.connection = connection;
-    }
-
     // ============================
-    // SAVE TREE
+    // SAVE TREE (Stateless)
     // ============================
-    public void saveTree(DefaultMutableTreeNode rootNode) throws SQLException {
+    public void saveTree(Connection connection, DefaultMutableTreeNode rootNode) throws SQLException {
         connection.setAutoCommit(false);
-        try {
-            saveNodeRecursive(rootNode, null); // start saving recursively
+
+        String sql = """
+            INSERT INTO collection_records (
+                parent_id, name, type, active, collection_name, url, request_type, headers, response_headers,
+                request_body, response_body, pre_request_script, post_request_script,
+                created_date, size_text, time_taken, status_code, uuid
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(uuid) DO UPDATE SET
+                parent_id=excluded.parent_id, name=excluded.name, type=excluded.type, active=excluded.active,
+                collection_name=excluded.collection_name, url=excluded.url, request_type=excluded.request_type,
+                headers=excluded.headers, response_headers=excluded.response_headers, request_body=excluded.request_body,
+                response_body=excluded.response_body, pre_request_script=excluded.pre_request_script,
+                post_request_script=excluded.post_request_script, created_date=excluded.created_date,
+                size_text=excluded.size_text, time_taken=excluded.time_taken, status_code=excluded.status_code
+            RETURNING id
+            """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            saveNodeRecursive(connection, rootNode, null, ps);
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
@@ -34,12 +45,10 @@ public class DbTreeStoreService {
         }
     }
 
-    /**
-     * Recursively saves a node and its children
-     * @param node current node
-     * @param parentId ID of parent node in DB
-     */
-    private void saveNodeRecursive(DefaultMutableTreeNode node, Integer parentId) throws SQLException {
+    private void saveNodeRecursive(Connection connection,
+                                   DefaultMutableTreeNode node,
+                                   Integer parentId,
+                                   PreparedStatement ps) throws SQLException {
         Object userObj = node.getUserObject();
         String type = "ROOT";
         boolean active = true;
@@ -78,71 +87,37 @@ public class DbTreeStoreService {
             uuid = "ROOT"; // stable root ID
         }
 
-        // Insert or update the node, returning ID
-        Integer currentId = insertOrUpdateNode(
-                parentId, name, type, active, collectionName, url, requestType, headers, responseHeaders,
-                requestBody, responseBody, preScript, postScript, createdDate, sizeText, timeTaken, statusCode, uuid
-        );
+        // Fill statement
+        if (parentId != null) ps.setInt(1, parentId); else ps.setNull(1, Types.INTEGER);
+        ps.setString(2, name);
+        ps.setString(3, type);
+        ps.setBoolean(4, active);
+        ps.setString(5, collectionName);
+        ps.setString(6, url);
+        ps.setString(7, requestType);
+        ps.setString(8, headers);
+        ps.setString(9, responseHeaders);
+        ps.setString(10, requestBody);
+        ps.setString(11, responseBody);
+        ps.setString(12, preScript);
+        ps.setString(13, postScript);
+        ps.setString(14, createdDate);
+        ps.setString(15, sizeText);
+        ps.setString(16, timeTaken);
+        ps.setInt(17, statusCode);
+        ps.setString(18, uuid);
+
+        Integer currentId = null;
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                currentId = rs.getInt(1);
+            }
+        }
 
         // Save children
         for (int i = 0; i < node.getChildCount(); i++) {
-            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
-            saveNodeRecursive(child, currentId);
+            saveNodeRecursive(connection, (DefaultMutableTreeNode) node.getChildAt(i), currentId, ps);
         }
-    }
-
-    private Integer insertOrUpdateNode(
-            Integer parentId, String name, String type, boolean active,
-            String collectionName, String url, String requestType, String headers, String responseHeaders,
-            String requestBody, String responseBody, String preScript, String postScript,
-            String createdDate, String sizeText, String timeTaken, int statusCode, String uuid
-    ) throws SQLException {
-        // Use INSERT OR REPLACE style for SQLite via UPSERT
-        String sql = "INSERT INTO collection_records (" +
-                "parent_id, name, type, active, collection_name, url, request_type, headers, response_headers," +
-                "request_body, response_body, pre_request_script, post_request_script," +
-                "created_date, size_text, time_taken, status_code, uuid" +
-                ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) " +
-                "ON CONFLICT(uuid) DO UPDATE SET " +
-                "parent_id=excluded.parent_id, name=excluded.name, type=excluded.type, active=excluded.active," +
-                "collection_name=excluded.collection_name, url=excluded.url, request_type=excluded.request_type," +
-                "headers=excluded.headers, response_headers=excluded.response_headers, request_body=excluded.request_body," +
-                "response_body=excluded.response_body, pre_request_script=excluded.pre_request_script," +
-                "post_request_script=excluded.post_request_script, created_date=excluded.created_date," +
-                "size_text=excluded.size_text, time_taken=excluded.time_taken, status_code=excluded.status_code " +
-                "RETURNING id";  // SQLite supports RETURNING from v3.35+
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            if (parentId != null) {
-                ps.setInt(1, parentId);
-            } else {
-                ps.setNull(1, Types.INTEGER);
-            }
-            ps.setString(2, name);
-            ps.setString(3, type);
-            ps.setBoolean(4, active);
-            ps.setString(5, collectionName);
-            ps.setString(6, url);
-            ps.setString(7, requestType);
-            ps.setString(8, headers);
-            ps.setString(9, responseHeaders);
-            ps.setString(10, requestBody);
-            ps.setString(11, responseBody);
-            ps.setString(12, preScript);
-            ps.setString(13, postScript);
-            ps.setString(14, createdDate);
-            ps.setString(15, sizeText);
-            ps.setString(16, timeTaken);
-            ps.setInt(17, statusCode);
-            ps.setString(18, uuid);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        }
-        return null;
     }
 
     private String ensureUuid(DaakiaBaseStoreData base) {
@@ -153,18 +128,18 @@ public class DbTreeStoreService {
     }
 
     // ============================
-    // LOAD TREE
+    // LOAD TREE (Stateless)
     // ============================
-    public DefaultMutableTreeNode loadTree(boolean onlyActive) throws SQLException {
+    public DefaultMutableTreeNode loadTree(Connection connection, boolean onlyActive) throws SQLException {
         Map<Integer, DefaultMutableTreeNode> nodeMap = new HashMap<>();
         Map<Integer, Integer> parentMap = new HashMap<>();
 
+        String sql = "SELECT * FROM collection_records " +
+                (onlyActive ? "WHERE active = 1 OR type='ROOT' " : "") +
+                "ORDER BY parent_id ASC, id ASC";
+
         try (Statement st = connection.createStatement();
-             ResultSet rs = st.executeQuery(
-                     "SELECT * FROM collection_records " +
-                             (onlyActive ? "WHERE active = 1 OR type='ROOT' " : "") +
-                             "ORDER BY parent_id ASC, id ASC"
-             )) {
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 Integer parentId = rs.getObject("parent_id") != null ? rs.getInt("parent_id") : null;
@@ -224,10 +199,9 @@ public class DbTreeStoreService {
     }
 
     // ============================
-    // MARK NODE INACTIVE
+    // NODE OPERATIONS (Stateless)
     // ============================
-    public void markNodeInactive(String uuid) throws SQLException {
-        // Update the node and all its descendants to inactive using a recursive CTE
+    public void markNodeInactive(Connection connection, String uuid) throws SQLException {
         String sql = """
             WITH RECURSIVE descendants(id) AS (
                 SELECT id FROM collection_records WHERE uuid = ?
@@ -243,11 +217,7 @@ public class DbTreeStoreService {
         }
     }
 
-    // ============================
-    // MARK NODE ACTIVE
-    // ============================
-
-    public void markNodeActive(String uuid) throws SQLException {
+    public void markNodeActive(Connection connection, String uuid) throws SQLException {
         String sql = """
             WITH RECURSIVE ancestors(id) AS (
                 SELECT parent_id FROM collection_records WHERE uuid = ?
@@ -272,10 +242,7 @@ public class DbTreeStoreService {
         }
     }
 
-    // ============================
-    // DELETE NODE PERMANENTLY
-    // ============================
-    public void deleteNode(String uuid) throws SQLException {
+    public void deleteNode(Connection connection, String uuid) throws SQLException {
         String sql = """
             WITH RECURSIVE descendants(id) AS (
                 SELECT id FROM collection_records WHERE uuid = ?
