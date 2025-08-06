@@ -77,7 +77,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
         leftSideNavPanelContainer = new DaakiaSideNavPanelContainer(rootPane, dataContext);
         tabbedMainPanel = new DaakiaTabbedMainPanel(rootPane, dataContext);
         leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSideNavPanelContainer, tabbedMainPanel);
-        leftRightSplitPane.setDividerLocation(300);
+        leftRightSplitPane.setDividerLocation(365);
         leftRightSplitPane.setDividerSize(3);
         dataContext.uiContext().setEnvironmentCombo(environmentCombo);
         refreshEnvironmentCombo();
@@ -100,7 +100,7 @@ public class DaakiaMainPanel extends BaseDaakiaPanel<DaakiaMainPanel> {
     public void initListeners() {
         listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER)) {
-                leftRightSplitPane.setDividerLocation(leftRightSplitPane.getDividerLocation() == 42 ? 300 : 42);
+                leftRightSplitPane.setDividerLocation(leftRightSplitPane.getDividerLocation() == 42 ? 365 : 42);
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_ENVIRONMENT_LIST_CHANGED)) {
                 refreshEnvironmentCombo();

@@ -5,13 +5,13 @@ import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreCollection;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RequestType;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 import org.jetbrains.annotations.NotNull;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
@@ -33,12 +33,14 @@ public class DaakiaUtils {
 
     public static DaakiaStore convertTreeToCollectionStore(DaakiaStore parentNode, DefaultMutableTreeNode node) {
         parentNode.setName(node.getUserObject() != null ? node.getUserObject().toString(): "");
-        parentNode.setCollection(true);
+        if(node.getUserObject() instanceof DaakiaStoreCollection daakiaStoreCollection) {
+            parentNode.setCollection(daakiaStoreCollection);
+        }
         if(node.isLeaf()) {
             if(node.getUserObject() instanceof DaakiaStoreRecord daakiaStoreRecord) {
                 parentNode.setRecord(daakiaStoreRecord);
-                parentNode.setCollection(false);
-            } else {
+            }
+            else {
                 parentNode.setEmptyCollection(true);
             }
         }
@@ -60,7 +62,7 @@ public class DaakiaUtils {
 
 
     public static DefaultMutableTreeNode convertCollectionStoreToTreeNode(DaakiaStore daakiaStore, DefaultMutableTreeNode treeNode) {
-        treeNode.setUserObject(daakiaStore.getRecord() == null ? daakiaStore.getName() : daakiaStore.getRecord());
+        treeNode.setUserObject(daakiaStore.getRecord() == null ? daakiaStore.getCollection() == null ? daakiaStore.getName() : daakiaStore.getCollection() : daakiaStore.getRecord());
         treeNode.removeAllChildren();
 
         if(daakiaStore.getChildren() != null && !daakiaStore.getChildren().isEmpty()) {
@@ -77,7 +79,7 @@ public class DaakiaUtils {
         if(daakiaStore.getChildren()!=null && !daakiaStore.getChildren().isEmpty()) {
             for (DaakiaStore childDaakiaStore : daakiaStore.getChildren()) {
                 if((childDaakiaStore.getRecord() == null)
-                    || (childDaakiaStore.getRecord()!=null &&
+                        || (childDaakiaStore.getRecord()!=null &&
                         (childDaakiaStore.getRecord().getUrl()!=null && childDaakiaStore.getRecord().getUrl().contains(searchText) || childDaakiaStore.getRecord().getDisplayName()!=null && childDaakiaStore.getRecord().getDisplayName().contains(searchText)))
                 ) {
                     DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDaakiaStore.getRecord() == null ? childDaakiaStore.getName() : childDaakiaStore.getRecord());
@@ -212,4 +214,94 @@ public class DaakiaUtils {
         }
     }
 
+    public static String generateUUID() {
+        return java.util.UUID.randomUUID().toString();
+    }
+
+    /**
+     * Filters a tree by search text.
+     * Keeps only nodes where the user object matches searchText (case-insensitive),
+     * plus their parent chain to preserve hierarchy.
+     */
+    public static DefaultMutableTreeNode filterTreeBySearchText(DefaultMutableTreeNode originalRoot, String searchText) {
+        if (searchText == null || searchText.isEmpty()) {
+            // No filtering, just clone original
+            return deepCopyNode(originalRoot);
+        }
+
+        String search = searchText.toLowerCase();
+
+        // Create a new root to store filtered results
+        DefaultMutableTreeNode newRoot = new DefaultMutableTreeNode(originalRoot.getUserObject());
+
+        // Recursively filter children
+        filterNodeRecursive(originalRoot, newRoot, search);
+
+        return newRoot;
+    }
+
+    /**
+     * Recursively filters children based on search text and clones matching nodes into newParent.
+     */
+    private static void filterNodeRecursive(DefaultMutableTreeNode originalNode,
+                                            DefaultMutableTreeNode newParent,
+                                            String searchText) {
+
+        for (int i = 0; i < originalNode.getChildCount(); i++) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) originalNode.getChildAt(i);
+
+            boolean match = matchesSearch(child, searchText);
+
+            // Create a new node for the child
+            DefaultMutableTreeNode newChild = new DefaultMutableTreeNode(child.getUserObject());
+
+            // Recursively filter its children
+            filterNodeRecursive(child, newChild, searchText);
+
+            // Include this node if:
+            // 1. It matches the search, or
+            // 2. Any of its descendants matched (newChild has children)
+            if (match || newChild.getChildCount() > 0) {
+                newParent.add(newChild);
+            }
+        }
+    }
+
+    /**
+     * Checks if the node's user object text matches the search text
+     */
+    private static boolean matchesSearch(DefaultMutableTreeNode node, String searchText) {
+        Object userObject = node.getUserObject();
+        switch (userObject) {
+            case null -> {
+                return false;
+            }
+
+            // Handle your Daakia types
+            case DaakiaStoreCollection coll -> {
+                return coll.getCollectionName() != null && coll.getCollectionName().toLowerCase().contains(searchText);
+            }
+            case DaakiaStoreRecord rec -> {
+                // Match on display name or URL
+                if (rec.getDisplayName() != null && rec.getDisplayName().toLowerCase().contains(searchText))
+                    return true;
+                return rec.getUrl() != null && rec.getUrl().toLowerCase().contains(searchText);
+            }
+            default -> {
+                return userObject.toString().toLowerCase().contains(searchText);
+            }
+        }
+
+    }
+
+    /**
+     * Optional: Deep copies a tree node (without filtering).
+     */
+    private static DefaultMutableTreeNode deepCopyNode(DefaultMutableTreeNode node) {
+        DefaultMutableTreeNode copy = new DefaultMutableTreeNode(node.getUserObject());
+        for (int i = 0; i < node.getChildCount(); i++) {
+            copy.add(deepCopyNode((DefaultMutableTreeNode) node.getChildAt(i)));
+        }
+        return copy;
+    }
 }

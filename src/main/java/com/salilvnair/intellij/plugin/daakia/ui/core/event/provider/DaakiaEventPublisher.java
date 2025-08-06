@@ -118,8 +118,28 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+    public void onRefreshTrashPanel() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_REFRESH_TRASH_PANEL);
+        publisher.publish(event);
+    }
+
+    public void onRefreshCollectionStorePanel() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_REFRESH_COLLECTION_STORE_PANEL);
+        publisher.publish(event);
+    }
+
     public void onClickSideNavVisibilityToggler() {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER);
+        publisher.publish(event);
+    }
+
+    public void onClickRequestPanelVisibilityToggler() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_REQUEST_PANEL_VISIBILITY_TOGGLER);
+        publisher.publish(event);
+    }
+
+    public void onClickResponsePanelVisibilityToggler() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_RESPONSE_PANEL_VISIBILITY_TOGGLER);
         publisher.publish(event);
     }
 

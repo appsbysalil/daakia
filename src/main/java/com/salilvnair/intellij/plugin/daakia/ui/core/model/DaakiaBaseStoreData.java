@@ -28,6 +28,7 @@ public class DaakiaBaseStoreData {
     protected String sizeText;
     protected String timeTaken;
     protected int statusCode;
+    private boolean active = true;
 
 
     public String getUuid() {

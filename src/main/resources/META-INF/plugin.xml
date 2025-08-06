@@ -74,6 +74,45 @@
             <li>Tabs for History, Collection, and Environment are now always created on the Swing thread</li>
             <li>Improved stability and UI responsiveness with ApplicationManager.invokeLater</li>
           </ul>
+
+        <h2>v3.0.0 - Major UI & Panel Management Enhancements</h2>
+        <ul>
+            <li><b>Double-click divider</b> to dynamically resize panels:
+                <ul>
+                    <li>First double-click → Maximize left panel</li>
+                    <li>Second double-click → Reset to center</li>
+                    <li>Third double-click → Maximize right panel</li>
+                </ul>
+            </li>
+            <li>Improved <b>panel visibility toggling</b> and divider thresholds</li>
+            <li>Refactored request/response panel handling:
+                <ul>
+                    <li>Hide response content when collapsed</li>
+                    <li>Toggle request and response body visibility with smooth state restoration</li>
+                </ul>
+            </li>
+            <li>Enhanced <b>trash panel</b>:
+                <ul>
+                    <li>Restore and permanent delete actions</li>
+                    <li>Ancestor/parent folder restoration for nested items</li>
+                </ul>
+            </li>
+            <li>Improved <b>collection management</b>:
+                <ul>
+                    <li>New DbTreeStoreService for persistence</li>
+                    <li>Fixed empty folder save and import/export handling</li>
+                    <li>Corrected Postman collection import/export logic</li>
+                </ul>
+            </li>
+            <li>UI refinements:
+                <ul>
+                    <li>Intellij built in editor for user input</li>
+                    <li>Adaptive layouts for panels</li>
+                    <li>Progress bar now shows on async requests</li>
+                    <li>Removed unused hide/show button in ResponseBodyContainer</li>
+                </ul>
+            </li>
+        </ul>
     ]]>
     </change-notes>
 

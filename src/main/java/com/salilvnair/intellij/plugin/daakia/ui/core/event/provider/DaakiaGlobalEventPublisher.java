@@ -103,8 +103,24 @@ public class DaakiaGlobalEventPublisher {
         publishSync(DaakiaEventType.ON_CLICK_DELETE_COLLECTIONS);
     }
 
+    public void onRefreshTrashPanel() {
+        publishSync(DaakiaEventType.ON_REFRESH_TRASH_PANEL);
+    }
+
+    public void onRefreshCollectionStorePanel() {
+        publishSync(DaakiaEventType.ON_REFRESH_COLLECTION_STORE_PANEL);
+    }
+
     public void onClickSideNavVisibilityToggler() {
         publishSync(DaakiaEventType.ON_CLICK_SIDE_NAV_VISIBILITY_TOGGLER);
+    }
+
+    public void onClickRequestPanelVisibilityToggler() {
+        publishSync(DaakiaEventType.ON_CLICK_REQUEST_PANEL_VISIBILITY_TOGGLER);
+    }
+
+    public void onClickResponsePanelVisibilityToggler() {
+        publishSync(DaakiaEventType.ON_CLICK_RESPONSE_PANEL_VISIBILITY_TOGGLER);
     }
 
     public void onOpenEnvironmentManager() {

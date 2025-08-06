@@ -17,11 +17,12 @@ public class HistoryDao {
         List<DaakiaHistory> list = new ArrayList<>();
         try (Connection conn = DaakiaDatabase.getInstance().getConnection();
              Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery("SELECT data FROM history_records");
+            ResultSet rs = stmt.executeQuery("SELECT id, data FROM history_records WHERE active='Y'");
             while (rs.next()) {
                 String json = rs.getString("data");
                 try {
                     DaakiaHistory h = JsonUtils.jsonToPojo(json, DaakiaHistory.class);
+                    h.setId(rs.getInt("id"));
                     list.add(h);
                 } catch (Exception ignore) {}
             }
@@ -30,20 +31,47 @@ public class HistoryDao {
                 .collect(Collectors.groupingBy(DaakiaHistory::getCreatedDate, LinkedHashMap::new, Collectors.toList()));
     }
 
+    public List<DaakiaHistory> loadInactiveHistory() {
+        List<DaakiaHistory> list = new ArrayList<>();
+        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+             Statement stmt = conn.createStatement()) {
+            ResultSet rs = stmt.executeQuery("SELECT id, data FROM history_records WHERE active='N'");
+            while (rs.next()) {
+                String json = rs.getString("data");
+                try {
+                    DaakiaHistory h = JsonUtils.jsonToPojo(json, DaakiaHistory.class);
+                    h.setId(rs.getInt("id"));
+                    list.add(h);
+                } catch (Exception ignore) {}
+            }
+        } catch (SQLException ignore) {}
+        return list;
+    }
+
     public void saveHistory(Map<String, List<DaakiaHistory>> data) {
         List<DaakiaHistory> flat = new ArrayList<>();
         data.values().forEach(flat::addAll);
         try (Connection conn = DaakiaDatabase.getInstance().getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("DELETE FROM history_records");
-            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO history_records(data) VALUES(?)")) {
+            stmt.executeUpdate("DELETE FROM history_records WHERE active='Y'");
+            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO history_records(data,active) VALUES(?,?)")) {
                 for (DaakiaHistory h : flat) {
                     try {
                         ps.setString(1, JsonUtils.pojoToJson(h));
+                        ps.setString(2, "Y");
                         ps.executeUpdate();
                     } catch (Exception ignore) {}
                 }
             }
+        } catch (SQLException ignore) {}
+    }
+
+    public void markActive(int id, boolean active) {
+        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement("UPDATE history_records SET active=? WHERE id=?")) {
+            ps.setString(1, active ? "Y" : "N");
+            ps.setInt(2, id);
+            ps.executeUpdate();
         } catch (SQLException ignore) {}
     }
 
@@ -60,6 +88,10 @@ public class HistoryDao {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             saveHistory(data);
         });
+    }
+
+    public void markActiveAsync(int id, boolean active) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> markActive(id, active));
     }
 
 

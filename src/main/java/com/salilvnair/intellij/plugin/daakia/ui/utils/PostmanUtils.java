@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreCollection;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.CryptoUtils;
-
+import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -25,8 +24,8 @@ public final class PostmanUtils {
     public static DaakiaStore fromPostmanJson(String json) throws IOException {
         JsonNode root = mapper.readTree(json);
         DaakiaStore store = new DaakiaStore();
-        store.setName(root.path("info").path("name").asText("Imported"));
-        store.setCollection(true);
+        DaakiaStoreCollection collection = prepareStoreCollection(root.path("info").path("name").asText("Imported Collection"));
+        store.setCollection(collection);
         List<DaakiaStore> children = new ArrayList<>();
         JsonNode items = root.path("item");
         if (items.isArray()) {
@@ -38,21 +37,32 @@ public final class PostmanUtils {
         return store;
     }
 
+    private static @NotNull DaakiaStoreCollection prepareStoreCollection(String name) {
+        DaakiaStoreCollection collection = new DaakiaStoreCollection();
+        collection.setCollectionName(name);
+        collection.setCollection(true);
+        return collection;
+    }
+
     private static DaakiaStore parseItem(JsonNode itemNode) throws IOException {
         DaakiaStore store = new DaakiaStore();
         store.setName(itemNode.path("name").asText());
+        DaakiaStoreCollection collection = prepareStoreCollection(itemNode.path("name").asText());
+        store.setCollection(collection);
         if (itemNode.has("item")) {
-            store.setCollection(true);
+            collection.setCollection(true);
             List<DaakiaStore> children = new ArrayList<>();
             for (JsonNode child : itemNode.get("item")) {
                 children.add(parseItem(child));
             }
             store.setChildren(children);
-        } else {
-            store.setCollection(false);
+        }
+        else {
+            collection.setCollection(false);
             DaakiaStoreRecord record = new DaakiaStoreRecord();
             record.setUuid(UUID.randomUUID().toString());
             record.setDisplayName(store.getName());
+            record.setCreatedDate(DateUtils.todayAsString());
             JsonNode req = itemNode.get("request");
             if (req != null) {
                 record.setRequestType(req.path("method").asText());
@@ -163,7 +173,7 @@ public final class PostmanUtils {
         String name = store.getRecord() != null && store.getRecord().getDisplayName() != null
                 ? store.getRecord().getDisplayName() : store.getName();
         map.put("name", name);
-        if (store.isCollection()) {
+        if (store.ofTypeCollection()) {
             List<Object> children = new ArrayList<>();
             if (store.getChildren() != null) {
                 for (DaakiaStore child : store.getChildren()) {
@@ -171,7 +181,8 @@ public final class PostmanUtils {
                 }
             }
             map.put("item", children);
-        } else if (store.getRecord() != null) {
+        }
+        else if (store.getRecord() != null) {
             DaakiaStoreRecord r = store.getRecord();
             Map<String, Object> request = new LinkedHashMap<>();
             request.put("method", r.getRequestType());

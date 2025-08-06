@@ -5,7 +5,6 @@ import com.salilvnair.intellij.plugin.daakia.ui.utils.JsonUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.io.File;
 import java.sql.*;
 import java.util.*;
@@ -39,11 +38,36 @@ public class DaakiaDatabase {
 
     private void init() {
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS history_records (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT)");
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS collection_records (id INTEGER PRIMARY KEY, data TEXT)");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS history_records (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT, active TEXT DEFAULT 'Y')");
+            stmt.executeUpdate("""
+                            CREATE TABLE IF NOT EXISTS collection_records (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                parent_id INTEGER,
+                                name TEXT,
+                                type TEXT,             -- 'COLLECTION' or 'RECORD'
+                                active BOOLEAN DEFAULT 1,
+                                collection_name TEXT,   -- if collection
+                                url TEXT,               -- if record
+                                request_type TEXT,
+                                headers TEXT,
+                                response_headers TEXT,
+                                request_body TEXT,
+                                response_body TEXT,
+                                pre_request_script TEXT,
+                                post_request_script TEXT,
+                                created_date TEXT,
+                                size_text TEXT,
+                                time_taken TEXT,
+                                status_code INTEGER,
+                                uuid TEXT UNIQUE
+                            )
+                    """);
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS environment_records (id INTEGER PRIMARY KEY, data TEXT)");
+            try { stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'"); } catch (SQLException ignore) {}
         }
-        catch (SQLException ignore) {}
+        catch (SQLException ignore) {
+            System.out.println("Error initializing database: " + ignore.getMessage());
+        }
         migrateIfNecessary();
     }
 
