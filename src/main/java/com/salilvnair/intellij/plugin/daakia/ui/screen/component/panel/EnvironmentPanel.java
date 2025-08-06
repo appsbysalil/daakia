@@ -200,11 +200,11 @@ public class EnvironmentPanel extends BaseDaakiaPanel<EnvironmentPanel> {
         typeCombo.setPreferredSize(new Dimension(100, 35));
         typeCombo.setMaximumSize(new Dimension(100, 35));
       
-        PasswordInputField initialField = new PasswordInputField("Initial");
+        PasswordInputField initialField = new PasswordInputField();
         if(initialVal != null) initialField.setText(initialVal);
         initialField.setPreferredSize(new Dimension(300, 35));
         initialField.setMaximumSize(new Dimension(300, 35));
-        PasswordInputField currentField = new PasswordInputField("Current");
+        PasswordInputField currentField = new PasswordInputField();
         if(currentVal != null) currentField.setText(currentVal);
         currentField.setPreferredSize(new Dimension(300, 35));
         currentField.setMaximumSize(new Dimension(300, 35));

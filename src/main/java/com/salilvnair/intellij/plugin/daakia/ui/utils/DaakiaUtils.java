@@ -1,6 +1,11 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
+import com.intellij.ide.highlighter.HtmlFileType;
+import com.intellij.ide.highlighter.XmlFileType;
+import com.intellij.json.JsonFileType;
 import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
@@ -8,10 +13,13 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStore;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreCollection;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.type.DaakiaJavaScriptFileType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RequestType;
 import com.salilvnair.intellij.plugin.daakia.ui.settings.DaakiaSettings;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.util.MultiValueMap;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
@@ -78,9 +86,7 @@ public class DaakiaUtils {
     public static DefaultMutableTreeNode convertCollectionStoreToTreeNodeFilterBySearchText(DaakiaStore daakiaStore, DefaultMutableTreeNode collectionStoreRootNode, String searchText) {
         if(daakiaStore.getChildren()!=null && !daakiaStore.getChildren().isEmpty()) {
             for (DaakiaStore childDaakiaStore : daakiaStore.getChildren()) {
-                if((childDaakiaStore.getRecord() == null)
-                        || (childDaakiaStore.getRecord()!=null &&
-                        (childDaakiaStore.getRecord().getUrl()!=null && childDaakiaStore.getRecord().getUrl().contains(searchText) || childDaakiaStore.getRecord().getDisplayName()!=null && childDaakiaStore.getRecord().getDisplayName().contains(searchText)))
+                if(childDaakiaStore.getRecord() == null || childDaakiaStore.getRecord().getUrl() != null && childDaakiaStore.getRecord().getUrl().contains(searchText) || childDaakiaStore.getRecord().getDisplayName() != null && childDaakiaStore.getRecord().getDisplayName().contains(searchText)
                 ) {
                     DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDaakiaStore.getRecord() == null ? childDaakiaStore.getName() : childDaakiaStore.getRecord());
                     convertCollectionStoreToTreeNodeFilterBySearchText(childDaakiaStore, childNode, searchText);
@@ -303,5 +309,27 @@ public class DaakiaUtils {
             copy.add(deepCopyNode((DefaultMutableTreeNode) node.getChildAt(i)));
         }
         return copy;
+    }
+
+    public static FileType resolveFileTypeFromHeaders(MultiValueMap<String, String> headers) {
+        try {
+            if (headers != null) {
+                String contentTypeKey= headers.keySet().stream().filter("Content-Type"::equalsIgnoreCase).findFirst().orElse("Content-Type");
+                String contentType = headers.getFirst(contentTypeKey);
+                if (contentType != null) {
+                    contentType = contentType.toLowerCase();
+                    if (contentType.contains("json")) {
+                        return JsonFileType.INSTANCE;
+                    } else if (contentType.contains("xml")) {
+                        return XmlFileType.INSTANCE;
+                    } else if (contentType.contains("html")) {
+                        return HtmlFileType.INSTANCE;
+                    } else if (contentType.contains("javascript") || contentType.contains("ecmascript")) {
+                        return DaakiaJavaScriptFileType.INSTANCE;
+                    }
+                }
+            }
+        } catch (Exception ignore) {}
+        return PlainTextFileType.INSTANCE;
     }
 }

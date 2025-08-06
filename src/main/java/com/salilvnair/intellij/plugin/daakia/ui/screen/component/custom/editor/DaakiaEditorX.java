@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -323,6 +324,15 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
         });
     }
 
+    public void setText(String text, FileType fileType) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            ApplicationManager.getApplication().runWriteAction(() -> {
+                editor.getDocument().setText(text == null ? "" : text);
+            });
+        });
+        updateFileType(fileType);
+    }
+
     public void updateFileType(FileType newFileType) {
         if (newFileType == null) newFileType = PlainTextFileType.INSTANCE;
         if (newFileType.equals(this.fileType)) return;
@@ -412,6 +422,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
             }
         }
 
+        // Add formatter button dynamically based on fileType
         DefaultActionGroup finalActionGroup = actionGroup;
         FormatUtils.formatterMap.forEach((ftClass, meta) -> {
             if (ftClass.isInstance(fileType)) {
@@ -423,8 +434,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
                         try {
                             String formatted = meta.formatter().apply(text);
                             WriteCommandAction.runWriteCommandAction(project, () -> editor.getDocument().setText(formatted));
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             System.out.println("Format Error: " + ex.getMessage());
                         }
                     }
@@ -432,6 +442,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
             }
         });
     }
+
 
     private void createLogViewActionGroup(DefaultActionGroup actionGroup) {
         actionGroup.addSeparator();
@@ -455,21 +466,23 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
 
     private void createAllowedPopupMenuActionGroup(AnAction action, DefaultActionGroup defaultActionGroup) {
         ActionManager actionManager = ActionManager.getInstance();
+        Set<AnAction> alreadyAdded = new HashSet<>();
+
         if (action instanceof DefaultActionGroup group) {
             for (AnAction child : group.getChildren(actionManager)) {
-                String id = actionManager.getId(action);
-                if(allowedPopupMenuGroupIds.contains(id)) {
-                    if(!defaultActionGroup.containsAction(action)) {
-                        defaultActionGroup.add(action);
+                String id = actionManager.getId(child);
+                if (id != null && allowedPopupMenuGroupIds.contains(id)) {
+                    if (alreadyAdded.add(child) && !defaultActionGroup.containsAction(child)) {
+                        defaultActionGroup.add(child);
                     }
                 }
                 createAllowedPopupMenuActionGroup(child, defaultActionGroup);
             }
-        }
-        else {
+        } else {
             String id = actionManager.getId(action);
             if (id != null && allowedFoldingActionIds.contains(id)) {
-                if(!defaultActionGroup.containsAction(action)) {
+                alreadyAdded.add(action);
+                if (!defaultActionGroup.containsAction(action)) {
                     defaultActionGroup.add(action);
                 }
             }
@@ -477,21 +490,21 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     }
 
 
-    private DefaultActionGroup filterActionGroup(Set<String> allowedMenuOptions, DefaultActionGroup existingActionGroup) {
-        AnAction action = ActionManager.getInstance().getAction(IdeActions.GROUP_EDITOR_POPUP);
-        DefaultActionGroup defaultActionGroup = existingActionGroup == null ? new DefaultActionGroup() : existingActionGroup;
 
-        if (action instanceof DefaultActionGroup originalGroup) {
+    private DefaultActionGroup filterActionGroup(Set<String> allowedMenuOptions, DefaultActionGroup existingActionGroup) {
+        AnAction popupAction = ActionManager.getInstance().getAction(IdeActions.GROUP_EDITOR_POPUP);
+        DefaultActionGroup defaultActionGroup = existingActionGroup != null ? existingActionGroup : new DefaultActionGroup();
+        if (popupAction instanceof DefaultActionGroup originalGroup) {
+            Set<AnAction> alreadyAdded = new HashSet<>();
             for (AnAction child : originalGroup.getChildren(ActionManager.getInstance())) {
                 String id = ActionManager.getInstance().getId(child);
-                if(id != null && !allowedMenuOptions.contains(id)) {
-                    continue;
-                }
-                if(!defaultActionGroup.containsAction(action)) {
+                if (id == null || !allowedMenuOptions.contains(id)) continue;
+                if (alreadyAdded.add(child)) {
                     defaultActionGroup.add(child);
                 }
             }
         }
+
         return defaultActionGroup;
     }
 }

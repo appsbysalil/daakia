@@ -1,32 +1,35 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.treeStructure.Tree;
+import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
+import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.*;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.*;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.*;
-import com.salilvnair.intellij.plugin.daakia.persistence.CollectionDao;
-import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
-import java.util.Base64;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class AppDaakiaService extends BaseDaakiaService {
@@ -184,8 +187,6 @@ public class AppDaakiaService extends BaseDaakiaService {
     }
 
     private void loadApplicableDaakiaUiComponents(DataContext dataContext, DaakiaBaseStoreData baseStoreData, Object... objects) {
-        dataContext.uiContext().requestTextArea().setText(baseStoreData.getRequestBody());
-        dataContext.uiContext().responseTextArea().setText(baseStoreData.getResponseBody());
         if(dataContext.uiContext().preRequestScriptArea()!=null) {
             dataContext.uiContext().preRequestScriptArea().setText(baseStoreData.getPreRequestScript());
         }
@@ -205,6 +206,8 @@ public class AppDaakiaService extends BaseDaakiaService {
         MultiValueMap<String, String> responseHeaders = JsonUtils.jsonStringToMultivaluedMap(responseHeadersJsonString);
         dataContext.daakiaContext().setRequestHeaders(requestHeaders);
         dataContext.daakiaContext().setResponseHeaders(responseHeaders);
+        dataContext.uiContext().requestTextArea().setText(baseStoreData.getRequestBody());
+        dataContext.uiContext().responseTextArea().setText(baseStoreData.getResponseBody(), DaakiaUtils.resolveFileTypeFromHeaders(dataContext.daakiaContext().responseHeaders()));
         if(baseStoreData.getStatusCode()!=0) {
             dataContext.daakiaContext().setHttpStatus(HttpStatus.valueOf(baseStoreData.getStatusCode()));
         }
