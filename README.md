@@ -70,3 +70,44 @@ This plugin is distributed under the MIT License. See the LICENSE file for detai
 ✅ A more stable and user-friendly experience, especially for debugging and script-heavy users!
 
 
+# Daakia IntelliJ Plugin v3.0.0
+
+## 🚀 What's New in v3.0.0
+Major release with **dynamic panel resizing**, **trash management improvements**, and **refined UI behaviors**.
+
+### 🔹 New Features
+- **Double-click divider for 3-way toggle**:
+    1. First double-click → Maximize **Left Panel**
+    2. Second double-click → **Center Split**
+    3. Third double-click → Maximize **Right Panel**
+- Smooth request/response panel visibility toggling with improved divider logic.
+- Progress bar now appears during async REST operations.
+
+### 🔹 Panel & UI Enhancements
+- Response panel hides content when collapsed for performance.
+- Removed unused `hideShowButton` from ResponseBodyContainer.
+- Adaptive layout refinements and better divider sizing.
+
+### 🔹 Trash & Collection Management
+- Added **restore** and **permanent delete** for trash panel items.
+- Nested folders automatically restore ancestors on reactivation.
+- Fixed empty collection save and Postman import/export logic.
+
+### 🔹 Developer Quality Improvements
+- Refactored save and error handling for stability.
+- Merged multiple feature branches with clean history.
+- Internal cleanup of unused UI elements and improved event handling.
+
+---
+
+### ✅ Upgrade Notes
+- Existing collections and trash data are preserved.
+- Double-click divider replaces old hide/show button logic.
+
+---
+
+**Release date:** August 6, 2025  
+**Author:** Salil V Nair (@salilvnair)  
+
+
+
