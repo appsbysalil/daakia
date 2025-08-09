@@ -3,7 +3,6 @@ package com.salilvnair.intellij.plugin.daakia.ui.utils;
 import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.json.JsonFileType;
-import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.ui.Gray;
@@ -170,12 +169,8 @@ public class DaakiaUtils {
                 DebugLogManager.startCapture();
                 dataContext.uiContext().setDebugMode(true);
                 DaakiaEditorX daakiaEditorX = dataContext.uiContext().debugLogEditor();
-                EditorEx editor = daakiaEditorX.editor();
-                if (editor != null) {
-                    com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
-                            () -> com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
-                                    () -> editor.getDocument().setText(DebugLogManager.getLogs()))
-                    );
+                if (daakiaEditorX != null) {
+                    daakiaEditorX.setText(DebugLogManager.getLogs());
                 }
                 dataContext.globalEventPublisher().onEnableDebugMode();
             }
