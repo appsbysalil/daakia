@@ -2,6 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.AuthInfo;
 import com.salilvnair.intellij.plugin.daakia.ui.core.rest.exception.RestResponseErrorHandler;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -9,6 +10,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.AuthorizationType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaScriptExecutor;
 import org.jetbrains.annotations.NotNull;
@@ -75,39 +77,52 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
 
     private HttpHeaders prepareRequestHeaders(DataContext dataContext) {
         HttpHeaders headers = new HttpHeaders();
-        Environment env = dataContext.globalContext().selectedEnvironment();
         dataContext.uiContext().headerTextFields().forEach((k, v) -> {
             String headerName = PostmanEnvironmentUtils.resolveVariables(v.get(0).getText(), dataContext);
             String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), dataContext);
             headers.add(headerName, headerVal);
         });
-        HttpHeaders authHeaders = addAuthorizationHeaderIfPresent(dataContext);
-        if(!authHeaders.isEmpty()) {
-            headers.addAll(authHeaders);
-        }
         dataContext.daakiaContext().setRequestHeaders(headers);
-        return headers;
+        HttpHeaders headersForRequest = new HttpHeaders(headers);
+        addAuthorizationHeaderIfPresent(dataContext, headersForRequest);
+        return headersForRequest;
     }
 
-    private HttpHeaders addAuthorizationHeaderIfPresent(DataContext dataContext) {
-        HttpHeaders authHeaders = new HttpHeaders();
-        if(dataContext.uiContext().authTypes() != null) {
-            String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
-            if("Bearer Token".equals(selectedAuthType)) {
-                String bearerToken = new String(dataContext.uiContext().bearerTokenTextField().getPassword());
-                bearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext);
-                authHeaders.setBearerAuth(bearerToken);
-            }
-            else if("Basic Auth".equals(selectedAuthType)) {
-                String userName = dataContext.uiContext().userNameTextField().getText();
-                String password = new String(dataContext.uiContext().passwordTextField().getPassword());
-                Environment env = dataContext.globalContext().selectedEnvironment();
-                userName = PostmanEnvironmentUtils.resolveVariables(userName, dataContext);
-                password = PostmanEnvironmentUtils.resolveVariables(password, dataContext);
-                authHeaders.setBasicAuth(userName, password);
-            }
+    private void addAuthorizationHeaderIfPresent(DataContext dataContext, HttpHeaders headers) {
+        AuthInfo authInfo = buildAuthInfoFromUi(dataContext);
+        dataContext.uiContext().setAuthInfo(authInfo);
+        if (authInfo == null || authInfo.getAuthType() == null) {
+            return;
         }
-        return authHeaders;
+        if (AuthorizationType.BEARER_TOKEN.type().equals(authInfo.getAuthType())) {
+            String bearerToken = PostmanEnvironmentUtils.resolveVariables(authInfo.getToken(), dataContext);
+            headers.setBearerAuth(bearerToken);
+        }
+        else if (AuthorizationType.BASIC_AUTH.type().equals(authInfo.getAuthType())) {
+            String userName = PostmanEnvironmentUtils.resolveVariables(authInfo.getUsername(), dataContext);
+            String password = PostmanEnvironmentUtils.resolveVariables(authInfo.getPassword(), dataContext);
+            headers.setBasicAuth(userName, password);
+        }
+    }
+
+    private AuthInfo buildAuthInfoFromUi(DataContext dataContext) {
+        if(dataContext.uiContext().authTypes() == null) {
+            return null;
+        }
+        String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
+        if(selectedAuthType == null || AuthorizationType.NONE.type().equals(selectedAuthType)) {
+            return null;
+        }
+        AuthInfo authInfo = new AuthInfo();
+        authInfo.setAuthType(selectedAuthType);
+        if(AuthorizationType.BEARER_TOKEN.type().equals(selectedAuthType)) {
+            authInfo.setToken(new String(dataContext.uiContext().bearerTokenTextField().getPassword()));
+        }
+        else if(AuthorizationType.BASIC_AUTH.type().equals(selectedAuthType)) {
+            authInfo.setUsername(dataContext.uiContext().userNameTextField().getText());
+            authInfo.setPassword(new String(dataContext.uiContext().passwordTextField().getPassword()));
+        }
+        return authInfo;
     }
 
     private void updateDaakiaContext(long startTime, DataContext dataContext, ResponseEntity<?> response, String finalErrorMessage) {

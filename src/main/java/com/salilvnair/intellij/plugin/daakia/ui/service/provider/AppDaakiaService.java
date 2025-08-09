@@ -10,6 +10,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.icon.DaakiaIcons;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.AuthInfo;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
@@ -28,6 +29,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -203,9 +205,38 @@ public class AppDaakiaService extends BaseDaakiaService {
             List<String> uniqueValues = new ArrayList<>(new LinkedHashSet<>(entry.getValue()));
             entry.setValue(uniqueValues);
         }
+        AuthInfo authInfo = null;
+        if(baseStoreData.getAuthInfo() != null) {
+            try {
+                authInfo = JsonUtils.jsonToPojo(baseStoreData.getAuthInfo(), AuthInfo.class);
+            } catch (IOException ignore) {}
+        } else if(requestHeaders.containsKey(AuthorizationType.Constant.AUTHORIZATION)) {
+            String value = requestHeaders.getFirst(AuthorizationType.Constant.AUTHORIZATION);
+            if(value != null) {
+                if(value.startsWith(AuthorizationType.Constant.BEARER_SPACE)) {
+                    authInfo = new AuthInfo();
+                    authInfo.setAuthType(AuthorizationType.BEARER_TOKEN.type());
+                    authInfo.setToken(value.substring(7));
+                }
+                else if(value.startsWith(AuthorizationType.Constant.BASIC_SPACE)) {
+                    try {
+                        String decoded = new String(Base64.getDecoder().decode(value.substring(6)));
+                        String[] parts = decoded.split(":",2);
+                        if(parts.length==2) {
+                            authInfo = new AuthInfo();
+                            authInfo.setAuthType(AuthorizationType.BASIC_AUTH.type());
+                            authInfo.setUsername(parts[0]);
+                            authInfo.setPassword(parts[1]);
+                        }
+                    } catch (Exception ignore) {}
+                }
+            }
+        }
+        requestHeaders.remove(AuthorizationType.Constant.AUTHORIZATION);
         MultiValueMap<String, String> responseHeaders = JsonUtils.jsonStringToMultivaluedMap(responseHeadersJsonString);
         dataContext.daakiaContext().setRequestHeaders(requestHeaders);
         dataContext.daakiaContext().setResponseHeaders(responseHeaders);
+        dataContext.uiContext().setAuthInfo(authInfo);
         dataContext.uiContext().requestTextArea().setText(baseStoreData.getRequestBody());
         dataContext.uiContext().responseTextArea().setText(baseStoreData.getResponseBody(), DaakiaUtils.resolveFileTypeFromHeaders(dataContext.daakiaContext().responseHeaders()));
         if(baseStoreData.getStatusCode()!=0) {
@@ -215,7 +246,7 @@ public class AppDaakiaService extends BaseDaakiaService {
         dataContext.uiContext().headerTextFields().clear();
         dataContext.uiContext().headersPanel().removeAll();
         createRequestHeaders(dataContext, objects);
-        loadAuthorizationPanel(requestHeaders, dataContext);
+        loadAuthorizationPanel(authInfo, dataContext);
         createResponseHeaders(dataContext, objects);
         createResponseStatus(dataContext, objects);
     }
@@ -229,26 +260,27 @@ public class AppDaakiaService extends BaseDaakiaService {
         });
     }
 
-    private void loadAuthorizationPanel(MultiValueMap<String, String> requestHeaders, DataContext dataContext) {
-        if(requestHeaders.containsKey(AuthorizationType.Constant.AUTHORIZATION)) {
-            String value = requestHeaders.getFirst(AuthorizationType.Constant.AUTHORIZATION);
-            if(value != null) {
-                if(value.startsWith(AuthorizationType.Constant.BEARER_SPACE)) {
-                    dataContext.uiContext().authTypes().setSelectedItem(AuthorizationType.BEARER_TOKEN.type());
-                    dataContext.uiContext().bearerTokenTextField().setText(value.substring(7));
-                }
-                else if(value.startsWith(AuthorizationType.Constant.BASIC_SPACE)) {
-                    try {
-                        String decoded = new String(Base64.getDecoder().decode(value.substring(6)));
-                        String[] parts = decoded.split(":",2);
-                        if(parts.length==2) {
-                            dataContext.uiContext().authTypes().setSelectedItem(AuthorizationType.BASIC_AUTH.type());
-                            dataContext.uiContext().userNameTextField().setText(parts[0]);
-                            dataContext.uiContext().passwordTextField().setText(parts[1]);
-                        }
-                    } catch (Exception ignore) {}
-                }
+    private void loadAuthorizationPanel(AuthInfo authInfo, DataContext dataContext) {
+        if(authInfo == null || authInfo.getAuthType() == null) {
+            dataContext.uiContext().authTypes().setSelectedItem(AuthorizationType.NONE.type());
+            if(dataContext.uiContext().bearerTokenTextField()!=null) {
+                dataContext.uiContext().bearerTokenTextField().setText("");
             }
+            if(dataContext.uiContext().userNameTextField()!=null) {
+                dataContext.uiContext().userNameTextField().setText("");
+            }
+            if(dataContext.uiContext().passwordTextField()!=null) {
+                dataContext.uiContext().passwordTextField().setText("");
+            }
+            return;
+        }
+        dataContext.uiContext().authTypes().setSelectedItem(authInfo.getAuthType());
+        if(AuthorizationType.BEARER_TOKEN.type().equals(authInfo.getAuthType())) {
+            dataContext.uiContext().bearerTokenTextField().setText(authInfo.getToken());
+        }
+        else if(AuthorizationType.BASIC_AUTH.type().equals(authInfo.getAuthType())) {
+            dataContext.uiContext().userNameTextField().setText(authInfo.getUsername());
+            dataContext.uiContext().passwordTextField().setText(authInfo.getPassword());
         }
     }
 
@@ -382,6 +414,7 @@ public class AppDaakiaService extends BaseDaakiaService {
             ObjectMapper objectMapper = new ObjectMapper();
             headers = objectMapper.writeValueAsString(requestHeaders);
             headers = CryptoUtils.encrypt(headers);
+            AuthInfo authInfo = buildAuthInfoFromUi(dataContext);
             daakiaBaseStoreData.setUuid(UUID.randomUUID().toString());
             daakiaBaseStoreData.setHeaders(headers);
             daakiaBaseStoreData.setResponseHeaders(objectMapper.writeValueAsString(responseHeaders));
@@ -395,6 +428,7 @@ public class AppDaakiaService extends BaseDaakiaService {
             daakiaBaseStoreData.setStatusCode(responseMetadata.getStatusCode());
             daakiaBaseStoreData.setTimeTaken(responseMetadata.getTimeTaken());
             daakiaBaseStoreData.setSizeText(responseMetadata.getSizeText());
+            daakiaBaseStoreData.setAuthInfo(authInfo != null ? JsonUtils.pojoToJson(authInfo) : null);
             String storeString = objectMapper.writeValueAsString(daakiaBaseStoreData);
             return JsonUtils.jsonToPojo(storeString, clazz);
         }
@@ -402,6 +436,28 @@ public class AppDaakiaService extends BaseDaakiaService {
 
         }
         return null;
+    }
+
+    private AuthInfo buildAuthInfoFromUi(DataContext dataContext) {
+        if(dataContext.uiContext().authTypes() == null) {
+            return null;
+        }
+        String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
+        if(selectedAuthType == null || AuthorizationType.NONE.type().equals(selectedAuthType)) {
+            dataContext.uiContext().setAuthInfo(null);
+            return null;
+        }
+        AuthInfo authInfo = new AuthInfo();
+        authInfo.setAuthType(selectedAuthType);
+        if(AuthorizationType.BEARER_TOKEN.type().equals(selectedAuthType)) {
+            authInfo.setToken(new String(dataContext.uiContext().bearerTokenTextField().getPassword()));
+        }
+        else if(AuthorizationType.BASIC_AUTH.type().equals(selectedAuthType)) {
+            authInfo.setUsername(dataContext.uiContext().userNameTextField().getText());
+            authInfo.setPassword(new String(dataContext.uiContext().passwordTextField().getPassword()));
+        }
+        dataContext.uiContext().setAuthInfo(authInfo);
+        return authInfo;
     }
 
 

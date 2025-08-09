@@ -18,6 +18,7 @@ public class DaakiaBaseStoreData {
     protected String url;
     protected String headers;
     protected String responseHeaders;
+    protected String authInfo;
     protected String requestBody;
     protected String responseBody;
     /** JavaScript executed before a request is sent */
@@ -125,6 +126,14 @@ public class DaakiaBaseStoreData {
 
     public void setResponseHeaders(String responseHeaders) {
         this.responseHeaders = responseHeaders;
+    }
+
+    public String getAuthInfo() {
+        return authInfo;
+    }
+
+    public void setAuthInfo(String authInfo) {
+        this.authInfo = authInfo;
     }
 
     public String getSizeText() {

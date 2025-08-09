@@ -22,15 +22,16 @@ public class DbTreeStoreService {
             INSERT INTO collection_records (
                 parent_id, name, type, active, collection_name, url, request_type, headers, response_headers,
                 request_body, response_body, pre_request_script, post_request_script,
-                created_date, size_text, time_taken, status_code, uuid
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                created_date, size_text, time_taken, status_code, auth_info, uuid
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(uuid) DO UPDATE SET
                 parent_id=excluded.parent_id, name=excluded.name, type=excluded.type, active=excluded.active,
                 collection_name=excluded.collection_name, url=excluded.url, request_type=excluded.request_type,
                 headers=excluded.headers, response_headers=excluded.response_headers, request_body=excluded.request_body,
                 response_body=excluded.response_body, pre_request_script=excluded.pre_request_script,
                 post_request_script=excluded.post_request_script, created_date=excluded.created_date,
-                size_text=excluded.size_text, time_taken=excluded.time_taken, status_code=excluded.status_code
+                size_text=excluded.size_text, time_taken=excluded.time_taken, status_code=excluded.status_code,
+                auth_info=excluded.auth_info
             RETURNING id
             """;
 
@@ -54,11 +55,15 @@ public class DbTreeStoreService {
         boolean active = true;
         String name = "";
         String collectionName = null;
-        String url = null, requestType = null, headers = null, responseHeaders = null;
+        String url = null, requestType = null, headers = null, responseHeaders = null, authInfo = null;
         String requestBody = null, responseBody = null, preScript = null, postScript = null;
         String createdDate = null, sizeText = null, timeTaken = null;
         int statusCode = 0;
         String uuid;
+
+        if (userObj instanceof DaakiaBaseStoreData baseData) {
+            authInfo = baseData.getAuthInfo();
+        }
 
         if (userObj instanceof DaakiaStoreCollection coll) {
             type = "COLLECTION";
@@ -105,7 +110,8 @@ public class DbTreeStoreService {
         ps.setString(15, sizeText);
         ps.setString(16, timeTaken);
         ps.setInt(17, statusCode);
-        ps.setString(18, uuid);
+        ps.setString(18, authInfo);
+        ps.setString(19, uuid);
 
         Integer currentId = null;
         try (ResultSet rs = ps.executeQuery()) {
@@ -153,6 +159,7 @@ public class DbTreeStoreService {
                     coll.setCollectionName(rs.getString("collection_name"));
                     coll.setActive(rs.getBoolean("active"));
                     coll.setUuid(uuid);
+                    coll.setAuthInfo(rs.getString("auth_info"));
                     node.setUserObject(coll);
                 } else if ("RECORD".equalsIgnoreCase(type)) {
                     DaakiaStoreRecord rec = new DaakiaStoreRecord();
@@ -171,6 +178,7 @@ public class DbTreeStoreService {
                     rec.setStatusCode(rs.getInt("status_code"));
                     rec.setActive(rs.getBoolean("active"));
                     rec.setUuid(uuid);
+                    rec.setAuthInfo(rs.getString("auth_info"));
                     node.setUserObject(rec);
                 } else {
                     node.setUserObject("Root");
