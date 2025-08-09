@@ -37,6 +37,10 @@ public class DaakiaGlobalEventPublisher {
         publishSync(DaakiaEventType.ON_CLICK_SEND);
     }
 
+    public void onClickStop() {
+        publishSync(DaakiaEventType.ON_CLICK_STOP);
+    }
+
     public void onClickSave() {
         publishSync(DaakiaEventType.ON_CLICK_SAVE);
     }

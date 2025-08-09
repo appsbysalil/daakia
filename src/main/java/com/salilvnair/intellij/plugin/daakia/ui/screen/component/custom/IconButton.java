@@ -19,17 +19,6 @@ public class IconButton extends JButton {
         setContentAreaFilled(false);
         setFocusPainted(false);
         setOpaque(false);
-//        addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseEntered(MouseEvent e) {
-//                setBorderPainted(true);
-//            }
-//
-//            @Override
-//            public void mouseExited(MouseEvent e) {
-//                setBorderPainted(false);
-//            }
-//        });
     }
 
     public IconButton(Icon icon, Dimension preferredSize) {
