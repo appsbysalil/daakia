@@ -56,6 +56,10 @@ public class UIContext {
 
     private JProgressBar progressBar;
 
+    private JButton stopButton;
+
+    private java.util.concurrent.Future<?> activeRequest;
+
     private DaakiaEditorX preRequestScriptArea;
     private DaakiaEditorX postRequestScriptArea;
 
@@ -148,6 +152,14 @@ public class UIContext {
 
     public JProgressBar progressBar() {
         return progressBar;
+    }
+
+    public JButton stopButton() {
+        return stopButton;
+    }
+
+    public java.util.concurrent.Future<?> activeRequest() {
+        return activeRequest;
     }
 
     public DaakiaEditorX preRequestScriptArea() {

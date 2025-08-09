@@ -107,14 +107,20 @@ public class DaakiaTabbedMainPanel extends BaseDaakiaPanel<DaakiaTabbedMainPanel
         String displayName = storeData.getDisplayName();
         displayName = displayName == null ? "Untitled" : displayName;
         String finalDisplayName = displayName;
-        ApplicationManager.getApplication().invokeLater(() -> {
+        Runnable task = () -> {
             addNewTab(newTabDataContext, requestType, finalDisplayName, true);
             daakiaService(DaakiaType.APP).execute(
                     DaakiaEvent.ofType(e, DaakiaEventType.ON_LOAD_SELECTED_HISTORY_DATA)
                             ? AppDaakiaType.ON_CLICK_HISTORY_NODE
                             : AppDaakiaType.ON_CLICK_STORE_COLLECTION_NODE,
                     newTabDataContext);
-        });
+        };
+        if (ApplicationManager.getApplication().isDispatchThread()) {
+            task.run();
+        }
+        else {
+            ApplicationManager.getApplication().invokeLater(task);
+        }
     }
 
     private DaakiaRightVerticalSplitPanel tabContent(GlobalContext globalContext) {
