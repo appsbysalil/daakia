@@ -57,6 +57,11 @@ public class DaakiaEventPublisher {
         publisher.publish(event);
     }
 
+    public void onClickStop() {
+        DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_CLICK_STOP);
+        publisher.publish(event);
+    }
+
     public void onSelectRawBodyType() {
         DaakiaEvent event = new DaakiaEvent(this, DaakiaEventType.ON_SELECT_RAW_BODY_TYPE);
         publisher.publish(event);

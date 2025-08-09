@@ -17,7 +17,9 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     private DaakiaRightVerticalSplitRightPanel rightPanel;
     private JSplitPane leftRightSplitPane;
     private JPanel rightPanelContainer;
+    private JPanel loaderPanel;
     private JProgressBar progressBar;
+    private JButton stopButton;
 
 
     public DaakiaRightVerticalSplitPanel(JRootPane rootPane, DataContext dataContext) {
@@ -37,14 +39,21 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
         rightPanel = new DaakiaRightVerticalSplitRightPanel(rootPane, dataContext);
         rightPanelContainer = new JPanel();
         rightPanelContainer.setLayout(new BoxLayout(rightPanelContainer, BoxLayout.Y_AXIS));
+        loaderPanel = new JPanel();
+        loaderPanel.setLayout(new BoxLayout(loaderPanel, BoxLayout.X_AXIS));
+        loaderPanel.setVisible(false);
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
-        progressBar.setVisible(false);
-        rightPanelContainer.add(progressBar);
+        stopButton = new JButton("Stop");
+        loaderPanel.add(progressBar);
+        loaderPanel.add(Box.createHorizontalStrut(5));
+        loaderPanel.add(stopButton);
+        rightPanelContainer.add(loaderPanel);
         rightPanelContainer.add(rightPanel);
         leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanelContainer);
         leftRightSplitPane.setDividerSize(2);
         uiContext().setProgressBar(progressBar);
+        uiContext().setStopButton(stopButton);
     }
 
     @Override
@@ -67,15 +76,24 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
             if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
                 com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
                     rightPanel.setVisible(false);
-                    progressBar.setVisible(true);
+                    loaderPanel.setVisible(true);
                 });
             }
-            else if (DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
+            else if (DaakiaEvent.ofAnyType(event, DaakiaEventType.AFTER_REST_EXCHANGE, DaakiaEventType.ON_CLICK_STOP)) {
                 com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
                     rightPanel.setVisible(true);
-                    progressBar.setVisible(false);
+                    loaderPanel.setVisible(false);
                 });
             }
+        });
+        stopButton.addActionListener(e -> {
+            java.util.concurrent.Future<?> future = uiContext().activeRequest();
+            if (future != null) {
+                future.cancel(true);
+                uiContext().setActiveRequest(null);
+            }
+            eventPublisher().onClickStop();
+            globalEventPublisher().onClickStop();
         });
         listenGlobal(event -> {
             if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_REQUEST_PANEL_VISIBILITY_TOGGLER)) {
