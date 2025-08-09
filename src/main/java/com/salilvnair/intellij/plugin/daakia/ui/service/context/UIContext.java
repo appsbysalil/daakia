@@ -2,6 +2,7 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.context;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.Environment;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.AuthInfo;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.RawBodyTypeDropdown;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
@@ -51,6 +52,7 @@ public class UIContext {
     private TextInputField userNameTextField;
     private PasswordInputField passwordTextField;
     private PasswordInputField bearerTokenTextField;
+    private AuthInfo authInfo;
 
     private JProgressBar progressBar;
 
@@ -138,6 +140,10 @@ public class UIContext {
 
     public PasswordInputField bearerTokenTextField() {
         return bearerTokenTextField;
+    }
+
+    public AuthInfo authInfo() {
+        return authInfo;
     }
 
     public JProgressBar progressBar() {

@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBTabbedPane;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
@@ -52,11 +53,11 @@ public class DaakiaRequestBottomPanel extends BaseDaakiaPanel<DaakiaRequestBotto
     @Override
     public void initListeners() {
         listen(event -> {
-            if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
-                tabbedPane.setSelectedIndex(1);
+            if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
+                ApplicationManager.getApplication().invokeLater(() -> tabbedPane.setSelectedIndex(1));
             }
-            else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_ADD_HEADER)) {
-                tabbedPane.setSelectedIndex(0);
+            else if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_ADD_HEADER)) {
+                ApplicationManager.getApplication().invokeLater(() -> tabbedPane.setSelectedIndex(0));
             }
         });
     }

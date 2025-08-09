@@ -70,6 +70,7 @@ public class DaakiaDatabase {
                     size_text TEXT,
                     time_taken TEXT,
                     status_code INTEGER,
+                    auth_info TEXT,
                     uuid TEXT UNIQUE
                 )
             """);
@@ -83,6 +84,12 @@ public class DaakiaDatabase {
             // Try adding missing column for older DBs
             try {
                 stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'");
+            } catch (SQLException ignore) {
+                // column exists already
+            }
+
+            try {
+                stmt.executeUpdate("ALTER TABLE collection_records ADD COLUMN auth_info TEXT");
             } catch (SQLException ignore) {
                 // column exists already
             }
