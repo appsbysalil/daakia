@@ -223,7 +223,9 @@ public class AppDaakiaService extends BaseDaakiaService {
     private void createRequestHeaders(DataContext dataContext, Object... objects) {
         MultiValueMap<String, String> requestHeaders = dataContext.daakiaContext().requestHeaders();
         requestHeaders.forEach((key, values) -> {
-            createHeader(dataContext, key, values.getFirst());
+            if (!AuthorizationType.Constant.AUTHORIZATION.equalsIgnoreCase(key)) {
+                createHeader(dataContext, key, values.getFirst());
+            }
         });
     }
 
