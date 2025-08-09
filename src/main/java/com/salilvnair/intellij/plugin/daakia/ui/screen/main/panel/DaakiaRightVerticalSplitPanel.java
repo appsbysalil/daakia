@@ -4,6 +4,8 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
+import com.intellij.icons.AllIcons;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
@@ -17,7 +19,9 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     private DaakiaRightVerticalSplitRightPanel rightPanel;
     private JSplitPane leftRightSplitPane;
     private JPanel rightPanelContainer;
+    private JPanel loaderPanel;
     private JProgressBar progressBar;
+    private IconButton stopButton;
 
 
     public DaakiaRightVerticalSplitPanel(JRootPane rootPane, DataContext dataContext) {
@@ -37,14 +41,20 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
         rightPanel = new DaakiaRightVerticalSplitRightPanel(rootPane, dataContext);
         rightPanelContainer = new JPanel();
         rightPanelContainer.setLayout(new BoxLayout(rightPanelContainer, BoxLayout.Y_AXIS));
+        loaderPanel = new JPanel(new BorderLayout());
+        loaderPanel.setVisible(false);
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
-        progressBar.setVisible(false);
-        rightPanelContainer.add(progressBar);
+        stopButton = new IconButton(AllIcons.Actions.Close, new Dimension(20, 20));
+        loaderPanel.add(progressBar, BorderLayout.CENTER);
+        loaderPanel.add(stopButton, BorderLayout.EAST);
+        loaderPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, progressBar.getPreferredSize().height));
+        rightPanelContainer.add(loaderPanel);
         rightPanelContainer.add(rightPanel);
         leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanelContainer);
         leftRightSplitPane.setDividerSize(2);
         uiContext().setProgressBar(progressBar);
+        uiContext().setStopButton(stopButton);
     }
 
     @Override
@@ -67,15 +77,24 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
             if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_SEND)) {
                 com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
                     rightPanel.setVisible(false);
-                    progressBar.setVisible(true);
+                    loaderPanel.setVisible(true);
                 });
             }
-            else if (DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
+            else if (DaakiaEvent.ofAnyType(event, DaakiaEventType.AFTER_REST_EXCHANGE, DaakiaEventType.ON_CLICK_STOP)) {
                 com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
                     rightPanel.setVisible(true);
-                    progressBar.setVisible(false);
+                    loaderPanel.setVisible(false);
                 });
             }
+        });
+        stopButton.addActionListener(e -> {
+            java.util.concurrent.Future<?> future = uiContext().activeRequest();
+            if (future != null) {
+                future.cancel(true);
+                uiContext().setActiveRequest(null);
+            }
+            eventPublisher().onClickStop();
+            globalEventPublisher().onClickStop();
         });
         listenGlobal(event -> {
             if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_REQUEST_PANEL_VISIBILITY_TOGGLER)) {

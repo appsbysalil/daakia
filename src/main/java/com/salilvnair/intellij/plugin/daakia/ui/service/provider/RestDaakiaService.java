@@ -24,9 +24,10 @@ public class RestDaakiaService extends BaseDaakiaService {
     @Override
     public DaakiaContext execute(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
         if(RestDaakiaType.EXCHANGE.equals(type)) {
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            java.util.concurrent.Future<?> future = ApplicationManager.getApplication().executeOnPooledThread(() -> {
                 invokeRestApi(dataContext);
             });
+            dataContext.uiContext().setActiveRequest(future);
 
         }
         return dataContext.daakiaContext();
@@ -57,10 +58,19 @@ public class RestDaakiaService extends BaseDaakiaService {
             }
         }
         catch (Exception e) {
+            if (Thread.currentThread().isInterrupted()) {
+                dataContext.uiContext().setActiveRequest(null);
+                return;
+            }
             errorMessage = e.getLocalizedMessage();
+        }
+        if (Thread.currentThread().isInterrupted()) {
+            dataContext.uiContext().setActiveRequest(null);
+            return;
         }
         ResponseEntity<?> finalResponse = response;
         String finalErrorMessage = errorMessage;
+        dataContext.uiContext().setActiveRequest(null);
         ApplicationManager.getApplication().invokeLater(() -> {
             updateDaakiaContext(startTime, dataContext, finalResponse, finalErrorMessage);
         });

@@ -134,6 +134,9 @@ public class DaakiaRequestTopBarPanel extends BaseDaakiaPanel<DaakiaRequestTopBa
                     daakiaService(DaakiaType.STORE).execute(StoreDaakiaType.SAVE_HISTORY, dataContext);
                 });
             }
+            else if (DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_STOP)) {
+                ApplicationManager.getApplication().invokeLater(() -> sendButton.setEnabled(true));
+            }
         });
         listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CURRENT_SELECTED_ENVIRONMENT_CHANGED)) {
