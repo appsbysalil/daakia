@@ -7,7 +7,6 @@ import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.json.JsonFileType;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.DocumentEvent;
@@ -317,17 +316,19 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
     }
 
     public void setText(String text) {
+        String sanitized = com.intellij.openapi.util.text.StringUtil.convertLineSeparators(text == null ? "" : text);
         ApplicationManager.getApplication().invokeLater(() -> {
             ApplicationManager.getApplication().runWriteAction(() -> {
-                editor.getDocument().setText(text == null ? "" : text);
+                editor.getDocument().setText(sanitized);
             });
         });
     }
 
     public void setText(String text, FileType fileType) {
+        String sanitized = com.intellij.openapi.util.text.StringUtil.convertLineSeparators(text == null ? "" : text);
         ApplicationManager.getApplication().invokeLater(() -> {
             ApplicationManager.getApplication().runWriteAction(() -> {
-                editor.getDocument().setText(text == null ? "" : text);
+                editor.getDocument().setText(sanitized);
             });
         });
         updateFileType(fileType);
@@ -433,7 +434,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
                         String text = editor.getDocument().getText();
                         try {
                             String formatted = meta.formatter().apply(text);
-                            WriteCommandAction.runWriteCommandAction(project, () -> editor.getDocument().setText(formatted));
+                            DaakiaEditorX.this.setText(formatted);
                         } catch (Exception ex) {
                             System.out.println("Format Error: " + ex.getMessage());
                         }
@@ -449,7 +450,7 @@ public class DaakiaEditorX extends JBPanel<DaakiaEditorX> {
         AnAction anAction = new AnAction("Clear All", null, AllIcons.General.Delete) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                WriteCommandAction.runWriteCommandAction(project, () -> editor.getDocument().setText(""));
+                DaakiaEditorX.this.setText("");
             }
             @Override
             public void update(@NotNull AnActionEvent e) {

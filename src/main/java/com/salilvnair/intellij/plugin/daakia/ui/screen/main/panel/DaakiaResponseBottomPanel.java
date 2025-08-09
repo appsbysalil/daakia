@@ -9,7 +9,6 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.ResponseH
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.DebugLogPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DebugLogManager;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
-import com.intellij.openapi.editor.ex.EditorEx;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,12 +60,8 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
             }
             else if (DaakiaEvent.ofType(event, DaakiaEventType.AFTER_REST_EXCHANGE)) {
                 DaakiaEditorX daakiaEditorX = uiContext().debugLogEditor();
-                EditorEx editor = daakiaEditorX.editor();
-                if (editor != null) {
-                    com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(
-                            () -> com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
-                                    () -> editor.getDocument().setText(DebugLogManager.getLogs()))
-                    );
+                if (daakiaEditorX != null) {
+                    daakiaEditorX.setText(DebugLogManager.getLogs());
                 }
             }
         });
@@ -84,10 +79,8 @@ public class DaakiaResponseBottomPanel extends BaseDaakiaPanel<DaakiaResponseBot
                 debugTabAdded = true;
             }
             DaakiaEditorX daakiaEditorX = uiContext().debugLogEditor();
-            EditorEx editor = daakiaEditorX.editor();
-            if (editor != null) {
-                com.intellij.openapi.application.ApplicationManager.getApplication().runWriteAction(
-                        () -> editor.getDocument().setText(DebugLogManager.getLogs()));
+            if (daakiaEditorX != null) {
+                daakiaEditorX.setText(DebugLogManager.getLogs());
             }
         });
     }
