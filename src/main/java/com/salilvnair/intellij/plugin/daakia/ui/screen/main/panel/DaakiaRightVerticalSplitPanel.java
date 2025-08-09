@@ -4,6 +4,8 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
+import com.intellij.icons.AllIcons;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
@@ -19,7 +21,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     private JPanel rightPanelContainer;
     private JPanel loaderPanel;
     private JProgressBar progressBar;
-    private JButton stopButton;
+    private IconButton stopButton;
 
 
     public DaakiaRightVerticalSplitPanel(JRootPane rootPane, DataContext dataContext) {
@@ -39,15 +41,14 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
         rightPanel = new DaakiaRightVerticalSplitRightPanel(rootPane, dataContext);
         rightPanelContainer = new JPanel();
         rightPanelContainer.setLayout(new BoxLayout(rightPanelContainer, BoxLayout.Y_AXIS));
-        loaderPanel = new JPanel();
-        loaderPanel.setLayout(new BoxLayout(loaderPanel, BoxLayout.X_AXIS));
+        loaderPanel = new JPanel(new BorderLayout());
         loaderPanel.setVisible(false);
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
-        stopButton = new JButton("Stop");
-        loaderPanel.add(progressBar);
-        loaderPanel.add(Box.createHorizontalStrut(5));
-        loaderPanel.add(stopButton);
+        stopButton = new IconButton(AllIcons.Actions.Close, new Dimension(20, 20));
+        loaderPanel.add(progressBar, BorderLayout.CENTER);
+        loaderPanel.add(stopButton, BorderLayout.EAST);
+        loaderPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, progressBar.getPreferredSize().height));
         rightPanelContainer.add(loaderPanel);
         rightPanelContainer.add(rightPanel);
         leftRightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanelContainer);
