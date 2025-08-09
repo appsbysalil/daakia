@@ -2,11 +2,13 @@ package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.salilvnair.intellij.plugin.daakia.script.main.DaakiaScriptExecutor;
+import com.salilvnair.intellij.plugin.daakia.ui.core.model.AuthInfo;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.core.rest.exception.RestResponseErrorHandler;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
+import com.salilvnair.intellij.plugin.daakia.ui.service.type.AuthorizationType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.RestDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
@@ -125,13 +127,11 @@ public class RestDaakiaService extends BaseDaakiaService {
             String headerVal = PostmanEnvironmentUtils.resolveVariables(v.get(1).getText(), dataContext);
             headers.add(headerName, headerVal);
         });
-        HttpHeaders authHeaders = addAuthorizationHeaderIfPresent(dataContext);
-        if(!authHeaders.isEmpty()) {
-            headers.addAll(authHeaders);
-        }
         addApplicableContentType(dataContext, headers);
         dataContext.daakiaContext().setRequestHeaders(headers);
-        return headers;
+        HttpHeaders headersForRequest = new HttpHeaders(headers);
+        addAuthorizationHeaderIfPresent(dataContext, headersForRequest);
+        return headersForRequest;
     }
 
     private void addApplicableContentType(DataContext dataContext, HttpHeaders headers) {
@@ -140,24 +140,41 @@ public class RestDaakiaService extends BaseDaakiaService {
         }
     }
 
-    private HttpHeaders addAuthorizationHeaderIfPresent(DataContext dataContext) {
-        HttpHeaders authHeaders = new HttpHeaders();
-        if(dataContext.uiContext().authTypes() != null) {
-            String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
-            if("Bearer Token".equals(selectedAuthType)) {
-                String bearerToken = new String(dataContext.uiContext().bearerTokenTextField().getPassword());
-                String resolvedBearerToken = PostmanEnvironmentUtils.resolveVariables(bearerToken, dataContext);
-                authHeaders.setBearerAuth(resolvedBearerToken);
-            }
-            else if("Basic Auth".equals(selectedAuthType)) {
-                String userName = dataContext.uiContext().userNameTextField().getText();
-                String password = new String(dataContext.uiContext().passwordTextField().getPassword());
-                String resolvedUserName = PostmanEnvironmentUtils.resolveVariables(userName, dataContext);
-                String resolvedPassword = PostmanEnvironmentUtils.resolveVariables(password, dataContext);
-                authHeaders.setBasicAuth(resolvedUserName, resolvedPassword);
-            }
+    private void addAuthorizationHeaderIfPresent(DataContext dataContext, HttpHeaders headers) {
+        AuthInfo authInfo = buildAuthInfoFromUi(dataContext);
+        dataContext.uiContext().setAuthInfo(authInfo);
+        if (authInfo == null || authInfo.getAuthType() == null) {
+            return;
         }
-        return authHeaders;
+        if (AuthorizationType.BEARER_TOKEN.type().equals(authInfo.getAuthType())) {
+            String resolvedBearerToken = PostmanEnvironmentUtils.resolveVariables(authInfo.getToken(), dataContext);
+            headers.setBearerAuth(resolvedBearerToken);
+        }
+        else if (AuthorizationType.BASIC_AUTH.type().equals(authInfo.getAuthType())) {
+            String resolvedUserName = PostmanEnvironmentUtils.resolveVariables(authInfo.getUsername(), dataContext);
+            String resolvedPassword = PostmanEnvironmentUtils.resolveVariables(authInfo.getPassword(), dataContext);
+            headers.setBasicAuth(resolvedUserName, resolvedPassword);
+        }
+    }
+
+    private AuthInfo buildAuthInfoFromUi(DataContext dataContext) {
+        if(dataContext.uiContext().authTypes() == null) {
+            return null;
+        }
+        String selectedAuthType = (String) dataContext.uiContext().authTypes().getSelectedItem();
+        if(selectedAuthType == null || AuthorizationType.NONE.type().equals(selectedAuthType)) {
+            return null;
+        }
+        AuthInfo authInfo = new AuthInfo();
+        authInfo.setAuthType(selectedAuthType);
+        if(AuthorizationType.BEARER_TOKEN.type().equals(selectedAuthType)) {
+            authInfo.setToken(new String(dataContext.uiContext().bearerTokenTextField().getPassword()));
+        }
+        else if(AuthorizationType.BASIC_AUTH.type().equals(selectedAuthType)) {
+            authInfo.setUsername(dataContext.uiContext().userNameTextField().getText());
+            authInfo.setPassword(new String(dataContext.uiContext().passwordTextField().getPassword()));
+        }
+        return authInfo;
     }
 
     private void executePreRequestScript(DataContext dataContext) {
