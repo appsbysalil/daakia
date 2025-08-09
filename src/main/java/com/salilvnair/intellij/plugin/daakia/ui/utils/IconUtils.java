@@ -64,4 +64,26 @@ public class IconUtils {
 
         return new ImageIcon(resizedImg);
     }
+
+    public static Icon scaleIcon(Icon icon, int targetW, int targetH) {
+        int srcW = icon.getIconWidth();
+        int srcH = icon.getIconHeight();
+
+        // Create buffer at target size
+        BufferedImage dst = ImageUtil.createImage(targetW, targetH, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = dst.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+        // Scale transform BEFORE painting — keeps SVG/vector sharp
+        double sx = targetW / (double) srcW;
+        double sy = targetH / (double) srcH;
+        g.scale(sx, sy);
+        icon.paintIcon(null, g, 0, 0);
+        g.dispose();
+
+        return new ImageIcon(dst);
+    }
+
 }
