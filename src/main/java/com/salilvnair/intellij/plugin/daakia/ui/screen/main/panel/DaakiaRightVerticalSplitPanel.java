@@ -5,7 +5,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.ColorIconButton;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.IconUtils;
@@ -26,7 +26,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     // Loader overlay that replaces right panel content while a request runs
     private JPanel loaderPanel;
     private JProgressBar progressBar;
-    private ColorIconButton stopButton;
+    private IconButton stopButton;
 
     public DaakiaRightVerticalSplitPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -52,7 +52,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
         progressBar.setIndeterminate(true);
 
         Icon closeIcon = IconUtils.scaleIcon(AllIcons.Process.StopHovered, 15, 15); // or AllIcons.Actions.Close
-        stopButton = new ColorIconButton(closeIcon);
+        stopButton = new IconButton(closeIcon);
 
         // Make the stop button hitbox exactly the icon bounds
         int iw = closeIcon.getIconWidth();
