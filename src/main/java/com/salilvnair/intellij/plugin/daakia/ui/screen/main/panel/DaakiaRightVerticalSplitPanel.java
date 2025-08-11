@@ -5,12 +5,11 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
-import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.IconUtils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -26,7 +25,7 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     // Loader overlay that replaces right panel content while a request runs
     private JPanel loaderPanel;
     private JProgressBar progressBar;
-    private IconButton stopButton;
+    private JButton stopButton;
 
     public DaakiaRightVerticalSplitPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -50,22 +49,16 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
 
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
-
-        Icon closeIcon = IconUtils.scaleIcon(AllIcons.Process.StopHovered, 15, 15); // or AllIcons.Actions.Close
-        stopButton = new IconButton(closeIcon);
-
-        // Make the stop button hitbox exactly the icon bounds
-        int iw = closeIcon.getIconWidth();
-        int ih = closeIcon.getIconHeight();
-        Dimension tight = new Dimension(iw, ih);
-        stopButton.setPreferredSize(tight);
-        stopButton.setMinimumSize(tight);
-        stopButton.setMaximumSize(tight);
-        stopButton.setBorder(BorderFactory.createEmptyBorder());
-        stopButton.setMargin(JBUI.emptyInsets());
-        stopButton.setContentAreaFilled(false);
-        stopButton.setFocusPainted(false);
-        stopButton.setOpaque(false);
+        stopButton = new JButton("Stop");
+//        Dimension tight = new Dimension(iw, ih);
+//        stopButton.setPreferredSize(tight);
+//        stopButton.setMinimumSize(tight);
+//        stopButton.setMaximumSize(tight);
+//        stopButton.setBorder(BorderFactory.createEmptyBorder());
+//        stopButton.setMargin(JBUI.emptyInsets());
+//        stopButton.setContentAreaFilled(false);
+//        stopButton.setFocusPainted(false);
+//        stopButton.setOpaque(false);
         stopButton.setForeground(JBColor.RED);
 
         // Layout: keep progress bar near top, button exactly in center
@@ -122,6 +115,29 @@ public class DaakiaRightVerticalSplitPanel extends BaseDaakiaPanel<DaakiaRightVe
     public void initStyle() {
         leftRightSplitPane.setUI(DaakiaUtils.thinDivider());
         leftRightSplitPane.setBorder(null);
+        stopButton.setIcon(AllIcons.Actions.Suspend);
+
+        stopButton.setOpaque(true);
+        stopButton.setContentAreaFilled(true);
+
+        // Border color (focus & normal)
+        // Default border
+        Border normalBorder = stopButton.getBorder();
+        // Pressed border (red rectangle)
+        Border pressedBorder = BorderFactory.createLineBorder(JBColor.RED, 2);
+
+        stopButton.getModel().addChangeListener(e -> {
+            ButtonModel model = stopButton.getModel();
+            if (model.isPressed()) {
+                stopButton.setBorder(pressedBorder);
+            } else {
+                stopButton.setBorder(normalBorder);
+            }
+        });
+
+        // Optional: keep border red when focused
+        stopButton.setFocusPainted(true);
+        stopButton.setBorderPainted(true);
     }
 
     @Override
