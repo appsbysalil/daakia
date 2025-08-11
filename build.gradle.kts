@@ -13,7 +13,7 @@ sourceSets {
 }
 
 group = "com.salilvnair.jb.plugin"
-version = "3.0.3"
+version = "3.0.4"
 
 repositories {
     mavenCentral()
