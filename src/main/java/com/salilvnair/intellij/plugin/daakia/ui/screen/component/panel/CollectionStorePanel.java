@@ -39,7 +39,9 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     private Tree collectionStoreTree;
     private DefaultTreeModel collectionStoreTreeModel;
     private JPanel searchPanel;
+    private JPanel treeWrapper;
     TextInputField searchTextField;
+    private boolean loaded = false;
 
     public CollectionStorePanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -53,8 +55,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     @Override
     public void initComponents() {
-        JPanel collectionStoreTreePanel = dynamicTree(this);
-        scrollPane = new JBScrollPane(collectionStoreTreePanel);
+        treeWrapper = new JPanel(new BorderLayout());
+        scrollPane = new JBScrollPane(treeWrapper);
         searchPanel = new JPanel(new BorderLayout());
         searchTextField = new TextInputField("Search");
         searchPanel.add(searchTextField, BorderLayout.CENTER);
@@ -68,24 +70,39 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     @Override
     public void initListeners() {
-        initTreeListeners();
         TextFieldUtils.addChangeListener(searchTextField, e -> {
             TextInputField textInputField = (TextInputField) e.getSource();
             if(textInputField.containsText()) {
+                loadData();
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.SEARCH_COLLECTION, dataContext, searchTextField.getText());
             }
         });
         listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN)) {
+                loadData();
                 importPostmanCollection();
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN)) {
+                loadData();
                 exportPostmanCollection();
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_REFRESH_COLLECTION_STORE_PANEL)) {
-                daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
+                if (loaded) {
+                    daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
+                }
             }
         });
+    }
+
+    public void loadData() {
+        if (loaded) return;
+        JPanel treePanel = dynamicTree(this);
+        treeWrapper.removeAll();
+        treeWrapper.add(treePanel, BorderLayout.CENTER);
+        treeWrapper.revalidate();
+        treeWrapper.repaint();
+        initTreeListeners();
+        loaded = true;
     }
 
     public JPanel dynamicTree(Component parentComponent) {
@@ -199,6 +216,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     public void initTreeListeners() {
 
         collectionStoreTree.addTreeSelectionListener(e -> {
+            loadData();
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
             if (selectedNode != null && selectedNode.getUserObject() instanceof DaakiaStoreRecord) {
                 Object userObject = selectedNode.getUserObject();
@@ -210,6 +228,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                loadData();
                 if (SwingUtilities.isRightMouseButton(e)) {
                     Object userObject = TreeUtils.extractSelectedNodeUserObject(collectionStoreTree, e);
                     if(userObject instanceof DaakiaStoreRecord) {
@@ -220,6 +239,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
             @Override
             public void mouseClicked(MouseEvent e) {
+                loadData();
                 if(TreeUtils.extractSelectedNodeUserObject(collectionStoreTree, e) == null) {
                     Object root = collectionStoreTree.getModel().getRoot();
                     collectionStoreTree.setSelectionPath(new TreePath(root));
