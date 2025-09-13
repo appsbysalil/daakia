@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Consumer;
 
 /** DAO for collection/store records (stateless + async-safe) */
@@ -96,7 +97,7 @@ public class CollectionDao {
     public void loadStoreAsync(DataContext dataContext, boolean onlyActive, Consumer<DefaultMutableTreeNode> callback) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
-                DefaultMutableTreeNode root = treeStoreService.loadTree(conn, onlyActive);
+                DefaultMutableTreeNode root = treeStoreService.loadRoot(conn, onlyActive);
 
                 if (onlyActive) {
                     dataContext.sideNavContext().setCollectionStoreRootNode(root);
@@ -113,6 +114,19 @@ public class CollectionDao {
 
     public void loadStoreAsync(DataContext dataContext, Consumer<DefaultMutableTreeNode> callback) {
         loadStoreAsync(dataContext, true, callback);
+    }
+
+    public void loadChildrenAsync(String parentUuid, Consumer<List<DefaultMutableTreeNode>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
+                List<DefaultMutableTreeNode> children = treeStoreService.loadChildren(conn, parentUuid, true);
+                if (callback != null) {
+                    ApplicationManager.getApplication().invokeLater(() -> callback.accept(children));
+                }
+            } catch (SQLException e) {
+                System.err.println("Error loading child nodes: " + e.getMessage());
+            }
+        });
     }
 
     // ============================

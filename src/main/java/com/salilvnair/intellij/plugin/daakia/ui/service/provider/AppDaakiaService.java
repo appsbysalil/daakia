@@ -317,45 +317,50 @@ public class AppDaakiaService extends BaseDaakiaService {
 
 
     private void initHistoryRootNodeFromSearchText(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
-        Map<String, List<DaakiaHistory>> historyData = dataContext.sideNavContext().historyData();
         String searchText = (String) objects[0];
-        Map<String, List<DaakiaHistory>> filteredHistoryData = new HashMap<>();
-        historyData.forEach( (yr, hDataList) -> {
-            List<DaakiaHistory> filteredList = hDataList
-                                                .stream()
-                                                .filter(hData -> hData.getDisplayName() !=null && hData.getDisplayName().contains(searchText)
-                                                        || hData.getUrl() !=null && hData.getUrl().contains(searchText)
-                                                )
-                                                .toList();
-            if(!filteredList.isEmpty()) {
-                filteredHistoryData.put(yr, filteredList);
+        new HistoryDao().loadHistoryAsync(historyData -> {
+            if (historyData == null) {
+                historyData = new HashMap<>();
             }
+            Map<String, List<DaakiaHistory>> filteredHistoryData = new HashMap<>();
+            historyData.forEach((yr, hDataList) -> {
+                List<DaakiaHistory> filteredList = hDataList.stream()
+                        .filter(hData -> (hData.getDisplayName() != null && hData.getDisplayName().contains(searchText))
+                                || (hData.getUrl() != null && hData.getUrl().contains(searchText)))
+                        .toList();
+                if (!filteredList.isEmpty()) {
+                    filteredHistoryData.put(yr, filteredList);
+                }
+            });
+            DefaultMutableTreeNode rootNode;
+            if (searchText == null || searchText.isEmpty()) {
+                rootNode = generateRootNodeFromHistoryData(historyData);
+            } else {
+                rootNode = generateRootNodeFromHistoryData(filteredHistoryData);
+            }
+            Tree historyTree = dataContext.sideNavContext().historyTree();
+            DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
+            treeModel.setRoot(rootNode);
+            treeModel.reload();
         });
-        DefaultMutableTreeNode rootNode;
-        if(searchText == null || searchText.isEmpty()) {
-            rootNode = generateRootNodeFromHistoryData(historyData);
-        }
-        else {
-            rootNode = generateRootNodeFromHistoryData(filteredHistoryData);
-        }
-        Tree historyTree = dataContext.sideNavContext().historyTree();
-        // Update the tree model with new data
-        DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
-        treeModel.setRoot(rootNode);
-        treeModel.reload();
     }
 
 
     private void initHistoryRootNode(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
-        new HistoryDao().loadHistoryAsync(historyData -> {
-            if(historyData == null) {
-                historyData = new LinkedHashMap<>();
+        new HistoryDao().loadYearsAsync(years -> {
+            if (years == null) {
+                years = new ArrayList<>();
             }
-            dataContext.sideNavContext().setHistoryData(historyData);
-            DefaultMutableTreeNode rootNode = generateRootNodeFromHistoryData(historyData);
+            dataContext.sideNavContext().setHistoryData(new LinkedHashMap<>());
+            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode();
+            for (String year : years) {
+                DefaultMutableTreeNode yearNode = new DefaultMutableTreeNode(year);
+                yearNode.add(new DefaultMutableTreeNode("Loading"));
+                rootNode.add(yearNode);
+            }
             dataContext.sideNavContext().setHistoryRootNode(rootNode);
             Tree historyTree = dataContext.sideNavContext().historyTree();
-            if(historyTree != null) {
+            if (historyTree != null) {
                 DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
                 ApplicationManager.getApplication().invokeLater(() -> {
                     treeModel.setRoot(rootNode);
