@@ -12,12 +12,14 @@ import com.salilvnair.intellij.plugin.daakia.ui.screen.main.panel.BaseDaakiaPane
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AppDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaType;
+import com.salilvnair.intellij.plugin.daakia.persistence.HistoryDao;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TextFieldUtils;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.TreeUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -69,7 +71,6 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_AFTER_HISTORY_ADDED)) {
                 loadData();
-                TreeUtils.expandAllNodes(historyTree);
             }
         });
 
@@ -78,7 +79,6 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
             if(textInputField.containsText()) {
                 loadData();
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.SEARCH_HISTORY, dataContext, searchTextField.getText());
-                TreeUtils.expandAllNodes(historyTree);
             }
         });
     }
@@ -89,7 +89,6 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         DefaultMutableTreeNode root = dataContext.sideNavContext().historyRootNode();
         DefaultTreeModel model = new DefaultTreeModel(root);
         historyTree.setModel(model);
-        TreeUtils.expandAllNodes(historyTree);
         sideNavContext().setHistoryTree(historyTree);
         sideNavContext().setHistoryTreeModel(model);
         loaded = true;
@@ -103,6 +102,43 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
             if (selectedNode != null && selectedNode.getUserObject() instanceof DaakiaHistory) {
                 Object userObject = selectedNode.getUserObject();
                 globalEventPublisher().onSelectHistoryDataNode((DaakiaHistory) userObject);
+            }
+        });
+
+        historyTree.addTreeWillExpandListener(new javax.swing.event.TreeWillExpandListener() {
+            @Override
+            public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) {
+                loadData();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
+                Object obj = node.getUserObject();
+                if (node.getLevel() == 1 && obj instanceof String year) {
+                    if (node.getChildCount() == 1 && isPlaceholder(node.getFirstChild())) {
+                        node.removeAllChildren();
+                        new HistoryDao().loadMonthsAsync(year, months -> {
+                            for (String m : months) {
+                                DefaultMutableTreeNode mn = new DefaultMutableTreeNode(new MonthItem(m));
+                                mn.add(new DefaultMutableTreeNode("Loading"));
+                                node.add(mn);
+                            }
+                            ((DefaultTreeModel) historyTree.getModel()).reload(node);
+                        });
+                    }
+                } else if (node.getLevel() == 2 && obj instanceof MonthItem monthItem) {
+                    String year = ((DefaultMutableTreeNode) node.getParent()).getUserObject().toString();
+                    if (node.getChildCount() == 1 && isPlaceholder(node.getFirstChild())) {
+                        node.removeAllChildren();
+                        new HistoryDao().loadByMonthAsync(year, monthItem.month, list -> {
+                            for (DaakiaHistory h : list) {
+                                node.add(new DefaultMutableTreeNode(h));
+                            }
+                            ((DefaultTreeModel) historyTree.getModel()).reload(node);
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) {
             }
         });
 
@@ -143,5 +179,23 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
     private void renameSelectedTreeItem(DaakiaHistory selectedItem) {
         globalEventPublisher().onRightClickRenameHistoryDataNode(selectedItem);
+    }
+
+    private boolean isPlaceholder(TreeNode node) {
+        return node instanceof DefaultMutableTreeNode && "Loading".equals(((DefaultMutableTreeNode) node).getUserObject());
+    }
+
+    private static class MonthItem {
+        final String month;
+        MonthItem(String month) { this.month = month; }
+        @Override
+        public String toString() {
+            try {
+                int m = Integer.parseInt(month);
+                return new java.text.DateFormatSymbols().getShortMonths()[m - 1];
+            } catch (Exception e) {
+                return month;
+            }
+        }
     }
 }

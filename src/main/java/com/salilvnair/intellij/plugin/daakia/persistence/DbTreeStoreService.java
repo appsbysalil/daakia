@@ -6,8 +6,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.UUID;
 
 public class DbTreeStoreService {
@@ -204,6 +203,112 @@ public class DbTreeStoreService {
             }
         }
         return root;
+    }
+
+    // ============================
+    // PARTIAL LOAD SUPPORT
+    // ============================
+
+    public DefaultMutableTreeNode loadRoot(Connection connection, boolean onlyActive) throws SQLException {
+        Integer rootId = findIdByUuid(connection, "ROOT");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+        if (rootId != null) {
+            loadChildren(connection, root, rootId, onlyActive);
+        }
+        return root;
+    }
+
+    public List<DefaultMutableTreeNode> loadChildren(Connection connection, String parentUuid, boolean onlyActive) throws SQLException {
+        Integer parentId = findIdByUuid(connection, parentUuid);
+        List<DefaultMutableTreeNode> list = new ArrayList<>();
+        if (parentId != null) {
+            loadChildren(connection, list, parentId, onlyActive);
+        }
+        return list;
+    }
+
+    private void loadChildren(Connection connection, DefaultMutableTreeNode parentNode, int parentId, boolean onlyActive) throws SQLException {
+        List<DefaultMutableTreeNode> children = new ArrayList<>();
+        loadChildren(connection, children, parentId, onlyActive);
+        for (DefaultMutableTreeNode child : children) {
+            parentNode.add(child);
+        }
+    }
+
+    private void loadChildren(Connection connection, List<DefaultMutableTreeNode> nodes, int parentId, boolean onlyActive) throws SQLException {
+        String sql = "SELECT * FROM collection_records WHERE parent_id=? " + (onlyActive ? "AND active=1 " : "") + "ORDER BY id ASC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, parentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    DefaultMutableTreeNode node = createNode(rs);
+                    int id = rs.getInt("id");
+                    if (hasChildren(connection, id, onlyActive)) {
+                        node.add(new DefaultMutableTreeNode("Loading"));
+                    }
+                    nodes.add(node);
+                }
+            }
+        }
+    }
+
+    private boolean hasChildren(Connection connection, int parentId, boolean onlyActive) throws SQLException {
+        String sql = "SELECT 1 FROM collection_records WHERE parent_id=? " + (onlyActive ? "AND active=1 " : "") + "LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, parentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private Integer findIdByUuid(Connection connection, String uuid) throws SQLException {
+        String sql = "SELECT id FROM collection_records WHERE uuid=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    private DefaultMutableTreeNode createNode(ResultSet rs) throws SQLException {
+        String type = rs.getString("type");
+        String uuid = rs.getString("uuid");
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode();
+        if ("COLLECTION".equalsIgnoreCase(type)) {
+            DaakiaStoreCollection coll = new DaakiaStoreCollection();
+            coll.setCollectionName(rs.getString("collection_name"));
+            coll.setActive(rs.getBoolean("active"));
+            coll.setUuid(uuid);
+            coll.setAuthInfo(rs.getString("auth_info"));
+            node.setUserObject(coll);
+        } else if ("RECORD".equalsIgnoreCase(type)) {
+            DaakiaStoreRecord rec = new DaakiaStoreRecord();
+            rec.setDisplayName(rs.getString("name"));
+            rec.setUrl(rs.getString("url"));
+            rec.setRequestType(rs.getString("request_type"));
+            rec.setHeaders(rs.getString("headers"));
+            rec.setResponseHeaders(rs.getString("response_headers"));
+            rec.setRequestBody(rs.getString("request_body"));
+            rec.setResponseBody(rs.getString("response_body"));
+            rec.setPreRequestScript(rs.getString("pre_request_script"));
+            rec.setPostRequestScript(rs.getString("post_request_script"));
+            rec.setCreatedDate(rs.getString("created_date"));
+            rec.setSizeText(rs.getString("size_text"));
+            rec.setTimeTaken(rs.getString("time_taken"));
+            rec.setStatusCode(rs.getInt("status_code"));
+            rec.setActive(rs.getBoolean("active"));
+            rec.setUuid(uuid);
+            rec.setAuthInfo(rs.getString("auth_info"));
+            node.setUserObject(rec);
+        } else {
+            node.setUserObject("Root");
+        }
+        return node;
     }
 
     // ============================

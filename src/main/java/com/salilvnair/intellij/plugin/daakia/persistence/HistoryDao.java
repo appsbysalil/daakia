@@ -131,5 +131,106 @@ public class HistoryDao {
     }
 
 
+    // ============================
+    // LAZY LOAD SUPPORT
+    // ============================
+
+    /**
+     * Return distinct years for which history records exist.
+     */
+    public List<String> loadYears() {
+        List<String> years = new ArrayList<>();
+        String sql = "SELECT DISTINCT substr(created_date,1,4) AS yr FROM history_records WHERE active='Y' ORDER BY yr DESC";
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                years.add(rs.getString("yr"));
+            }
+        } catch (SQLException ignore) {}
+        return years;
+    }
+
+    /**
+     * Return distinct months (01-12) for a given year.
+     */
+    public List<String> loadMonths(String year) {
+        List<String> months = new ArrayList<>();
+        String sql = "SELECT DISTINCT substr(created_date,6,2) AS mn FROM history_records WHERE active='Y' AND substr(created_date,1,4)=? ORDER BY mn DESC";
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, year);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    months.add(rs.getString("mn"));
+                }
+            }
+        } catch (SQLException ignore) {}
+        return months;
+    }
+
+    /**
+     * Load history records for a given year and month.
+     */
+    public List<DaakiaHistory> loadByMonth(String year, String month) {
+        List<DaakiaHistory> list = new ArrayList<>();
+        String sql = "SELECT id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid FROM history_records WHERE active='Y' AND substr(created_date,1,4)=? AND substr(created_date,6,2)=? ORDER BY created_date DESC";
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, year);
+            ps.setString(2, month);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    DaakiaHistory h = new DaakiaHistory();
+                    h.setId(rs.getInt("id"));
+                    h.setDisplayName(rs.getString("display_name"));
+                    h.setRequestType(rs.getString("request_type"));
+                    h.setUrl(rs.getString("url"));
+                    h.setHeaders(rs.getString("headers"));
+                    h.setResponseHeaders(rs.getString("response_headers"));
+                    h.setRequestBody(rs.getString("request_body"));
+                    h.setResponseBody(rs.getString("response_body"));
+                    h.setPreRequestScript(rs.getString("pre_request_script"));
+                    h.setPostRequestScript(rs.getString("post_request_script"));
+                    h.setCreatedDate(rs.getString("created_date"));
+                    h.setSizeText(rs.getString("size_text"));
+                    h.setTimeTaken(rs.getString("time_taken"));
+                    h.setStatusCode(rs.getInt("status_code"));
+                    h.setAuthInfo(rs.getString("auth_info"));
+                    h.setUuid(rs.getString("uuid"));
+                    list.add(h);
+                }
+            }
+        } catch (SQLException ignore) {}
+        return list;
+    }
+
+    public void loadYearsAsync(Consumer<List<String>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<String> data = loadYears();
+            if (callback != null) {
+                ApplicationManager.getApplication().invokeLater(() -> callback.accept(data));
+            }
+        });
+    }
+
+    public void loadMonthsAsync(String year, Consumer<List<String>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<String> data = loadMonths(year);
+            if (callback != null) {
+                ApplicationManager.getApplication().invokeLater(() -> callback.accept(data));
+            }
+        });
+    }
+
+    public void loadByMonthAsync(String year, String month, Consumer<List<DaakiaHistory>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<DaakiaHistory> data = loadByMonth(year, month);
+            if (callback != null) {
+                ApplicationManager.getApplication().invokeLater(() -> callback.accept(data));
+            }
+        });
+    }
+
 
 }
