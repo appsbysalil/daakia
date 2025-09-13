@@ -15,7 +15,7 @@ public class HistoryDao {
 
     public Map<String, List<DaakiaHistory>> loadHistory() {
         List<DaakiaHistory> list = new ArrayList<>();
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
              Statement stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT id, data FROM history_records WHERE active='Y'");
             while (rs.next()) {
@@ -33,7 +33,7 @@ public class HistoryDao {
 
     public List<DaakiaHistory> loadInactiveHistory() {
         List<DaakiaHistory> list = new ArrayList<>();
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
              Statement stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT id, data FROM history_records WHERE active='N'");
             while (rs.next()) {
@@ -51,7 +51,7 @@ public class HistoryDao {
     public void saveHistory(Map<String, List<DaakiaHistory>> data) {
         List<DaakiaHistory> flat = new ArrayList<>();
         data.values().forEach(flat::addAll);
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
              Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("DELETE FROM history_records WHERE active='Y'");
             try (PreparedStatement ps = conn.prepareStatement("INSERT INTO history_records(data,active) VALUES(?,?)")) {
@@ -67,7 +67,7 @@ public class HistoryDao {
     }
 
     public void markActive(int id, boolean active) {
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
              PreparedStatement ps = conn.prepareStatement("UPDATE history_records SET active=? WHERE id=?")) {
             ps.setString(1, active ? "Y" : "N");
             ps.setInt(2, id);

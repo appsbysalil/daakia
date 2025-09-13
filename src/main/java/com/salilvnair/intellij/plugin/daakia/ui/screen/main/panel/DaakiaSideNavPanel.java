@@ -45,6 +45,7 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
         tabbedPane.setToolTipTextAt(0, "History");
         tabbedPane.setToolTipTextAt(1, "Collection");
         tabbedPane.setToolTipTextAt(2, "Trash");
+        tabbedPane.setSelectedIndex(-1);
     }
 
     @Override
@@ -54,6 +55,17 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
 
     @Override
     public void initListeners() {
+        tabbedPane.addChangeListener(e -> {
+            Component selected = tabbedPane.getSelectedComponent();
+            if (selected == historyPanel) {
+                historyPanel.loadData();
+            } else if (selected == collectionStorePanel) {
+                collectionStorePanel.loadData();
+            } else if (selected == trashPanel) {
+                trashPanel.loadData();
+            }
+        });
+
         listenGlobal(event -> {
             if(DaakiaEvent.ofAnyType(event, DaakiaEventType.ON_SELECT_HISTORY_DATA_NODE, DaakiaEventType.ON_DBL_CLICK_HISTORY_DATA_NODE)) {
                 DaakiaEvent daakiaEvent = DaakiaEvent.extract(event);

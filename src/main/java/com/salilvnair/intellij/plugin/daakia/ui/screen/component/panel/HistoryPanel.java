@@ -27,6 +27,8 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     private Tree historyTree;
     private JPanel searchPanel;
     TextInputField searchTextField;
+    private boolean loaded = false;
+
     public HistoryPanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
         init(this);
@@ -44,7 +46,11 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
     @Override
     public void initComponents() {
-        initTreeNode();
+        historyTree = new Tree(new DefaultTreeModel(new DefaultMutableTreeNode("History")));
+        historyTree.setRootVisible(false);
+        historyTree.setOpaque(false);
+        historyTree.setBackground(UIUtil.getTreeBackground());
+        historyTree.setCellRenderer(new HistoryTreeCellRenderer());
         scrollPane = new JBScrollPane(historyTree);
         searchPanel = new JPanel(new BorderLayout());
         searchTextField = new TextInputField("Search");
@@ -62,6 +68,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         initTreeListeners();
         listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_AFTER_HISTORY_ADDED)) {
+                loadData();
                 TreeUtils.expandAllNodes(historyTree);
             }
         });
@@ -69,29 +76,29 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         TextFieldUtils.addChangeListener(searchTextField, e -> {
             TextInputField textInputField = (TextInputField) e.getSource();
             if(textInputField.containsText()) {
+                loadData();
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.SEARCH_HISTORY, dataContext, searchTextField.getText());
                 TreeUtils.expandAllNodes(historyTree);
             }
         });
     }
 
-    private void initTreeNode() {
+    public void loadData() {
+        if (loaded) return;
         daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_HISTORY, dataContext);
         DefaultMutableTreeNode root = dataContext.sideNavContext().historyRootNode();
-        DefaultTreeModel historyTreeModel = new DefaultTreeModel(root);
-        historyTree = new Tree(historyTreeModel);
-        historyTree.setRootVisible(false);
-        historyTree.setOpaque(false);
-        historyTree.setBackground(UIUtil.getTreeBackground());
-        historyTree.setCellRenderer(new HistoryTreeCellRenderer());
+        DefaultTreeModel model = new DefaultTreeModel(root);
+        historyTree.setModel(model);
         TreeUtils.expandAllNodes(historyTree);
         sideNavContext().setHistoryTree(historyTree);
-        sideNavContext().setHistoryTreeModel(historyTreeModel);
+        sideNavContext().setHistoryTreeModel(model);
+        loaded = true;
     }
 
     public void initTreeListeners() {
 
         historyTree.addTreeSelectionListener(e -> {
+            loadData();
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) historyTree.getLastSelectedPathComponent();
             if (selectedNode != null && selectedNode.getUserObject() instanceof DaakiaHistory) {
                 Object userObject = selectedNode.getUserObject();
@@ -103,6 +110,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                loadData();
                 if (SwingUtilities.isRightMouseButton(e)) {
                     Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
                     if(userObject instanceof DaakiaHistory) {
@@ -113,7 +121,8 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) { // Single click
+                loadData();
+                if (e.getClickCount() == 2) {
                     Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
                     if(userObject instanceof DaakiaHistory) {
                         globalEventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
