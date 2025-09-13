@@ -55,19 +55,32 @@ public class DaakiaDatabase {
 
     private void initHistoryDb() {
         try (Connection conn = getHistoryConnection(); Statement stmt = conn.createStatement()) {
+            // If old table with JSON column exists, migrate it first
+            if (hasColumn(conn, "history_records", "data")) {
+                migrateHistoryTable(conn);
+            }
+
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS history_records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    data TEXT,
+                    display_name TEXT,
+                    request_type TEXT,
+                    url TEXT,
+                    headers TEXT,
+                    response_headers TEXT,
+                    request_body TEXT,
+                    response_body TEXT,
+                    pre_request_script TEXT,
+                    post_request_script TEXT,
+                    created_date TEXT,
+                    size_text TEXT,
+                    time_taken TEXT,
+                    status_code INTEGER,
+                    auth_info TEXT,
+                    uuid TEXT UNIQUE,
                     active TEXT DEFAULT 'Y'
                 )
             """);
-
-            try {
-                stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'");
-            } catch (SQLException ignore) {
-                // column exists already
-            }
         } catch (SQLException e) {
             System.err.println("Error initializing history database: " + e.getMessage());
         }
@@ -151,13 +164,34 @@ public class DaakiaDatabase {
             }
             try (Statement oldStmt = legacyConn.createStatement();
                  ResultSet rs = oldStmt.executeQuery("SELECT id,data,active FROM history_records")) {
-                String insert = "INSERT INTO history_records(id,data,active) VALUES(?,?,?)";
+                String insert = "INSERT INTO history_records(id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 try (PreparedStatement ps = historyConn.prepareStatement(insert)) {
                     while (rs.next()) {
-                        ps.setInt(1, rs.getInt("id"));
-                        ps.setString(2, rs.getString("data"));
-                        ps.setString(3, rs.getString("active"));
-                        ps.addBatch();
+                        String json = rs.getString("data");
+                        try {
+                            DaakiaHistory h = JsonUtils.jsonToPojo(json, DaakiaHistory.class);
+                            if (h == null) {
+                                continue;
+                            }
+                            ps.setInt(1, rs.getInt("id"));
+                            ps.setString(2, h.getDisplayName());
+                            ps.setString(3, h.getRequestType());
+                            ps.setString(4, h.getUrl());
+                            ps.setString(5, h.getHeaders());
+                            ps.setString(6, h.getResponseHeaders());
+                            ps.setString(7, h.getRequestBody());
+                            ps.setString(8, h.getResponseBody());
+                            ps.setString(9, h.getPreRequestScript());
+                            ps.setString(10, h.getPostRequestScript());
+                            ps.setString(11, h.getCreatedDate());
+                            ps.setString(12, h.getSizeText());
+                            ps.setString(13, h.getTimeTaken());
+                            ps.setObject(14, h.getStatusCode());
+                            ps.setString(15, h.getAuthInfo());
+                            ps.setString(16, h.getUuid());
+                            ps.setString(17, rs.getString("active"));
+                            ps.addBatch();
+                        } catch (Exception ignore) {}
                     }
                     ps.executeBatch();
                 }
@@ -261,6 +295,80 @@ public class DaakiaDatabase {
         }
     }
 
+    private boolean hasColumn(Connection conn, String table, String column) {
+        try (ResultSet rs = conn.getMetaData().getColumns(null, null, table, column)) {
+            return rs.next();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private void migrateHistoryTable(Connection conn) {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("ALTER TABLE history_records RENAME TO history_records_old");
+
+            stmt.executeUpdate("""
+                CREATE TABLE history_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    display_name TEXT,
+                    request_type TEXT,
+                    url TEXT,
+                    headers TEXT,
+                    response_headers TEXT,
+                    request_body TEXT,
+                    response_body TEXT,
+                    pre_request_script TEXT,
+                    post_request_script TEXT,
+                    created_date TEXT,
+                    size_text TEXT,
+                    time_taken TEXT,
+                    status_code INTEGER,
+                    auth_info TEXT,
+                    uuid TEXT UNIQUE,
+                    active TEXT DEFAULT 'Y'
+                )
+            """);
+
+            try (Statement oldStmt = conn.createStatement();
+                 ResultSet rs = oldStmt.executeQuery("SELECT id,data,active FROM history_records_old")) {
+                String insert = "INSERT INTO history_records(id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                try (PreparedStatement ps = conn.prepareStatement(insert)) {
+                    while (rs.next()) {
+                        String json = rs.getString("data");
+                        try {
+                            DaakiaHistory h = JsonUtils.jsonToPojo(json, DaakiaHistory.class);
+                            if (h == null) {
+                                continue;
+                            }
+                            ps.setInt(1, rs.getInt("id"));
+                            ps.setString(2, h.getDisplayName());
+                            ps.setString(3, h.getRequestType());
+                            ps.setString(4, h.getUrl());
+                            ps.setString(5, h.getHeaders());
+                            ps.setString(6, h.getResponseHeaders());
+                            ps.setString(7, h.getRequestBody());
+                            ps.setString(8, h.getResponseBody());
+                            ps.setString(9, h.getPreRequestScript());
+                            ps.setString(10, h.getPostRequestScript());
+                            ps.setString(11, h.getCreatedDate());
+                            ps.setString(12, h.getSizeText());
+                            ps.setString(13, h.getTimeTaken());
+                            ps.setObject(14, h.getStatusCode());
+                            ps.setString(15, h.getAuthInfo());
+                            ps.setString(16, h.getUuid());
+                            ps.setString(17, rs.getString("active"));
+                            ps.addBatch();
+                        } catch (Exception ignore) {}
+                    }
+                    ps.executeBatch();
+                }
+            }
+            stmt.executeUpdate("DROP TABLE history_records_old");
+        } catch (SQLException e) {
+            System.err.println("Error migrating history table: " + e.getMessage());
+        }
+    }
+
     private void migrateHistory(Connection conn) {
         File historyFile = DaakiaUtils.historyFile();
         if (!historyFile.exists()) return;
@@ -273,9 +381,25 @@ public class DaakiaDatabase {
             List<DaakiaHistory> flat = new ArrayList<>();
             data.values().forEach(flat::addAll);
 
-            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO history_records(data) VALUES(?)")) {
+            String insert = "INSERT INTO history_records(display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            try (PreparedStatement ps = conn.prepareStatement(insert)) {
                 for (DaakiaHistory h : flat) {
-                    ps.setString(1, JsonUtils.pojoToJson(h));
+                    ps.setString(1, h.getDisplayName());
+                    ps.setString(2, h.getRequestType());
+                    ps.setString(3, h.getUrl());
+                    ps.setString(4, h.getHeaders());
+                    ps.setString(5, h.getResponseHeaders());
+                    ps.setString(6, h.getRequestBody());
+                    ps.setString(7, h.getResponseBody());
+                    ps.setString(8, h.getPreRequestScript());
+                    ps.setString(9, h.getPostRequestScript());
+                    ps.setString(10, h.getCreatedDate());
+                    ps.setString(11, h.getSizeText());
+                    ps.setString(12, h.getTimeTaken());
+                    ps.setObject(13, h.getStatusCode());
+                    ps.setString(14, h.getAuthInfo());
+                    ps.setString(15, h.getUuid());
+                    ps.setString(16, "Y");
                     ps.executeUpdate();
                 }
             }
