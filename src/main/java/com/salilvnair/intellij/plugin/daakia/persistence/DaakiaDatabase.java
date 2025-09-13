@@ -17,7 +17,8 @@ import java.util.*;
 public class DaakiaDatabase {
 
     private static final DaakiaDatabase INSTANCE = new DaakiaDatabase();
-    private final String dbPath;
+    private final String collectionDbPath;
+    private final String historyDbPath;
 
     static {
         try {
@@ -33,7 +34,8 @@ public class DaakiaDatabase {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        this.dbPath = new File(dir, "daakia.db").getAbsolutePath();
+        this.collectionDbPath = new File(dir, "collections.db").getAbsolutePath();
+        this.historyDbPath = new File(dir, "history.db").getAbsolutePath();
         init();
     }
 
@@ -42,7 +44,12 @@ public class DaakiaDatabase {
     }
 
     private void init() {
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+        initHistoryDb();
+        initCollectionDb();
+    }
+
+    private void initHistoryDb() {
+        try (Connection conn = getHistoryConnection(); Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS history_records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,15 +57,30 @@ public class DaakiaDatabase {
                     active TEXT DEFAULT 'Y'
                 )
             """);
+
+            try {
+                stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'");
+            } catch (SQLException ignore) {
+                // column exists already
+            }
+        } catch (SQLException e) {
+            System.err.println("Error initializing history database: " + e.getMessage());
+        }
+
+        migrateHistoryIfNecessary();
+    }
+
+    private void initCollectionDb() {
+        try (Connection conn = getCollectionConnection(); Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS collection_records (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     parent_id INTEGER,
                     name TEXT,
-                    type TEXT,             -- 'COLLECTION' or 'RECORD'
+                    type TEXT,
                     active BOOLEAN DEFAULT 1,
-                    collection_name TEXT,   -- if collection
-                    url TEXT,               -- if record
+                    collection_name TEXT,
+                    url TEXT,
                     request_type TEXT,
                     headers TEXT,
                     response_headers TEXT,
@@ -81,57 +103,43 @@ public class DaakiaDatabase {
                 )
             """);
 
-            // Try adding missing column for older DBs
-            try {
-                stmt.executeUpdate("ALTER TABLE history_records ADD COLUMN active TEXT DEFAULT 'Y'");
-            } catch (SQLException ignore) {
-                // column exists already
-            }
-
             try {
                 stmt.executeUpdate("ALTER TABLE collection_records ADD COLUMN auth_info TEXT");
             } catch (SQLException ignore) {
                 // column exists already
             }
-
         } catch (SQLException e) {
-            System.err.println("Error initializing database: " + e.getMessage());
+            System.err.println("Error initializing collection database: " + e.getMessage());
         }
 
-        migrateIfNecessary();
+        migrateStoreIfNecessary();
     }
 
-    public Connection getConnection() throws SQLException {
-        try {
-            return DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-        } catch (SQLException e) {
-            DriverManager.registerDriver(new org.sqlite.JDBC());
-            return DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-        }
+    public Connection getHistoryConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:sqlite:" + historyDbPath);
     }
 
-    /**
-     * Migration for old JSON-based storage to DB tree structure
-     */
-    private void migrateIfNecessary() {
-        try (Connection conn = getConnection()) {
-            boolean historyEmpty;
-            boolean storeEmpty;
+    public Connection getCollectionConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:sqlite:" + collectionDbPath);
+    }
 
-            try (Statement stmt = conn.createStatement()) {
-                historyEmpty = isEmpty(stmt, "history_records");
-                storeEmpty = isEmpty(stmt, "collection_records");
-            }
-
-            if (historyEmpty) {
+    private void migrateHistoryIfNecessary() {
+        try (Connection conn = getHistoryConnection(); Statement stmt = conn.createStatement()) {
+            if (isEmpty(stmt, "history_records")) {
                 migrateHistory(conn);
             }
-            if (storeEmpty) {
+        } catch (SQLException e) {
+            System.err.println("History migration failed: " + e.getMessage());
+        }
+    }
+
+    private void migrateStoreIfNecessary() {
+        try (Connection conn = getCollectionConnection(); Statement stmt = conn.createStatement()) {
+            if (isEmpty(stmt, "collection_records")) {
                 migrateStore(conn);
             }
-
         } catch (SQLException e) {
-            System.err.println("Migration failed: " + e.getMessage());
+            System.err.println("Store migration failed: " + e.getMessage());
         }
     }
 

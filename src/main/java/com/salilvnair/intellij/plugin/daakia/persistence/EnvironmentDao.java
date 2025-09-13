@@ -15,7 +15,7 @@ public class EnvironmentDao {
 
     public List<Environment> loadEnvironments() {
         List<Environment> list = new ArrayList<>();
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection();
              Statement stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT id,data FROM environment_records");
             while (rs.next()) {
@@ -31,7 +31,7 @@ public class EnvironmentDao {
     }
 
     public void saveEnvironments(List<Environment> envs) {
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection();
              Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("DELETE FROM environment_records");
             try (PreparedStatement ps = conn.prepareStatement("INSERT INTO environment_records(id,data) VALUES(?,?)")) {
