@@ -19,6 +19,7 @@ public class DaakiaDatabase {
     private static final DaakiaDatabase INSTANCE = new DaakiaDatabase();
     private final String collectionDbPath;
     private final String historyDbPath;
+    private final File dbDir;
 
     static {
         try {
@@ -34,6 +35,7 @@ public class DaakiaDatabase {
         if (!dir.exists()) {
             dir.mkdirs();
         }
+        this.dbDir = dir;
         this.collectionDbPath = new File(dir, "collections.db").getAbsolutePath();
         this.historyDbPath = new File(dir, "history.db").getAbsolutePath();
         init();
@@ -46,6 +48,9 @@ public class DaakiaDatabase {
     private void init() {
         initHistoryDb();
         initCollectionDb();
+        migrateFromLegacyDbIfNecessary();
+        migrateHistoryIfNecessary();
+        migrateStoreIfNecessary();
     }
 
     private void initHistoryDb() {
@@ -66,8 +71,6 @@ public class DaakiaDatabase {
         } catch (SQLException e) {
             System.err.println("Error initializing history database: " + e.getMessage());
         }
-
-        migrateHistoryIfNecessary();
     }
 
     private void initCollectionDb() {
@@ -111,8 +114,6 @@ public class DaakiaDatabase {
         } catch (SQLException e) {
             System.err.println("Error initializing collection database: " + e.getMessage());
         }
-
-        migrateStoreIfNecessary();
     }
 
     public Connection getHistoryConnection() throws SQLException {
@@ -121,6 +122,117 @@ public class DaakiaDatabase {
 
     public Connection getCollectionConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:sqlite:" + collectionDbPath);
+    }
+
+    private void migrateFromLegacyDbIfNecessary() {
+        File legacyDb = new File(dbDir, "daakia.db");
+        if (!legacyDb.exists()) {
+            return;
+        }
+        try (Connection legacyConn = DriverManager.getConnection("jdbc:sqlite:" + legacyDb.getAbsolutePath())) {
+            migrateHistoryFromLegacy(legacyConn);
+            migrateStoreFromLegacy(legacyConn);
+        } catch (SQLException e) {
+            System.err.println("Legacy DB migration failed: " + e.getMessage());
+        }
+
+        File backup = new File(dbDir, "daakia.db.bak");
+        if (!legacyDb.renameTo(backup)) {
+            // If rename fails, attempt delete to avoid repeated migration
+            //noinspection ResultOfMethodCallIgnored
+            legacyDb.delete();
+        }
+    }
+
+    private void migrateHistoryFromLegacy(Connection legacyConn) {
+        try (Connection historyConn = getHistoryConnection(); Statement stmt = historyConn.createStatement()) {
+            if (!isEmpty(stmt, "history_records")) {
+                return;
+            }
+            try (Statement oldStmt = legacyConn.createStatement();
+                 ResultSet rs = oldStmt.executeQuery("SELECT id,data,active FROM history_records")) {
+                String insert = "INSERT INTO history_records(id,data,active) VALUES(?,?,?)";
+                try (PreparedStatement ps = historyConn.prepareStatement(insert)) {
+                    while (rs.next()) {
+                        ps.setInt(1, rs.getInt("id"));
+                        ps.setString(2, rs.getString("data"));
+                        ps.setString(3, rs.getString("active"));
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error migrating legacy history: " + e.getMessage());
+        }
+    }
+
+    private void migrateStoreFromLegacy(Connection legacyConn) {
+        try (Connection collectionConn = getCollectionConnection()) {
+            // migrate collection records
+            try (Statement stmt = collectionConn.createStatement()) {
+                if (isEmpty(stmt, "collection_records")) {
+                    try (Statement oldStmt = legacyConn.createStatement();
+                         ResultSet rs = oldStmt.executeQuery("SELECT id,parent_id,name,type,active,collection_name,url,request_type,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid FROM collection_records")) {
+                        String insert = "INSERT INTO collection_records(id,parent_id,name,type,active,collection_name,url,request_type,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                        try (PreparedStatement ps = collectionConn.prepareStatement(insert)) {
+                            while (rs.next()) {
+                                ps.setInt(1, rs.getInt("id"));
+                                ps.setObject(2, rs.getObject("parent_id"));
+                                ps.setString(3, rs.getString("name"));
+                                ps.setString(4, rs.getString("type"));
+                                ps.setObject(5, rs.getObject("active"));
+                                ps.setString(6, rs.getString("collection_name"));
+                                ps.setString(7, rs.getString("url"));
+                                ps.setString(8, rs.getString("request_type"));
+                                ps.setString(9, rs.getString("headers"));
+                                ps.setString(10, rs.getString("response_headers"));
+                                ps.setString(11, rs.getString("request_body"));
+                                ps.setString(12, rs.getString("response_body"));
+                                ps.setString(13, rs.getString("pre_request_script"));
+                                ps.setString(14, rs.getString("post_request_script"));
+                                ps.setString(15, rs.getString("created_date"));
+                                ps.setString(16, rs.getString("size_text"));
+                                ps.setString(17, rs.getString("time_taken"));
+                                ps.setObject(18, rs.getObject("status_code"));
+                                String authInfo;
+                                try {
+                                    authInfo = rs.getString("auth_info");
+                                } catch (SQLException ex) {
+                                    authInfo = null;
+                                }
+                                ps.setString(19, authInfo);
+                                ps.setString(20, rs.getString("uuid"));
+                                ps.addBatch();
+                            }
+                            ps.executeBatch();
+                        }
+                    }
+                }
+            }
+
+            // migrate environment records
+            try (Statement stmt = collectionConn.createStatement()) {
+                if (isEmpty(stmt, "environment_records")) {
+                    try (Statement oldStmt = legacyConn.createStatement();
+                         ResultSet rs = oldStmt.executeQuery("SELECT id,data FROM environment_records")) {
+                        String insertEnv = "INSERT INTO environment_records(id,data) VALUES(?,?)";
+                        try (PreparedStatement ps = collectionConn.prepareStatement(insertEnv)) {
+                            while (rs.next()) {
+                                ps.setInt(1, rs.getInt("id"));
+                                ps.setString(2, rs.getString("data"));
+                                ps.addBatch();
+                            }
+                            ps.executeBatch();
+                        }
+                    } catch (SQLException ignored) {
+                        // legacy DB might not have environment table
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error migrating legacy store: " + e.getMessage());
+        }
     }
 
     private void migrateHistoryIfNecessary() {
