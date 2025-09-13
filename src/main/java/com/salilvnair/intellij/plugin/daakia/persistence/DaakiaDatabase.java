@@ -21,15 +21,13 @@ public class DaakiaDatabase {
     private final String historyDbPath;
     private final File dbDir;
 
-    static {
+    private DaakiaDatabase() {
         try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
+            DriverManager.registerDriver(new org.sqlite.JDBC());
+        }
+        catch (Exception e) {
             System.err.println("SQLite driver not found: " + e.getMessage());
         }
-    }
-
-    private DaakiaDatabase() {
         String userHomePath = System.getProperty("user.home");
         File dir = new File(userHomePath, ".salilvnair" + File.separator + "daakia");
         if (!dir.exists()) {
