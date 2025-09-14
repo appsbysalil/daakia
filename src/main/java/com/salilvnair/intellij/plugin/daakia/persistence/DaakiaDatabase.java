@@ -162,7 +162,7 @@ public class DaakiaDatabase {
             }
             try (Statement oldStmt = legacyConn.createStatement();
                  ResultSet rs = oldStmt.executeQuery("SELECT id,data,active FROM history_records")) {
-                String insert = "INSERT INTO history_records(id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                String insert = "INSERT INTO history_records(id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 try (PreparedStatement ps = historyConn.prepareStatement(insert)) {
                     while (rs.next()) {
                         String json = rs.getString("data");
@@ -206,7 +206,7 @@ public class DaakiaDatabase {
                 if (isEmpty(stmt, "collection_records")) {
                     try (Statement oldStmt = legacyConn.createStatement();
                          ResultSet rs = oldStmt.executeQuery("SELECT id,parent_id,name,type,active,collection_name,url,request_type,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid FROM collection_records")) {
-                        String insert = "INSERT INTO collection_records(id,parent_id,name,type,active,collection_name,url,request_type,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                        String insert = "INSERT INTO collection_records(id,parent_id,name,type,active,collection_name,url,request_type,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                         try (PreparedStatement ps = collectionConn.prepareStatement(insert)) {
                             while (rs.next()) {
                                 ps.setInt(1, rs.getInt("id"));
@@ -329,7 +329,7 @@ public class DaakiaDatabase {
 
             try (Statement oldStmt = conn.createStatement();
                  ResultSet rs = oldStmt.executeQuery("SELECT id,data,active FROM history_records_old")) {
-                String insert = "INSERT INTO history_records(id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                String insert = "INSERT INTO history_records(id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 try (PreparedStatement ps = conn.prepareStatement(insert)) {
                     while (rs.next()) {
                         String json = rs.getString("data");
@@ -379,7 +379,7 @@ public class DaakiaDatabase {
             List<DaakiaHistory> flat = new ArrayList<>();
             data.values().forEach(flat::addAll);
 
-            String insert = "INSERT INTO history_records(display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String insert = "INSERT INTO history_records(display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             try (PreparedStatement ps = conn.prepareStatement(insert)) {
                 for (DaakiaHistory h : flat) {
                     ps.setString(1, h.getDisplayName());
