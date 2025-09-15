@@ -53,6 +53,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         historyTree.setOpaque(false);
         historyTree.setBackground(UIUtil.getTreeBackground());
         historyTree.setCellRenderer(new HistoryTreeCellRenderer());
+        historyTree.setToggleClickCount(0);
         scrollPane = new JBScrollPane(historyTree);
         searchPanel = new JPanel(new BorderLayout());
         searchTextField = new TextInputField("Search");
@@ -158,10 +159,22 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 loadData();
-                if (e.getClickCount() == 2) {
-                    Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
-                    if(userObject instanceof DaakiaHistory) {
-                        globalEventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
+                int row = historyTree.getRowForLocation(e.getX(), e.getY());
+                if (row != -1 && SwingUtilities.isLeftMouseButton(e)) {
+                    if (e.getClickCount() == 1) {
+                        if (historyTree.isExpanded(row)) {
+                            historyTree.collapseRow(row);
+                        } else {
+                            historyTree.expandRow(row);
+                        }
+                    } else if (e.getClickCount() == 2) {
+                        if (historyTree.isCollapsed(row)) {
+                            historyTree.expandRow(row);
+                        }
+                        Object userObject = TreeUtils.extractSelectedNodeUserObject(historyTree, e);
+                        if(userObject instanceof DaakiaHistory) {
+                            globalEventPublisher().onDoubleClickHistoryDataNode((DaakiaHistory) userObject);
+                        }
                     }
                 }
             }
