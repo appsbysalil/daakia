@@ -107,7 +107,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     }
 
     public JPanel dynamicTree(Component parentComponent) {
-        daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
         DefaultMutableTreeNode rootNode = sideNavContext().collectionStoreRootNode();
         collectionStoreTreeModel = new DefaultTreeModel(rootNode);
         collectionStoreTree = new Tree(collectionStoreTreeModel);
@@ -204,6 +203,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
         sideNavContext().setCollectionStoreTree(collectionStoreTree);
         sideNavContext().setCollectionStoreTreeModel(collectionStoreTreeModel);
+
+        daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
 
         return panel;
     }
