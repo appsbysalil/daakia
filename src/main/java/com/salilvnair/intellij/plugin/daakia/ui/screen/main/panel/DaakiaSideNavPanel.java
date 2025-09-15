@@ -45,7 +45,8 @@ public class DaakiaSideNavPanel extends BaseDaakiaPanel<DaakiaSideNavPanel> {
         tabbedPane.setToolTipTextAt(0, "History");
         tabbedPane.setToolTipTextAt(1, "Collection");
         tabbedPane.setToolTipTextAt(2, "Trash");
-        tabbedPane.setSelectedIndex(-1);
+        tabbedPane.setSelectedIndex(0);
+        historyPanel.loadData();
     }
 
     @Override

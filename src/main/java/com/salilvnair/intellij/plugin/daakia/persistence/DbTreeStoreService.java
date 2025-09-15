@@ -189,7 +189,7 @@ public class DbTreeStoreService {
         }
 
         // Build hierarchy
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Collections");
 
         for (Map.Entry<Integer, DefaultMutableTreeNode> entry : nodeMap.entrySet()) {
             Integer id = entry.getKey();
@@ -202,6 +202,7 @@ public class DbTreeStoreService {
                 if (parentNode != null) parentNode.add(node);
             }
         }
+        root.setUserObject("Collections");
         return root;
     }
 
@@ -211,9 +212,25 @@ public class DbTreeStoreService {
 
     public DefaultMutableTreeNode loadRoot(Connection connection, boolean onlyActive) throws SQLException {
         Integer rootId = findIdByUuid(connection, "ROOT");
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Collections");
         if (rootId != null) {
-            loadChildren(connection, root, rootId, onlyActive);
+            List<DefaultMutableTreeNode> levelOne = new ArrayList<>();
+            loadChildren(connection, levelOne, rootId, onlyActive);
+            for (DefaultMutableTreeNode child : levelOne) {
+                root.add(child);
+                Object userObj = child.getUserObject();
+                String uuid = null;
+                if (userObj instanceof DaakiaBaseStoreData base) {
+                    uuid = base.getUuid();
+                }
+                if (uuid != null) {
+                    Integer childId = findIdByUuid(connection, uuid);
+                    if (childId != null) {
+                        child.removeAllChildren();
+                        loadChildren(connection, child, childId, onlyActive);
+                    }
+                }
+            }
         }
         return root;
     }

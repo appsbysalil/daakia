@@ -165,8 +165,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         buttonPanel.add(moreIconButton, BorderLayout.EAST);
         panel.add(buttonPanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
-        // Hide the root node
-        collectionStoreTree.setRootVisible(false);
+        // Show the root node so top level collections are visible
+        collectionStoreTree.setRootVisible(true);
 
         addButton.addActionListener(actionEvent -> {
             DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();

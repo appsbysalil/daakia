@@ -27,6 +27,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -146,9 +147,20 @@ public class AppDaakiaService extends BaseDaakiaService {
                     DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();
                     model.setRoot(latestRootNode);
                     model.reload();
+                    expandFirstTwoLevels(tree, latestRootNode);
                 });
             }
         });
+    }
+
+    private void expandFirstTwoLevels(Tree tree, DefaultMutableTreeNode rootNode) {
+        TreePath rootPath = new TreePath(rootNode);
+        tree.expandPath(rootPath);
+        Enumeration<?> children = rootNode.children();
+        while (children.hasMoreElements()) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+            tree.expandPath(rootPath.pathByAddingChild(child));
+        }
     }
 
     private void onSaveRequest(DataContext dataContext, Object... objects) {
@@ -342,6 +354,7 @@ public class AppDaakiaService extends BaseDaakiaService {
             DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
             treeModel.setRoot(rootNode);
             treeModel.reload();
+            TreeUtils.expandAllNodes(historyTree);
         });
     }
 
