@@ -188,7 +188,7 @@ public class DbTreeStoreService {
             }
         }
 
-        // Build hierarchy
+        // Build hierarchy with a placeholder root node and attach every parentless entry under it.
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Collections");
 
         for (Map.Entry<Integer, DefaultMutableTreeNode> entry : nodeMap.entrySet()) {
@@ -196,13 +196,18 @@ public class DbTreeStoreService {
             DefaultMutableTreeNode node = entry.getValue();
             Integer parentId = parentMap.get(id);
             if (parentId == null) {
-                root = node;
+                root.add(node);
             } else {
                 DefaultMutableTreeNode parentNode = nodeMap.get(parentId);
-                if (parentNode != null) parentNode.add(node);
+                if (parentNode != null) {
+                    parentNode.add(node);
+                } else {
+                    // Orphaned nodes fall back to the placeholder root so they remain visible.
+                    root.add(node);
+                }
             }
         }
-        root.setUserObject("Collections");
+
         return root;
     }
 
@@ -211,28 +216,74 @@ public class DbTreeStoreService {
     // ============================
 
     public DefaultMutableTreeNode loadRoot(Connection connection, boolean onlyActive) throws SQLException {
-        Integer rootId = findIdByUuid(connection, "ROOT");
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Collections");
-        if (rootId != null) {
-            List<DefaultMutableTreeNode> levelOne = new ArrayList<>();
-            loadChildren(connection, levelOne, rootId, onlyActive);
-            for (DefaultMutableTreeNode child : levelOne) {
-                root.add(child);
-                Object userObj = child.getUserObject();
-                String uuid = null;
-                if (userObj instanceof DaakiaBaseStoreData base) {
-                    uuid = base.getUuid();
-                }
-                if (uuid != null) {
-                    Integer childId = findIdByUuid(connection, uuid);
-                    if (childId != null) {
-                        child.removeAllChildren();
-                        loadChildren(connection, child, childId, onlyActive);
-                    }
+
+        List<Integer> topLevelIds = findTopLevelIds(connection, onlyActive);
+        for (Integer topLevelId : topLevelIds) {
+            DefaultMutableTreeNode topLevelNode = loadNodeById(connection, topLevelId, onlyActive);
+            if (topLevelNode == null) {
+                continue;
+            }
+            root.add(topLevelNode);
+            populateNodeChildren(connection, topLevelNode, topLevelId, onlyActive);
+        }
+
+        return root;
+    }
+
+    private void populateNodeChildren(Connection connection,
+                                       DefaultMutableTreeNode parentNode,
+                                       int parentId,
+                                       boolean onlyActive) throws SQLException {
+        List<DefaultMutableTreeNode> children = new ArrayList<>();
+        loadChildren(connection, children, parentId, onlyActive);
+        for (DefaultMutableTreeNode child : children) {
+            parentNode.add(child);
+            preloadFirstLevelChildren(connection, child, onlyActive);
+        }
+    }
+
+    private void preloadFirstLevelChildren(Connection connection,
+                                           DefaultMutableTreeNode node,
+                                           boolean onlyActive) throws SQLException {
+        Object userObj = node.getUserObject();
+        if (userObj instanceof DaakiaBaseStoreData base) {
+            String uuid = base.getUuid();
+            if (uuid != null) {
+                Integer nodeId = findIdByUuid(connection, uuid);
+                if (nodeId != null) {
+                    node.removeAllChildren();
+                    loadChildren(connection, node, nodeId, onlyActive);
                 }
             }
         }
-        return root;
+    }
+
+    private List<Integer> findTopLevelIds(Connection connection, boolean onlyActive) throws SQLException {
+        String sql = "SELECT id FROM collection_records WHERE parent_id IS NULL" +
+                (onlyActive ? " AND active=1" : "") + " ORDER BY id";
+        List<Integer> ids = new ArrayList<>();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+            }
+        }
+        return ids;
+    }
+
+    private DefaultMutableTreeNode loadNodeById(Connection connection, int id, boolean onlyActive) throws SQLException {
+        String sql = "SELECT * FROM collection_records WHERE id=?" + (onlyActive ? " AND active=1" : "");
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return createNode(rs);
+                }
+            }
+        }
+        return null;
     }
 
     public List<DefaultMutableTreeNode> loadChildren(Connection connection, String parentUuid, boolean onlyActive) throws SQLException {
