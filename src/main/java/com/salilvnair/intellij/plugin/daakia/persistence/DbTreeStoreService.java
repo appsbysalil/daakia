@@ -91,31 +91,37 @@ public class DbTreeStoreService {
             uuid = "ROOT"; // stable root ID
         }
 
-        // Fill statement
-        if (parentId != null) ps.setInt(1, parentId); else ps.setNull(1, Types.INTEGER);
-        ps.setString(2, name);
-        ps.setString(3, type);
-        ps.setBoolean(4, active);
-        ps.setString(5, collectionName);
-        ps.setString(6, url);
-        ps.setString(7, requestType);
-        ps.setString(8, headers);
-        ps.setString(9, responseHeaders);
-        ps.setString(10, requestBody);
-        ps.setString(11, responseBody);
-        ps.setString(12, preScript);
-        ps.setString(13, postScript);
-        ps.setString(14, createdDate);
-        ps.setString(15, sizeText);
-        ps.setString(16, timeTaken);
-        ps.setInt(17, statusCode);
-        ps.setString(18, authInfo);
-        ps.setString(19, uuid);
+        Integer currentId = parentId;
 
-        Integer currentId = null;
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                currentId = rs.getInt(1);
+        // Only persist nodes that represent actual data entries.
+        boolean shouldPersist = userObj instanceof DaakiaStoreCollection || userObj instanceof DaakiaStoreRecord;
+
+        if (shouldPersist) {
+            // Fill statement
+            if (parentId != null) ps.setInt(1, parentId); else ps.setNull(1, Types.INTEGER);
+            ps.setString(2, name);
+            ps.setString(3, type);
+            ps.setBoolean(4, active);
+            ps.setString(5, collectionName);
+            ps.setString(6, url);
+            ps.setString(7, requestType);
+            ps.setString(8, headers);
+            ps.setString(9, responseHeaders);
+            ps.setString(10, requestBody);
+            ps.setString(11, responseBody);
+            ps.setString(12, preScript);
+            ps.setString(13, postScript);
+            ps.setString(14, createdDate);
+            ps.setString(15, sizeText);
+            ps.setString(16, timeTaken);
+            ps.setInt(17, statusCode);
+            ps.setString(18, authInfo);
+            ps.setString(19, uuid);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    currentId = rs.getInt(1);
+                }
             }
         }
 
