@@ -283,7 +283,7 @@ public class DbTreeStoreService {
     }
 
     private Integer findRootRecordId(Connection connection) throws SQLException {
-        String sql = "SELECT id FROM collection_records WHERE parent_id IS NULL AND (uuid='ROOT' OR type='ROOT') LIMIT 1";
+        String sql = "SELECT id FROM collection_records WHERE parent_id IS NULL LIMIT 1";
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
