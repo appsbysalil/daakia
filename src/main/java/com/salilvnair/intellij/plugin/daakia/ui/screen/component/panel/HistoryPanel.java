@@ -20,6 +20,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -95,6 +96,12 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         loaded = true;
     }
 
+    private void setTreeBusy(boolean busy) {
+        if (historyTree != null) {
+            historyTree.setPaintBusy(busy);
+        }
+    }
+
     public void initTreeListeners() {
 
         historyTree.addTreeSelectionListener(e -> {
@@ -114,25 +121,43 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
                 Object obj = node.getUserObject();
                 if (node.getLevel() == 1 && obj instanceof String year) {
                     if (node.getChildCount() == 1 && isPlaceholder(node.getFirstChild())) {
-                        node.removeAllChildren();
+                        DefaultMutableTreeNode placeholder = (DefaultMutableTreeNode) node.getFirstChild();
+                        placeholder.setUserObject("Loading...");
+                        ((DefaultTreeModel) historyTree.getModel()).nodeChanged(placeholder);
+                        setTreeBusy(true);
                         new HistoryDao().loadMonthsAsync(year, months -> {
-                            for (String m : months) {
-                                DefaultMutableTreeNode mn = new DefaultMutableTreeNode(new MonthItem(m));
-                                mn.add(new DefaultMutableTreeNode("Loading"));
-                                node.add(mn);
+                            node.removeAllChildren();
+                            if (months != null && !months.isEmpty()) {
+                                for (String m : months) {
+                                    DefaultMutableTreeNode mn = new DefaultMutableTreeNode(new MonthItem(m));
+                                    mn.add(new DefaultMutableTreeNode("Loading"));
+                                    node.add(mn);
+                                }
                             }
-                            ((DefaultTreeModel) historyTree.getModel()).reload(node);
+                            DefaultTreeModel model = (DefaultTreeModel) historyTree.getModel();
+                            model.reload(node);
+                            SwingUtilities.invokeLater(() -> historyTree.expandPath(new TreePath(node.getPath())));
+                            setTreeBusy(false);
                         });
                     }
                 } else if (node.getLevel() == 2 && obj instanceof MonthItem monthItem) {
                     String year = ((DefaultMutableTreeNode) node.getParent()).getUserObject().toString();
                     if (node.getChildCount() == 1 && isPlaceholder(node.getFirstChild())) {
-                        node.removeAllChildren();
+                        DefaultMutableTreeNode placeholder = (DefaultMutableTreeNode) node.getFirstChild();
+                        placeholder.setUserObject("Loading...");
+                        ((DefaultTreeModel) historyTree.getModel()).nodeChanged(placeholder);
+                        setTreeBusy(true);
                         new HistoryDao().loadByMonthAsync(year, monthItem.month, list -> {
-                            for (DaakiaHistory h : list) {
-                                node.add(new DefaultMutableTreeNode(h));
+                            node.removeAllChildren();
+                            if (list != null) {
+                                for (DaakiaHistory h : list) {
+                                    node.add(new DefaultMutableTreeNode(h));
+                                }
                             }
-                            ((DefaultTreeModel) historyTree.getModel()).reload(node);
+                            DefaultTreeModel model = (DefaultTreeModel) historyTree.getModel();
+                            model.reload(node);
+                            SwingUtilities.invokeLater(() -> historyTree.expandPath(new TreePath(node.getPath())));
+                            setTreeBusy(false);
                         });
                     }
                 }
@@ -195,7 +220,13 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     }
 
     private boolean isPlaceholder(TreeNode node) {
-        return node instanceof DefaultMutableTreeNode && "Loading".equals(((DefaultMutableTreeNode) node).getUserObject());
+        if (node instanceof DefaultMutableTreeNode treeNode) {
+            Object userObject = treeNode.getUserObject();
+            if (userObject instanceof String text) {
+                return text.startsWith("Loading");
+            }
+        }
+        return false;
     }
 
     private static class MonthItem {
