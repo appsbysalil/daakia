@@ -106,6 +106,12 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         loaded = true;
     }
 
+    private void setTreeBusy(boolean busy) {
+        if (collectionStoreTree != null) {
+            collectionStoreTree.setPaintBusy(busy);
+        }
+    }
+
     public JPanel dynamicTree(Component parentComponent) {
         DefaultMutableTreeNode rootNode = sideNavContext().collectionStoreRootNode();
         collectionStoreTreeModel = new DefaultTreeModel(rootNode);
@@ -230,12 +236,20 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 Object obj = node.getUserObject();
                 if (obj instanceof DaakiaStoreCollection coll) {
                     if (node.getChildCount() == 1 && isPlaceholder(node.getFirstChild())) {
-                        node.removeAllChildren();
+                        DefaultMutableTreeNode placeholder = (DefaultMutableTreeNode) node.getFirstChild();
+                        placeholder.setUserObject("Loading...");
+                        collectionStoreTreeModel.nodeChanged(placeholder);
+                        setTreeBusy(true);
                         new CollectionDao().loadChildrenAsync(coll.getUuid(), children -> {
-                            for (DefaultMutableTreeNode child : children) {
-                                node.add(child);
+                            node.removeAllChildren();
+                            if (children != null) {
+                                for (DefaultMutableTreeNode child : children) {
+                                    node.add(child);
+                                }
                             }
                             collectionStoreTreeModel.reload(node);
+                            SwingUtilities.invokeLater(() -> collectionStoreTree.expandPath(new TreePath(node.getPath())));
+                            setTreeBusy(false);
                         });
                     }
                 }
@@ -289,7 +303,13 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     }
 
     private boolean isPlaceholder(TreeNode node) {
-        return node instanceof DefaultMutableTreeNode && "Loading".equals(((DefaultMutableTreeNode) node).getUserObject());
+        if (node instanceof DefaultMutableTreeNode treeNode) {
+            Object userObject = treeNode.getUserObject();
+            if (userObject instanceof String text) {
+                return text.startsWith("Loading");
+            }
+        }
+        return false;
     }
 
     private void importPostmanCollectionToRootNode(DefaultMutableTreeNode node, DaakiaStore store) {

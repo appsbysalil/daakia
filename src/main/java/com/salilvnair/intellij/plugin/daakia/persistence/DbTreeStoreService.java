@@ -218,10 +218,27 @@ public class DbTreeStoreService {
     public DefaultMutableTreeNode loadRoot(Connection connection, boolean onlyActive) throws SQLException {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Collections");
 
+        Integer rootRecordId = findRootRecordId(connection);
+        if (rootRecordId != null) {
+            List<DefaultMutableTreeNode> rootChildren = new ArrayList<>();
+            loadChildren(connection, rootChildren, rootRecordId, onlyActive);
+            for (DefaultMutableTreeNode child : rootChildren) {
+                root.add(child);
+                preloadFirstLevelChildren(connection, child, onlyActive);
+            }
+        }
+
         List<Integer> topLevelIds = findTopLevelIds(connection, onlyActive);
         for (Integer topLevelId : topLevelIds) {
+            if (rootRecordId != null && rootRecordId.equals(topLevelId)) {
+                continue;
+            }
             DefaultMutableTreeNode topLevelNode = loadNodeById(connection, topLevelId, onlyActive);
             if (topLevelNode == null) {
+                continue;
+            }
+            if (isRootPlaceholder(topLevelNode)) {
+                populateNodeChildren(connection, root, topLevelId, onlyActive);
                 continue;
             }
             root.add(topLevelNode);
@@ -257,6 +274,25 @@ public class DbTreeStoreService {
                 }
             }
         }
+    }
+
+    private Integer findRootRecordId(Connection connection) throws SQLException {
+        String sql = "SELECT id FROM collection_records WHERE parent_id IS NULL AND (uuid='ROOT' OR type='ROOT') LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return null;
+    }
+
+    private boolean isRootPlaceholder(DefaultMutableTreeNode node) {
+        Object userObject = node.getUserObject();
+        if (userObject instanceof String text) {
+            return "root".equalsIgnoreCase(text) || "collections".equalsIgnoreCase(text);
+        }
+        return false;
     }
 
     private List<Integer> findTopLevelIds(Connection connection, boolean onlyActive) throws SQLException {
