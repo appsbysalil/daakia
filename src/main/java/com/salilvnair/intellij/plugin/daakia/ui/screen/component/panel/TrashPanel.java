@@ -71,7 +71,6 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
 
     @Override
     public void initListeners() {
-        loadTrashData();
         listenGlobal(event -> {
             if (DaakiaEvent.ofType(event, DaakiaEventType.ON_REFRESH_TRASH_PANEL)) {
                 loadTrashData();
@@ -83,21 +82,29 @@ public class TrashPanel extends BaseDaakiaPanel<TrashPanel> {
         deletePermanentlyButton.addActionListener(e -> deleteSelectedNode());
     }
 
-    private void loadTrashData() {
-        List<DaakiaHistory> deletedHistory = new HistoryDao().loadInactiveHistory();
-        DefaultMutableTreeNode historyRoot = new DefaultMutableTreeNode("History");
-        for (DaakiaHistory h : deletedHistory) {
-            historyRoot.add(new DefaultMutableTreeNode(h));
-        }
-        historyTrashTree.setModel(new DefaultTreeModel(historyRoot));
-        TreeUtils.expandAllNodes(historyTrashTree);
+    public void loadData() {
+        loadTrashData();
+    }
 
-        new CollectionDao().loadStoreAsync(dataContext, false, defaultMutableTreeNode -> {
-            DefaultMutableTreeNode inactiveRoot = filterInactiveNodes(defaultMutableTreeNode);
-            if (inactiveRoot == null) {
-                inactiveRoot = new DefaultMutableTreeNode("Collections");
+    private void loadTrashData() {
+        com.intellij.openapi.application.ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<DaakiaHistory> deletedHistory = new HistoryDao().loadInactiveHistory();
+            DefaultMutableTreeNode historyRoot = new DefaultMutableTreeNode("History");
+            for (DaakiaHistory h : deletedHistory) {
+                historyRoot.add(new DefaultMutableTreeNode(h));
             }
-            dynamicTree(inactiveRoot, collectionStoreTreePanel);
+            com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
+                historyTrashTree.setModel(new DefaultTreeModel(historyRoot));
+                TreeUtils.expandAllNodes(historyTrashTree);
+            });
+
+            new CollectionDao().loadStoreAsync(dataContext, false, defaultMutableTreeNode -> {
+                DefaultMutableTreeNode inactiveRoot = filterInactiveNodes(defaultMutableTreeNode);
+                if (inactiveRoot == null) {
+                    inactiveRoot = new DefaultMutableTreeNode("Collections");
+                }
+                dynamicTree(inactiveRoot, collectionStoreTreePanel);
+            });
         });
     }
 

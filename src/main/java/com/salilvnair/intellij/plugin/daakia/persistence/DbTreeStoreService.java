@@ -6,8 +6,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaStoreRecord;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.UUID;
 
 public class DbTreeStoreService {
@@ -92,31 +91,37 @@ public class DbTreeStoreService {
             uuid = "ROOT"; // stable root ID
         }
 
-        // Fill statement
-        if (parentId != null) ps.setInt(1, parentId); else ps.setNull(1, Types.INTEGER);
-        ps.setString(2, name);
-        ps.setString(3, type);
-        ps.setBoolean(4, active);
-        ps.setString(5, collectionName);
-        ps.setString(6, url);
-        ps.setString(7, requestType);
-        ps.setString(8, headers);
-        ps.setString(9, responseHeaders);
-        ps.setString(10, requestBody);
-        ps.setString(11, responseBody);
-        ps.setString(12, preScript);
-        ps.setString(13, postScript);
-        ps.setString(14, createdDate);
-        ps.setString(15, sizeText);
-        ps.setString(16, timeTaken);
-        ps.setInt(17, statusCode);
-        ps.setString(18, authInfo);
-        ps.setString(19, uuid);
+        Integer currentId = parentId;
 
-        Integer currentId = null;
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                currentId = rs.getInt(1);
+        // Only persist nodes that represent actual data entries.
+        boolean shouldPersist = userObj instanceof DaakiaStoreCollection || userObj instanceof DaakiaStoreRecord;
+
+        if (shouldPersist) {
+            // Fill statement
+            if (parentId != null) ps.setInt(1, parentId); else ps.setNull(1, Types.INTEGER);
+            ps.setString(2, name);
+            ps.setString(3, type);
+            ps.setBoolean(4, active);
+            ps.setString(5, collectionName);
+            ps.setString(6, url);
+            ps.setString(7, requestType);
+            ps.setString(8, headers);
+            ps.setString(9, responseHeaders);
+            ps.setString(10, requestBody);
+            ps.setString(11, responseBody);
+            ps.setString(12, preScript);
+            ps.setString(13, postScript);
+            ps.setString(14, createdDate);
+            ps.setString(15, sizeText);
+            ps.setString(16, timeTaken);
+            ps.setInt(17, statusCode);
+            ps.setString(18, authInfo);
+            ps.setString(19, uuid);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    currentId = rs.getInt(1);
+                }
             }
         }
 
@@ -189,21 +194,231 @@ public class DbTreeStoreService {
             }
         }
 
-        // Build hierarchy
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+        // Build hierarchy with a placeholder root node and attach every parentless entry under it.
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Collections");
 
         for (Map.Entry<Integer, DefaultMutableTreeNode> entry : nodeMap.entrySet()) {
             Integer id = entry.getKey();
             DefaultMutableTreeNode node = entry.getValue();
             Integer parentId = parentMap.get(id);
             if (parentId == null) {
-                root = node;
+                root.add(node);
             } else {
                 DefaultMutableTreeNode parentNode = nodeMap.get(parentId);
-                if (parentNode != null) parentNode.add(node);
+                if (parentNode != null) {
+                    parentNode.add(node);
+                } else {
+                    // Orphaned nodes fall back to the placeholder root so they remain visible.
+                    root.add(node);
+                }
             }
         }
+
         return root;
+    }
+
+    // ============================
+    // PARTIAL LOAD SUPPORT
+    // ============================
+
+    public DefaultMutableTreeNode loadRoot(Connection connection, boolean onlyActive) throws SQLException {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Collections");
+
+        Integer rootRecordId = findRootRecordId(connection);
+        if (rootRecordId != null) {
+            List<DefaultMutableTreeNode> rootChildren = new ArrayList<>();
+            loadChildren(connection, rootChildren, rootRecordId, onlyActive);
+            for (DefaultMutableTreeNode child : rootChildren) {
+                root.add(child);
+                preloadFirstLevelChildren(connection, child, onlyActive);
+            }
+        }
+
+        List<Integer> topLevelIds = findTopLevelIds(connection, onlyActive);
+        for (Integer topLevelId : topLevelIds) {
+            if (rootRecordId != null && rootRecordId.equals(topLevelId)) {
+                continue;
+            }
+            DefaultMutableTreeNode topLevelNode = loadNodeById(connection, topLevelId, onlyActive);
+            if (topLevelNode == null) {
+                continue;
+            }
+            if (isRootPlaceholder(topLevelNode)) {
+                populateNodeChildren(connection, root, topLevelId, onlyActive);
+                continue;
+            }
+            root.add(topLevelNode);
+            populateNodeChildren(connection, topLevelNode, topLevelId, onlyActive);
+        }
+
+        return root;
+    }
+
+    private void populateNodeChildren(Connection connection,
+                                       DefaultMutableTreeNode parentNode,
+                                       int parentId,
+                                       boolean onlyActive) throws SQLException {
+        List<DefaultMutableTreeNode> children = new ArrayList<>();
+        loadChildren(connection, children, parentId, onlyActive);
+        for (DefaultMutableTreeNode child : children) {
+            parentNode.add(child);
+            preloadFirstLevelChildren(connection, child, onlyActive);
+        }
+    }
+
+    private void preloadFirstLevelChildren(Connection connection,
+                                           DefaultMutableTreeNode node,
+                                           boolean onlyActive) throws SQLException {
+        Object userObj = node.getUserObject();
+        if (userObj instanceof DaakiaBaseStoreData base) {
+            String uuid = base.getUuid();
+            if (uuid != null) {
+                Integer nodeId = findIdByUuid(connection, uuid);
+                if (nodeId != null) {
+                    node.removeAllChildren();
+                    loadChildren(connection, node, nodeId, onlyActive);
+                }
+            }
+        }
+    }
+
+    private Integer findRootRecordId(Connection connection) throws SQLException {
+        String sql = "SELECT id FROM collection_records WHERE parent_id IS NULL LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return null;
+    }
+
+    private boolean isRootPlaceholder(DefaultMutableTreeNode node) {
+        Object userObject = node.getUserObject();
+        if (userObject instanceof String text) {
+            return "root".equalsIgnoreCase(text) || "collections".equalsIgnoreCase(text);
+        }
+        return false;
+    }
+
+    private List<Integer> findTopLevelIds(Connection connection, boolean onlyActive) throws SQLException {
+        String sql = "SELECT id FROM collection_records WHERE parent_id IS NULL" +
+                (onlyActive ? " AND active=1" : "") + " ORDER BY id";
+        List<Integer> ids = new ArrayList<>();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+            }
+        }
+        return ids;
+    }
+
+    private DefaultMutableTreeNode loadNodeById(Connection connection, int id, boolean onlyActive) throws SQLException {
+        String sql = "SELECT * FROM collection_records WHERE id=?" + (onlyActive ? " AND active=1" : "");
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return createNode(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<DefaultMutableTreeNode> loadChildren(Connection connection, String parentUuid, boolean onlyActive) throws SQLException {
+        Integer parentId = findIdByUuid(connection, parentUuid);
+        List<DefaultMutableTreeNode> list = new ArrayList<>();
+        if (parentId != null) {
+            loadChildren(connection, list, parentId, onlyActive);
+        }
+        return list;
+    }
+
+    private void loadChildren(Connection connection, DefaultMutableTreeNode parentNode, int parentId, boolean onlyActive) throws SQLException {
+        List<DefaultMutableTreeNode> children = new ArrayList<>();
+        loadChildren(connection, children, parentId, onlyActive);
+        for (DefaultMutableTreeNode child : children) {
+            parentNode.add(child);
+        }
+    }
+
+    private void loadChildren(Connection connection, List<DefaultMutableTreeNode> nodes, int parentId, boolean onlyActive) throws SQLException {
+        String sql = "SELECT * FROM collection_records WHERE parent_id=? " + (onlyActive ? "AND active=1 " : "") + "ORDER BY id ASC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, parentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    DefaultMutableTreeNode node = createNode(rs);
+                    int id = rs.getInt("id");
+                    if (hasChildren(connection, id, onlyActive)) {
+                        node.add(new DefaultMutableTreeNode("Loading"));
+                    }
+                    nodes.add(node);
+                }
+            }
+        }
+    }
+
+    private boolean hasChildren(Connection connection, int parentId, boolean onlyActive) throws SQLException {
+        String sql = "SELECT 1 FROM collection_records WHERE parent_id=? " + (onlyActive ? "AND active=1 " : "") + "LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, parentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private Integer findIdByUuid(Connection connection, String uuid) throws SQLException {
+        String sql = "SELECT id FROM collection_records WHERE uuid=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    private DefaultMutableTreeNode createNode(ResultSet rs) throws SQLException {
+        String type = rs.getString("type");
+        String uuid = rs.getString("uuid");
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode();
+        if ("COLLECTION".equalsIgnoreCase(type)) {
+            DaakiaStoreCollection coll = new DaakiaStoreCollection();
+            coll.setCollectionName(rs.getString("collection_name"));
+            coll.setActive(rs.getBoolean("active"));
+            coll.setUuid(uuid);
+            coll.setAuthInfo(rs.getString("auth_info"));
+            node.setUserObject(coll);
+        } else if ("RECORD".equalsIgnoreCase(type)) {
+            DaakiaStoreRecord rec = new DaakiaStoreRecord();
+            rec.setDisplayName(rs.getString("name"));
+            rec.setUrl(rs.getString("url"));
+            rec.setRequestType(rs.getString("request_type"));
+            rec.setHeaders(rs.getString("headers"));
+            rec.setResponseHeaders(rs.getString("response_headers"));
+            rec.setRequestBody(rs.getString("request_body"));
+            rec.setResponseBody(rs.getString("response_body"));
+            rec.setPreRequestScript(rs.getString("pre_request_script"));
+            rec.setPostRequestScript(rs.getString("post_request_script"));
+            rec.setCreatedDate(rs.getString("created_date"));
+            rec.setSizeText(rs.getString("size_text"));
+            rec.setTimeTaken(rs.getString("time_taken"));
+            rec.setStatusCode(rs.getInt("status_code"));
+            rec.setActive(rs.getBoolean("active"));
+            rec.setUuid(uuid);
+            rec.setAuthInfo(rs.getString("auth_info"));
+            node.setUserObject(rec);
+        } else {
+            node.setUserObject("Root");
+        }
+        return node;
     }
 
     // ============================

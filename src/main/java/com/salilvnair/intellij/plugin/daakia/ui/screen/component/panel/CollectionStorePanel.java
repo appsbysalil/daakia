@@ -29,6 +29,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -39,7 +40,9 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     private Tree collectionStoreTree;
     private DefaultTreeModel collectionStoreTreeModel;
     private JPanel searchPanel;
+    private JPanel treeWrapper;
     TextInputField searchTextField;
+    private boolean loaded = false;
 
     public CollectionStorePanel(JRootPane rootPane, DataContext dataContext) {
         super(rootPane, dataContext);
@@ -53,8 +56,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     @Override
     public void initComponents() {
-        JPanel collectionStoreTreePanel = dynamicTree(this);
-        scrollPane = new JBScrollPane(collectionStoreTreePanel);
+        treeWrapper = new JPanel(new BorderLayout());
+        scrollPane = new JBScrollPane(treeWrapper);
         searchPanel = new JPanel(new BorderLayout());
         searchTextField = new TextInputField("Search");
         searchPanel.add(searchTextField, BorderLayout.CENTER);
@@ -68,28 +71,48 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     @Override
     public void initListeners() {
-        initTreeListeners();
         TextFieldUtils.addChangeListener(searchTextField, e -> {
             TextInputField textInputField = (TextInputField) e.getSource();
             if(textInputField.containsText()) {
+                loadData();
                 daakiaService(DaakiaType.APP).execute(AppDaakiaType.SEARCH_COLLECTION, dataContext, searchTextField.getText());
             }
         });
         listenGlobal(event -> {
             if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_IMPORT_POSTMAN)) {
+                loadData();
                 importPostmanCollection();
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_CLICK_EXPORT_POSTMAN)) {
+                loadData();
                 exportPostmanCollection();
             }
             else if(DaakiaEvent.ofType(event, DaakiaEventType.ON_REFRESH_COLLECTION_STORE_PANEL)) {
-                daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
+                if (loaded) {
+                    daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
+                }
             }
         });
     }
 
+    public void loadData() {
+        if (loaded) return;
+        JPanel treePanel = dynamicTree(this);
+        treeWrapper.removeAll();
+        treeWrapper.add(treePanel, BorderLayout.CENTER);
+        treeWrapper.revalidate();
+        treeWrapper.repaint();
+        initTreeListeners();
+        loaded = true;
+    }
+
+    private void setTreeBusy(boolean busy) {
+        if (collectionStoreTree != null) {
+            collectionStoreTree.setPaintBusy(busy);
+        }
+    }
+
     public JPanel dynamicTree(Component parentComponent) {
-        daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
         DefaultMutableTreeNode rootNode = sideNavContext().collectionStoreRootNode();
         collectionStoreTreeModel = new DefaultTreeModel(rootNode);
         collectionStoreTree = new Tree(collectionStoreTreeModel);
@@ -122,7 +145,6 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 if (parent != null) {
                     collectionStoreTreeModel.removeNodeFromParent(selectedNode);
                     collectionStoreTreeModel.reload(parent);
-                    TreeUtils.expandAllNodes(collectionStoreTree);
                 }
             }
             globalEventPublisher().onClickDeleteCollections();
@@ -148,11 +170,9 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         buttonPanel.add(moreIconButton, BorderLayout.EAST);
         panel.add(buttonPanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
-        // Hide the root node
+        // Hide the placeholder root node so only real collections are shown
         collectionStoreTree.setRootVisible(false);
-
-        // Expand all nodes in the collectionStoreTree
-        TreeUtils.expandAllNodes(collectionStoreTree);
+        collectionStoreTree.setShowsRootHandles(true);
 
         addButton.addActionListener(actionEvent -> {
             DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();
@@ -175,12 +195,12 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
                 newCollection.setCollection(true);
                 newCollection.setUuid(DaakiaUtils.generateUUID());
                 DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newCollection);
+                newNode.add(new DefaultMutableTreeNode("Loading"));
                 node.add(newNode);
                 ((DefaultTreeModel) collectionStoreTree.getModel()).reload(node);
                 parentComponent.revalidate();
                 parentComponent.repaint();
             }
-            TreeUtils.expandAllNodes(collectionStoreTree);
             globalEventPublisher().onClickAddNewCollection();
         });
 
@@ -191,6 +211,8 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
         sideNavContext().setCollectionStoreTree(collectionStoreTree);
         sideNavContext().setCollectionStoreTreeModel(collectionStoreTreeModel);
 
+        daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_STORE_COLLECTIONS, dataContext);
+
         return panel;
     }
 
@@ -199,6 +221,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
     public void initTreeListeners() {
 
         collectionStoreTree.addTreeSelectionListener(e -> {
+            loadData();
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) collectionStoreTree.getLastSelectedPathComponent();
             if (selectedNode != null && selectedNode.getUserObject() instanceof DaakiaStoreRecord) {
                 Object userObject = selectedNode.getUserObject();
@@ -206,10 +229,43 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
             }
         });
 
+        collectionStoreTree.addTreeWillExpandListener(new javax.swing.event.TreeWillExpandListener() {
+            @Override
+            public void treeWillExpand(javax.swing.event.TreeExpansionEvent event) {
+                loadData();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) event.getPath().getLastPathComponent();
+                Object obj = node.getUserObject();
+                if (obj instanceof DaakiaStoreCollection coll) {
+                    if (node.getChildCount() == 1 && isPlaceholder(node.getFirstChild())) {
+                        DefaultMutableTreeNode placeholder = (DefaultMutableTreeNode) node.getFirstChild();
+                        placeholder.setUserObject("Loading...");
+                        collectionStoreTreeModel.nodeChanged(placeholder);
+                        setTreeBusy(true);
+                        new CollectionDao().loadChildrenAsync(coll.getUuid(), children -> {
+                            node.removeAllChildren();
+                            if (children != null) {
+                                for (DefaultMutableTreeNode child : children) {
+                                    node.add(child);
+                                }
+                            }
+                            collectionStoreTreeModel.reload(node);
+                            SwingUtilities.invokeLater(() -> collectionStoreTree.expandPath(new TreePath(node.getPath())));
+                            setTreeBusy(false);
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void treeWillCollapse(javax.swing.event.TreeExpansionEvent event) {
+            }
+        });
+
         collectionStoreTree.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                loadData();
                 if (SwingUtilities.isRightMouseButton(e)) {
                     Object userObject = TreeUtils.extractSelectedNodeUserObject(collectionStoreTree, e);
                     if(userObject instanceof DaakiaStoreRecord) {
@@ -220,6 +276,7 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
             @Override
             public void mouseClicked(MouseEvent e) {
+                loadData();
                 if(TreeUtils.extractSelectedNodeUserObject(collectionStoreTree, e) == null) {
                     Object root = collectionStoreTree.getModel().getRoot();
                     collectionStoreTree.setSelectionPath(new TreePath(root));
@@ -244,6 +301,16 @@ public class CollectionStorePanel extends BaseDaakiaPanel<CollectionStorePanel> 
 
     private void renameSelectedTreeItem(DaakiaStoreRecord daakiaStoreRecord) {
         globalEventPublisher().onRightClickRenameStoreCollectionNode(daakiaStoreRecord);
+    }
+
+    private boolean isPlaceholder(TreeNode node) {
+        if (node instanceof DefaultMutableTreeNode treeNode) {
+            Object userObject = treeNode.getUserObject();
+            if (userObject instanceof String text) {
+                return text.startsWith("Loading");
+            }
+        }
+        return false;
     }
 
     private void importPostmanCollectionToRootNode(DefaultMutableTreeNode node, DaakiaStore store) {

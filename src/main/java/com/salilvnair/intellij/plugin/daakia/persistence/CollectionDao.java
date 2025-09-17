@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Consumer;
 
 /** DAO for collection/store records (stateless + async-safe) */
@@ -22,7 +23,7 @@ public class CollectionDao {
     // ============================
     public DaakiaStore loadStore(boolean active) {
         String sql = "SELECT data FROM collection_records WHERE id=1 AND active=?";
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, active ? "Y" : "N");
             ResultSet rs = ps.executeQuery();
@@ -48,7 +49,7 @@ public class CollectionDao {
     // SAVE STORE (Legacy JSON mode)
     // ============================
     public void saveStore(DaakiaStore store) {
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+        try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
             boolean exists;
             try (PreparedStatement check = conn.prepareStatement(
                     "SELECT COUNT(*) FROM collection_records WHERE id=1")) {
@@ -79,7 +80,7 @@ public class CollectionDao {
     // ============================
     public void saveStoreNew(DataContext dataContext) {
         DefaultMutableTreeNode root = dataContext.sideNavContext().collectionStoreRootNode();
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+        try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
             treeStoreService.saveTree(conn, root);
         } catch (Exception e) {
             System.err.println("Error saving store tree: " + e.getMessage());
@@ -95,8 +96,8 @@ public class CollectionDao {
     // ============================
     public void loadStoreAsync(DataContext dataContext, boolean onlyActive, Consumer<DefaultMutableTreeNode> callback) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
-                DefaultMutableTreeNode root = treeStoreService.loadTree(conn, onlyActive);
+            try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
+                DefaultMutableTreeNode root = treeStoreService.loadRoot(conn, onlyActive);
 
                 if (onlyActive) {
                     dataContext.sideNavContext().setCollectionStoreRootNode(root);
@@ -115,12 +116,25 @@ public class CollectionDao {
         loadStoreAsync(dataContext, true, callback);
     }
 
+    public void loadChildrenAsync(String parentUuid, Consumer<List<DefaultMutableTreeNode>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
+                List<DefaultMutableTreeNode> children = treeStoreService.loadChildren(conn, parentUuid, true);
+                if (callback != null) {
+                    ApplicationManager.getApplication().invokeLater(() -> callback.accept(children));
+                }
+            } catch (SQLException e) {
+                System.err.println("Error loading child nodes: " + e.getMessage());
+            }
+        });
+    }
+
     // ============================
     // NODE STATE OPERATIONS (Async)
     // ============================
     public void markNodeInactiveAsync(String uuid, Runnable onComplete) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+            try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
                 treeStoreService.markNodeInactive(conn, uuid);
             } catch (SQLException e) {
                 System.err.println("Error marking node inactive: " + e.getMessage());
@@ -137,7 +151,7 @@ public class CollectionDao {
 
     public void markNodeActiveAsync(String uuid, Runnable onComplete) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+            try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
                 treeStoreService.markNodeActive(conn, uuid);
             } catch (SQLException e) {
                 System.err.println("Error marking node active: " + e.getMessage());
@@ -150,7 +164,7 @@ public class CollectionDao {
 
     public void deleteNodeAsync(String uuid, Runnable onComplete) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            try (Connection conn = DaakiaDatabase.getInstance().getConnection()) {
+            try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection()) {
                 treeStoreService.deleteNode(conn, uuid);
             } catch (SQLException e) {
                 System.err.println("Error deleting node: " + e.getMessage());
@@ -165,7 +179,7 @@ public class CollectionDao {
     // MARK ROOT ACTIVE/INACTIVE
     // ============================
     public void markActive(boolean active) {
-        try (Connection conn = DaakiaDatabase.getInstance().getConnection();
+        try (Connection conn = DaakiaDatabase.getInstance().getCollectionConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "UPDATE collection_records SET active=? WHERE id=1")) {
             ps.setString(1, active ? "Y" : "N");

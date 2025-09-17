@@ -27,6 +27,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -137,18 +138,36 @@ public class AppDaakiaService extends BaseDaakiaService {
     }
 
     private void initStoreCollections(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
+        Tree initialTree = dataContext.sideNavContext().collectionStoreTree();
+        if (initialTree != null) {
+            initialTree.setPaintBusy(true);
+        }
         new CollectionDao().loadStoreAsync(dataContext, rootNode -> {
             dataContext.sideNavContext().setCollectionStoreRootNode(rootNode);
             Tree tree = dataContext.sideNavContext().collectionStoreTree();
-            if(tree != null) {
+            if (tree != null) {
                 DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                 ApplicationManager.getApplication().invokeLater(() -> {
                     DefaultMutableTreeNode latestRootNode = dataContext.sideNavContext().collectionStoreRootNode();
                     model.setRoot(latestRootNode);
                     model.reload();
+                    expandFirstTwoLevels(tree, latestRootNode);
+                    tree.setPaintBusy(false);
                 });
+            } else if (initialTree != null) {
+                ApplicationManager.getApplication().invokeLater(() -> initialTree.setPaintBusy(false));
             }
         });
+    }
+
+    private void expandFirstTwoLevels(Tree tree, DefaultMutableTreeNode rootNode) {
+        TreePath rootPath = new TreePath(rootNode);
+        tree.expandPath(rootPath);
+        Enumeration<?> children = rootNode.children();
+        while (children.hasMoreElements()) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+            tree.expandPath(rootPath.pathByAddingChild(child));
+        }
     }
 
     private void onSaveRequest(DataContext dataContext, Object... objects) {
@@ -288,27 +307,32 @@ public class AppDaakiaService extends BaseDaakiaService {
         try {
             String searchText = (String) objects[0];
 
-            // New async load returning a tree node
+            Tree initialTree = dataContext.sideNavContext().collectionStoreTree();
+            if (initialTree != null) {
+                initialTree.setPaintBusy(true);
+            }
+
             new CollectionDao().loadStoreAsync(dataContext, collectionStoreRootNode -> {
-                if (collectionStoreRootNode != null) {
+                Tree collectionStoreTree = dataContext.sideNavContext().collectionStoreTree();
+                if (collectionStoreTree != null && collectionStoreRootNode != null) {
                     DefaultMutableTreeNode rootNode;
 
                     if (searchText == null || searchText.isEmpty()) {
-                        // No filtering, just use the loaded tree
                         rootNode = collectionStoreRootNode;
                     } else {
-                        // Filter by search text
                         rootNode = DaakiaUtils.filterTreeBySearchText(collectionStoreRootNode, searchText);
                     }
 
-                    Tree collectionStoreTree = dataContext.sideNavContext().collectionStoreTree();
                     DefaultTreeModel treeModel = (DefaultTreeModel) collectionStoreTree.getModel();
 
                     ApplicationManager.getApplication().invokeLater(() -> {
                         treeModel.setRoot(rootNode);
                         treeModel.reload();
                         TreeUtils.expandAllNodes(collectionStoreTree);
+                        collectionStoreTree.setPaintBusy(false);
                     });
+                } else if (initialTree != null) {
+                    ApplicationManager.getApplication().invokeLater(() -> initialTree.setPaintBusy(false));
                 }
             });
 
@@ -317,50 +341,72 @@ public class AppDaakiaService extends BaseDaakiaService {
 
 
     private void initHistoryRootNodeFromSearchText(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
-        Map<String, List<DaakiaHistory>> historyData = dataContext.sideNavContext().historyData();
         String searchText = (String) objects[0];
-        Map<String, List<DaakiaHistory>> filteredHistoryData = new HashMap<>();
-        historyData.forEach( (yr, hDataList) -> {
-            List<DaakiaHistory> filteredList = hDataList
-                                                .stream()
-                                                .filter(hData -> hData.getDisplayName() !=null && hData.getDisplayName().contains(searchText)
-                                                        || hData.getUrl() !=null && hData.getUrl().contains(searchText)
-                                                )
-                                                .toList();
-            if(!filteredList.isEmpty()) {
-                filteredHistoryData.put(yr, filteredList);
+        Tree initialTree = dataContext.sideNavContext().historyTree();
+        if (initialTree != null) {
+            initialTree.setPaintBusy(true);
+        }
+        new HistoryDao().loadHistoryAsync(historyData -> {
+            if (historyData == null) {
+                historyData = new HashMap<>();
+            }
+            Map<String, List<DaakiaHistory>> filteredHistoryData = new HashMap<>();
+            historyData.forEach((yr, hDataList) -> {
+                List<DaakiaHistory> filteredList = hDataList.stream()
+                        .filter(hData -> (hData.getDisplayName() != null && hData.getDisplayName().contains(searchText))
+                                || (hData.getUrl() != null && hData.getUrl().contains(searchText)))
+                        .toList();
+                if (!filteredList.isEmpty()) {
+                    filteredHistoryData.put(yr, filteredList);
+                }
+            });
+            DefaultMutableTreeNode rootNode;
+            if (searchText == null || searchText.isEmpty()) {
+                rootNode = generateRootNodeFromHistoryData(historyData);
+            } else {
+                rootNode = generateRootNodeFromHistoryData(filteredHistoryData);
+            }
+            Tree historyTree = dataContext.sideNavContext().historyTree();
+            if (historyTree != null) {
+                DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
+                treeModel.setRoot(rootNode);
+                treeModel.reload();
+                TreeUtils.expandAllNodes(historyTree);
+                historyTree.setPaintBusy(false);
+            } else if (initialTree != null) {
+                initialTree.setPaintBusy(false);
             }
         });
-        DefaultMutableTreeNode rootNode;
-        if(searchText == null || searchText.isEmpty()) {
-            rootNode = generateRootNodeFromHistoryData(historyData);
-        }
-        else {
-            rootNode = generateRootNodeFromHistoryData(filteredHistoryData);
-        }
-        Tree historyTree = dataContext.sideNavContext().historyTree();
-        // Update the tree model with new data
-        DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
-        treeModel.setRoot(rootNode);
-        treeModel.reload();
     }
 
 
     private void initHistoryRootNode(DaakiaTypeBase type, DataContext dataContext, Object... objects) {
-        new HistoryDao().loadHistoryAsync(historyData -> {
-            if(historyData == null) {
-                historyData = new LinkedHashMap<>();
+        Tree initialTree = dataContext.sideNavContext().historyTree();
+        if (initialTree != null) {
+            initialTree.setPaintBusy(true);
+        }
+        new HistoryDao().loadYearsAsync(years -> {
+            if (years == null) {
+                years = new ArrayList<>();
             }
-            dataContext.sideNavContext().setHistoryData(historyData);
-            DefaultMutableTreeNode rootNode = generateRootNodeFromHistoryData(historyData);
+            dataContext.sideNavContext().setHistoryData(new LinkedHashMap<>());
+            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode();
+            for (String year : years) {
+                DefaultMutableTreeNode yearNode = new DefaultMutableTreeNode(year);
+                yearNode.add(new DefaultMutableTreeNode("Loading"));
+                rootNode.add(yearNode);
+            }
             dataContext.sideNavContext().setHistoryRootNode(rootNode);
             Tree historyTree = dataContext.sideNavContext().historyTree();
-            if(historyTree != null) {
+            if (historyTree != null) {
                 DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
                 ApplicationManager.getApplication().invokeLater(() -> {
                     treeModel.setRoot(rootNode);
                     treeModel.reload();
+                    historyTree.setPaintBusy(false);
                 });
+            } else if (initialTree != null) {
+                ApplicationManager.getApplication().invokeLater(() -> initialTree.setPaintBusy(false));
             }
         });
     }
