@@ -89,5 +89,10 @@
                     icon="AllIcons.Javaee.WebServiceClient"
                     anchor="bottom"
                     factoryClass="com.salilvnair.intellij.plugin.daakia.MainViewFactory"/>
+        <notificationGroup
+                id="Daakia Notifications"
+                displayType="BALLOON"
+                isLogByDefault="true"
+        />
     </extensions>
 </idea-plugin>

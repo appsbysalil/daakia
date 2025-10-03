@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel;
 
 import com.intellij.json.JsonFileType;
+import com.intellij.util.ui.UIUtil;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEvent;
 import com.salilvnair.intellij.plugin.daakia.ui.core.event.type.DaakiaEventType;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.editor.DaakiaEditorX;
@@ -48,7 +49,9 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
                     String formattedText = uiContext().downloadResponse() ? null : responseEntity.getBody() == null ? null :JsonUtils.format((String) responseEntity.getBody());
                     responseTextArea.setText(formattedText, DaakiaUtils.resolveFileTypeFromHeaders(daakiaContext().responseHeaders()));
                     if(uiContext().downloadResponse()) {
-                        FileUtils.saveResponseAsFile(responseEntity);
+                        UIUtil.invokeLaterIfNeeded(() -> {
+                            FileUtils.saveResponseAsFile(dataContext.project(), responseEntity);
+                        });
                     }
                 }
                 else if(daakiaEvent.daakiaContext() != null && daakiaEvent.daakiaContext().errorMessage() != null) {
