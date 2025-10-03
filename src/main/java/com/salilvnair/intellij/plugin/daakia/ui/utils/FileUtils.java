@@ -4,6 +4,7 @@ import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -89,20 +90,28 @@ public class FileUtils {
             }
 
             Path path = wrapper.getFile().toPath();
+            ModalityState modalityState = ModalityState.current();
 
             ApplicationManager.getApplication().executeOnPooledThread(() -> {
                 try {
-                    ApplicationManager.getApplication().invokeLaterOnWriteThread(() -> {
-                        try {
-                            Files.createDirectories(path.getParent());
-                            Files.write(path, bytes);
-                        }
-                        catch (Exception ignored) { }
+                    Path parent = path.getParent();
+                    if (parent != null) {
+                        Files.createDirectories(parent);
+                    }
+                    Files.write(path, bytes);
+
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        WriteAction.run(() -> {
+                            VirtualFile vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(path.toFile());
+                            if (vFile != null) {
+                                vFile.refresh(false, false);
+                            }
+                        });
                         notify(project, "File saved to: " + path, NotificationType.INFORMATION);
-                    }, ModalityState.nonModal());
+                    }, modalityState);
                 } catch (Exception e) {
-                    UIUtil.invokeLaterIfNeeded(() ->
-                            notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR));
+                    ApplicationManager.getApplication().invokeLater(() ->
+                            notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR), modalityState);
                 }
             });
         });
