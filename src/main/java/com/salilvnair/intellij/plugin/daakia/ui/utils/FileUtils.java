@@ -4,6 +4,7 @@ import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.project.Project;
@@ -101,17 +102,18 @@ public class FileUtils {
                     Files.write(path, bytes);
 
                     ApplicationManager.getApplication().invokeLater(() -> {
-                        WriteAction.run(() -> {
-                            VirtualFile vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(path.toFile());
-                            if (vFile != null) {
-                                vFile.refresh(false, false);
-                            }
-                        });
+                        TransactionGuard.getInstance().submitTransaction(project, () ->
+                                WriteAction.run(() -> {
+                                    VirtualFile vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(path.toFile());
+                                    if (vFile != null) {
+                                        vFile.refresh(false, false);
+                                    }
+                                }));
                         notify(project, "File saved to: " + path, NotificationType.INFORMATION);
-                    }, modalityState);
+                    }, ModalityState.NON_MODAL);
                 } catch (Exception e) {
                     ApplicationManager.getApplication().invokeLater(() ->
-                            notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR), modalityState);
+                            notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR), ModalityState.NON_MODAL);
                 }
             });
         });
