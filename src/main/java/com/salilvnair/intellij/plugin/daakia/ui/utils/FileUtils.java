@@ -4,8 +4,6 @@ import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.TransactionGuard;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -16,6 +14,8 @@ import com.intellij.util.ui.UIUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -63,7 +63,7 @@ public class FileUtils {
         return data;
     }
 
-    public static void saveResponseAsFile(Project project, ResponseEntity<?> raw) {
+    public static void saveResponseAsFile(Project project, ResponseEntity<?> raw, Component component) {
         if (!(raw.getBody() instanceof byte[] || raw.getBody() instanceof String)) {
             notify(project, "Unsupported response body type", NotificationType.ERROR);
             return;
@@ -80,43 +80,22 @@ public class FileUtils {
         String contentType = raw.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
         String defaultName = resolveDefaultFilename(raw.getHeaders(), contentType);
 
-        UIUtil.invokeLaterIfNeeded(() -> {
-            FileSaverDescriptor descriptor = new FileSaverDescriptor("Save Response", "Choose where to save the file");
-            FileSaverDialog dialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project);
-
-            VirtualFileWrapper wrapper = dialog.save((VirtualFile) null, defaultName);
-            if (wrapper == null) {
-                notify(project, "Save operation was canceled.", NotificationType.INFORMATION);
-                return;
+        JFileChooser chooser = new JFileChooser();
+        chooser.setSelectedFile(new File(defaultName));
+        int res = chooser.showSaveDialog(component);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            chooser.setCurrentDirectory(new File(userHomePath()));
+            try {
+                Files.write(file.toPath(), bytes);
+                UIUtil.invokeLaterIfNeeded(() ->
+                        notify(project, "File saved to: " + file.toPath(), NotificationType.INFORMATION));
             }
-
-            Path path = wrapper.getFile().toPath();
-            ModalityState modalityState = ModalityState.current();
-
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                try {
-                    Path parent = path.getParent();
-                    if (parent != null) {
-                        Files.createDirectories(parent);
-                    }
-                    Files.write(path, bytes);
-
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        TransactionGuard.getInstance().submitTransaction(project, () ->
-                                WriteAction.run(() -> {
-                                    VirtualFile vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(path.toFile());
-                                    if (vFile != null) {
-                                        vFile.refresh(false, false);
-                                    }
-                                }));
-                        notify(project, "File saved to: " + path, NotificationType.INFORMATION);
-                    }, ModalityState.NON_MODAL);
-                } catch (Exception e) {
-                    ApplicationManager.getApplication().invokeLater(() ->
-                            notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR), ModalityState.NON_MODAL);
-                }
-            });
-        });
+            catch (IOException e) {
+                ApplicationManager.getApplication().invokeLater(() ->
+                        notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR), ModalityState.NON_MODAL);
+            }
+        }
     }
 
     public static void saveResponseAsFile2(Project project, ResponseEntity<?> raw) {
