@@ -18,102 +18,62 @@
         all without leaving your development environment.
   ]]></description>
 
-    <change-notes><![CDATA[
-        v1.0.0 released
-
-        <br>
-        v1.0.1 released with bug fixes , 401 when in post was not working
-
-        <br>
-        v1.0.2 released with below changes :
-            Added support for json linter and format json in request and response body added
-        <br>
-        v1.0.3 released with below updates:
-            calling pool thread while invoking api to see if the localhost projects debugger working fine or not
-            for unknown errors showing 503 service unavailable with error message.
-        <br>
-        v1.0.4 released with below updates:
-            added context menu on the tabs as Close other tabs and Close all tabs and minor improvements.
-        <br>
-        v1.0.5 released with below updates:
-            added progress view on click of send and added default request headers, as of now its hardcoded will make it configurable in future releases.
-        <br>
-        v1.0.6 released with below updates:
-            fixed some minor bugs and polished some rough edges.
-        <br>
-        v1.0.7 released with below updates:
-            added support for the multipart-form data more testing is needed though 😂
-        <br>
-        v1.0.8 released with below updates:
-            added support for the search text functionality in the collection and history panel 😈
-        <br>
-        v2.0.2
-        - Added SQLite persistence layer and DAO classes.
-        - Created Postman import/export utilities for collections.
-        - Implemented environment and variable data models with management UI.
-        - Enhanced plugin with GraphQL request support.
-        - Refined environment panel layout and text box alignment.
-        - Added dynamic row management for environment variables.
-        - Introduced placeholder-enabled `PasswordInputField` and updated authorization panel layout.
-        - Bug fixes and enhancements
-        <br>
-        v2.0.3
+    <change-notes>
+        <![CDATA[
+          <h2>v3.0.0 - Major UI & Panel Management Enhancements</h2>
           <ul>
-            <li><b>Scripts Tab:</b> Added pre-request and post-request script editors for customizing request behavior using JavaScript.</li>
-            <li><b>Environment Variable Scripting:</b> Support for modifying environment variables via <code>daakia.setGlobalEnvVar</code> in scripts.</li>
-            <li><b>Authorization Enhancements:</b> Authorization headers now resolve environment variable placeholders (e.g., <code>{{token}}</code>).</li>
-            <li><b>GraalVM Migration:</b> Replaced Nashorn with GraalVM for executing modern JavaScript securely.</li>
-            <li><b>Postman Compatibility:</b> Enhanced Postman import/export to include auth headers and script events.</li>
-            <li><b>Persistence:</b> Script content is now saved with history and collection records for full reproducibility.</li>
+            <li>Double-click divider to dynamically resize panels (maximize left, reset, maximize right)</li>
+            <li>Improved panel visibility toggling and divider thresholds</li>
+            <li>Refactored request/response panel handling: hide response content when collapsed, smooth state restoration</li>
+            <li>Enhanced trash panel: restore and permanent delete actions, ancestor/parent folder restoration</li>
+            <li>Improved collection management: new DbTreeStoreService, fixed empty folder save, improved import/export</li>
+            <li>UI refinements: built-in editor for user input, adaptive layouts, async request progress bar, removed unused buttons</li>
           </ul>
-        v2.0.4
+
+          <h2>v2.0.4</h2>
           <ul>
             <li>Persistent debug mode and script log settings via DaakiaSettings</li>
             <li>About dialog now remembers Script/GraalVM checkbox state</li>
             <li>Debug tab created on EDT, shows logs instantly</li>
-            <li>Tabs for History, Collection, and Environment are now always created on the Swing thread</li>
+            <li>Tabs for History, Collection, and Environment always created on the Swing thread</li>
             <li>Improved stability and UI responsiveness with ApplicationManager.invokeLater</li>
           </ul>
 
-        <h2>v3.0.0 - Major UI & Panel Management Enhancements</h2>
-        <ul>
-            <li><b>Double-click divider</b> to dynamically resize panels:
-                <ul>
-                    <li>First double-click → Maximize left panel</li>
-                    <li>Second double-click → Reset to center</li>
-                    <li>Third double-click → Maximize right panel</li>
-                </ul>
-            </li>
-            <li>Improved <b>panel visibility toggling</b> and divider thresholds</li>
-            <li>Refactored request/response panel handling:
-                <ul>
-                    <li>Hide response content when collapsed</li>
-                    <li>Toggle request and response body visibility with smooth state restoration</li>
-                </ul>
-            </li>
-            <li>Enhanced <b>trash panel</b>:
-                <ul>
-                    <li>Restore and permanent delete actions</li>
-                    <li>Ancestor/parent folder restoration for nested items</li>
-                </ul>
-            </li>
-            <li>Improved <b>collection management</b>:
-                <ul>
-                    <li>New DbTreeStoreService for persistence</li>
-                    <li>Fixed empty folder save and import/export handling</li>
-                    <li>Corrected Postman collection import/export logic</li>
-                </ul>
-            </li>
-            <li>UI refinements:
-                <ul>
-                    <li>Intellij built in editor for user input</li>
-                    <li>Adaptive layouts for panels</li>
-                    <li>Progress bar now shows on async requests</li>
-                    <li>Removed unused hide/show button in ResponseBodyContainer</li>
-                </ul>
-            </li>
-        </ul>
-    ]]>
+          <h2>v2.0.3</h2>
+          <ul>
+            <li>Scripts Tab: Added pre-request and post-request script editors (JavaScript)</li>
+            <li>Environment Variable Scripting: Support for modifying environment variables via <code>daakia.setGlobalEnvVar</code></li>
+            <li>Authorization Enhancements: Auth headers resolve environment variable placeholders (e.g., <code>{{token}}</code>)</li>
+            <li>GraalVM Migration: Replaced Nashorn with GraalVM for JavaScript execution</li>
+            <li>Postman Compatibility: Import/export includes auth headers and script events</li>
+            <li>Persistence: Script content saved with history and collection records</li>
+          </ul>
+
+          <h2>v2.0.2</h2>
+          <ul>
+            <li>Added SQLite persistence layer and DAO classes</li>
+            <li>Created Postman import/export utilities for collections</li>
+            <li>Implemented environment and variable data models with management UI</li>
+            <li>Enhanced plugin with GraphQL request support</li>
+            <li>Refined environment panel layout and text box alignment</li>
+            <li>Added dynamic row management for environment variables</li>
+            <li>Introduced placeholder-enabled PasswordInputField and updated authorization panel layout</li>
+            <li>Bug fixes and enhancements</li>
+          </ul>
+
+          <h2>v1.0.x</h2>
+          <ul>
+            <li>v1.0.8: Search text functionality in collection and history panel</li>
+            <li>v1.0.7: Multipart-form data support</li>
+            <li>v1.0.6: Minor bug fixes and UI polish</li>
+            <li>v1.0.5: Progress view on send, default request headers</li>
+            <li>v1.0.4: Context menu on tabs (Close other/all tabs), minor improvements</li>
+            <li>v1.0.3: Pool thread for API invocation, 503 error handling</li>
+            <li>v1.0.2: JSON linter and formatter for request/response bodies</li>
+            <li>v1.0.1: Bug fix for 401 on POST</li>
+            <li>v1.0.0: Initial release</li>
+          </ul>
+        ]]>
     </change-notes>
 
     <!-- Product and plugin compatibility requirements.
@@ -129,5 +89,10 @@
                     icon="AllIcons.Javaee.WebServiceClient"
                     anchor="bottom"
                     factoryClass="com.salilvnair.intellij.plugin.daakia.MainViewFactory"/>
+        <notificationGroup
+                id="Daakia Notifications"
+                displayType="BALLOON"
+                isLogByDefault="true"
+        />
     </extensions>
 </idea-plugin>

@@ -1,14 +1,24 @@
 package com.salilvnair.intellij.plugin.daakia.ui.utils;
 
-import com.intellij.openapi.fileChooser.FileChooser;
-import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.fileChooser.*;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileWrapper;
+import com.intellij.util.ui.UIUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -53,8 +63,127 @@ public class FileUtils {
         return data;
     }
 
+    public static void saveResponseAsFile(Project project, ResponseEntity<?> raw, Component component) {
+        if (!(raw.getBody() instanceof byte[] || raw.getBody() instanceof String)) {
+            notify(project, "Unsupported response body type", NotificationType.ERROR);
+            return;
+        }
+        if (!raw.getStatusCode().is2xxSuccessful()) {
+            notify(project, "Failed to download data from the server.", NotificationType.ERROR);
+            return;
+        }
 
-    public static void saveResponseAsFile(ResponseEntity<?> responseEntity) {
+        byte[] bytes = (raw.getBody() instanceof byte[])
+                ? (byte[]) raw.getBody()
+                : ((String) raw.getBody()).getBytes(StandardCharsets.UTF_8);
+
+        String contentType = raw.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+        String defaultName = resolveDefaultFilename(raw.getHeaders(), contentType);
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setSelectedFile(new File(defaultName));
+        int res = chooser.showSaveDialog(component);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            chooser.setCurrentDirectory(new File(userHomePath()));
+            try {
+                Files.write(file.toPath(), bytes);
+                UIUtil.invokeLaterIfNeeded(() ->
+                        notify(project, "File saved to: " + file.toPath(), NotificationType.INFORMATION));
+            }
+            catch (IOException e) {
+                ApplicationManager.getApplication().invokeLater(() ->
+                        notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR), ModalityState.NON_MODAL);
+            }
+        }
+    }
+
+    public static void saveResponseAsFile2(Project project, ResponseEntity<?> raw) {
+        // Validate
+        if (!(raw.getBody() instanceof byte[] || raw.getBody() instanceof String)) {
+            notify(project, "Unsupported response body type", NotificationType.ERROR);
+            return;
+        }
+        if (!raw.getStatusCode().is2xxSuccessful()) {
+            notify(project, "Failed to download data from the server.", NotificationType.ERROR);
+            return;
+        }
+
+        // Convert body to bytes
+        byte[] bytes = (raw.getBody() instanceof byte[])
+                ? (byte[]) raw.getBody()
+                : ((String) raw.getBody()).getBytes(StandardCharsets.UTF_8);
+
+        String contentType = raw.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+        String defaultName = resolveDefaultFilename(raw.getHeaders(), contentType);
+
+        // Run chooser on EDT
+        UIUtil.invokeLaterIfNeeded(() -> {
+            FileSaverDescriptor descriptor = new FileSaverDescriptor("Save Response", "Choose where to save the file");
+            FileSaverDialog dialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project);
+
+            // Explicitly call VirtualFile overload
+            VirtualFileWrapper wrapper = dialog.save((VirtualFile) null, defaultName);
+            if (wrapper == null) {
+                notify(project, "Save operation was canceled.", NotificationType.INFORMATION);
+                return;
+            }
+
+            Path path = wrapper.getFile().toPath();
+
+            // Write file on background thread
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                try {
+                    Files.createDirectories(path.getParent());
+                    Files.write(path, bytes);
+
+                    // Refresh VFS safely
+                    ApplicationManager.getApplication().invokeLaterOnWriteThread(() -> {
+                        ApplicationManager.getApplication().runWriteAction(() -> {
+                            var vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(path.toFile());
+                            if (vFile != null) {
+                                vFile.refresh(false, false);
+                            }
+                        });
+                    }, ModalityState.nonModal());
+
+                    // Notify success
+                    UIUtil.invokeLaterIfNeeded(() ->
+                            notify(project, "File saved to: " + path, NotificationType.INFORMATION));
+                } catch (Exception e) {
+                    UIUtil.invokeLaterIfNeeded(() ->
+                            notify(project, "Error saving file: " + e.getMessage(), NotificationType.ERROR));
+                }
+            });
+        });
+    }
+
+// === helpers ===
+
+    private static String resolveDefaultFilename(HttpHeaders headers, String contentType) {
+        String cd = headers.getFirst(HttpHeaders.CONTENT_DISPOSITION);
+        if (cd != null && cd.contains("filename=")) {
+            String name = cd.substring(cd.indexOf("filename=") + 9).replaceAll("\"", "");
+            if (!name.isBlank()) return name;
+        }
+        if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equalsIgnoreCase(contentType)) {
+            return "output.xlsx";
+        }
+        if (contentType != null && contentType.startsWith("text")) {
+            return "output.txt";
+        }
+        return "output.bin";
+    }
+
+    private static void notify(Project project, String message, NotificationType type) {
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("Daakia Notifications") // must match plugin.xml id
+                .createNotification(message, type)
+                .notify(project);
+    }
+
+
+    public static void saveResponseAsFile1(ResponseEntity<?> responseEntity) {
         try {
             // Fetch the response using RestTemplate
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {

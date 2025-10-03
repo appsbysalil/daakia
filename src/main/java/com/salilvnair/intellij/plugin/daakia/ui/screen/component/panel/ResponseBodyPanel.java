@@ -48,7 +48,7 @@ public class ResponseBodyPanel extends BaseDaakiaPanel<ResponseBodyPanel> {
                     String formattedText = uiContext().downloadResponse() ? null : responseEntity.getBody() == null ? null :JsonUtils.format((String) responseEntity.getBody());
                     responseTextArea.setText(formattedText, DaakiaUtils.resolveFileTypeFromHeaders(daakiaContext().responseHeaders()));
                     if(uiContext().downloadResponse()) {
-                        FileUtils.saveResponseAsFile(responseEntity);
+                        FileUtils.saveResponseAsFile(dataContext.project(), responseEntity, this);
                     }
                 }
                 else if(daakiaEvent.daakiaContext() != null && daakiaEvent.daakiaContext().errorMessage() != null) {
