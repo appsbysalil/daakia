@@ -91,6 +91,7 @@ public class FileUtils {
             }
 
             Path path = wrapper.getFile().toPath();
+            ModalityState modalityState = ModalityState.current();
 
             ApplicationManager.getApplication().executeOnPooledThread(() -> {
                 try {
