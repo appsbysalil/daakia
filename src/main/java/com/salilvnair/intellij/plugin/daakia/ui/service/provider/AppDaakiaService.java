@@ -15,6 +15,7 @@ import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.DaakiaAutoSuggestField;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.IconButton;
 import com.salilvnair.intellij.plugin.daakia.ui.screen.component.custom.TextInputField;
+import com.salilvnair.intellij.plugin.daakia.ui.screen.component.panel.HistoryPanel;
 import com.salilvnair.intellij.plugin.daakia.ui.service.base.BaseDaakiaService;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DaakiaContext;
 import com.salilvnair.intellij.plugin.daakia.ui.service.context.DataContext;
@@ -171,7 +172,7 @@ public class AppDaakiaService extends BaseDaakiaService {
     }
 
     private void onSaveRequest(DataContext dataContext, Object... objects) {
-        if(!TreeUtils.selectedNodeIsRootNode(dataContext.sideNavContext().collectionStoreTree())) {
+        if(dataContext.sideNavContext().collectionStoreTree() != null && !TreeUtils.selectedNodeIsRootNode(dataContext.sideNavContext().collectionStoreTree())) {
             System.out.println("lets add this request to the Tree");
             String displayName = (String) JOptionPane
                     .showInputDialog(
@@ -351,13 +352,13 @@ public class AppDaakiaService extends BaseDaakiaService {
                 historyData = new HashMap<>();
             }
             Map<String, List<DaakiaHistory>> filteredHistoryData = new HashMap<>();
-            historyData.forEach((yr, hDataList) -> {
+            historyData.forEach((dateString, hDataList) -> {
                 List<DaakiaHistory> filteredList = hDataList.stream()
                         .filter(hData -> (hData.getDisplayName() != null && hData.getDisplayName().contains(searchText))
                                 || (hData.getUrl() != null && hData.getUrl().contains(searchText)))
                         .toList();
                 if (!filteredList.isEmpty()) {
-                    filteredHistoryData.put(yr, filteredList);
+                    filteredHistoryData.put(dateString, filteredList);
                 }
             });
             DefaultMutableTreeNode rootNode;
@@ -414,19 +415,40 @@ public class AppDaakiaService extends BaseDaakiaService {
     private DefaultMutableTreeNode generateRootNodeFromHistoryData(Map<String, List<DaakiaHistory>> historyData) {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode();
         List<String> historyYears = initHistoryYears(historyData);
+        Map<String, List<String>> historyYearMonths = initHistoryYearMonths(historyData);
         Map<String, DefaultMutableTreeNode> yearNodes = new LinkedHashMap<>();
+        Map<String, DefaultMutableTreeNode> monthYearNodes = new LinkedHashMap<>();
         for (String historyYear : historyYears) {
             DefaultMutableTreeNode yearNode = new DefaultMutableTreeNode(historyYear);
             yearNodes.put(historyYear, yearNode);
         }
+        for (String historyYear : historyYearMonths.keySet()) {
+            List<String> months = historyYearMonths.get(historyYear);
+            if(months == null) {
+                continue;
+            }
+            for (String month : months) {
+                if(monthYearNodes.containsKey(historyYear + "-" + month)) {
+                    continue;
+                }
+                if(!yearNodes.containsKey(historyYear)) {
+                    DefaultMutableTreeNode yearNode = new DefaultMutableTreeNode(historyYear);
+                    yearNodes.put(historyYear, yearNode);
+                }
+                DefaultMutableTreeNode yearNode = yearNodes.get(historyYear);
+                DefaultMutableTreeNode monthNode = new DefaultMutableTreeNode(new HistoryPanel.MonthItem(month));
+                yearNode.add(monthNode);
+                monthYearNodes.put(historyYear + "-" + month, monthNode);
+            }
+        }
         for (Map.Entry<String, List<DaakiaHistory>> entry : historyData.entrySet()) {
             String date = entry.getKey();
-            DefaultMutableTreeNode yearNode = yearNodes.get(DateUtils.yearFromDateString(date));
+            DefaultMutableTreeNode monthNode = monthYearNodes.get(DateUtils.yearMonthFromDateString(date));
             DefaultMutableTreeNode dateNode = new DefaultMutableTreeNode(date);
             for (DaakiaHistory rowEntry : entry.getValue()) {
                 dateNode.add(new DefaultMutableTreeNode(rowEntry));
             }
-            yearNode.add(dateNode);
+            monthNode.add(dateNode);
         }
 
         for (String year : yearNodes.keySet()) {
@@ -440,6 +462,13 @@ public class AppDaakiaService extends BaseDaakiaService {
             return new ArrayList<>();
         }
         return historyData.keySet().stream().map(DateUtils::yearFromDateString).collect(Collectors.toList());
+    }
+
+    private Map<String, List<String>> initHistoryYearMonths(Map<String, List<DaakiaHistory>> historyData) {
+        if(historyData.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+        return historyData.keySet().stream().collect(Collectors.groupingBy(DateUtils::yearFromDateString, LinkedHashMap::new, Collectors.mapping(DateUtils::monthFromDateString, Collectors.toList())));
     }
 
     private <T> T generateStoreData(DataContext dataContext, Class<T> clazz) {
