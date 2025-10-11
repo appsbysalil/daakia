@@ -1,11 +1,13 @@
 package com.salilvnair.intellij.plugin.daakia.persistence;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaBaseStoreData;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.DaakiaHistory;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -76,7 +78,6 @@ public class HistoryDao {
         data.values().forEach(flat::addAll);
         try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("DELETE FROM history_records WHERE active='Y'");
             String insert = "INSERT INTO history_records(display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             try (PreparedStatement ps = conn.prepareStatement(insert)) {
                 for (DaakiaHistory h : flat) {
@@ -156,7 +157,7 @@ public class HistoryDao {
      */
     public List<String> loadMonths(String year) {
         List<String> months = new ArrayList<>();
-        String sql = "SELECT DISTINCT substr(created_date,6,2) AS mn FROM history_records WHERE active='Y' AND substr(created_date,1,4)=? ORDER BY mn DESC";
+        String sql = "SELECT DISTINCT substr(created_date,6,2) AS mn FROM history_records WHERE active='Y' AND substr(created_date,1,4)=?  ORDER BY mn DESC";
         try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, year);
@@ -169,16 +170,32 @@ public class HistoryDao {
         return months;
     }
 
-    /**
-     * Load history records for a given year and month.
-     */
-    public List<DaakiaHistory> loadByMonth(String year, String month) {
-        List<DaakiaHistory> list = new ArrayList<>();
-        String sql = "SELECT id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid FROM history_records WHERE active='Y' AND substr(created_date,1,4)=? AND substr(created_date,6,2)=? ORDER BY created_date DESC";
+
+    public List<String> loadMonthDates(String year, String month) {
+        List<String> months = new ArrayList<>();
+        String sql = "SELECT DISTINCT created_date AS mn FROM history_records WHERE active='Y' and substr(created_date,1,4)=? and substr(created_date,6,2)=? ORDER BY mn DESC";
         try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, year);
             ps.setString(2, month);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    months.add(rs.getString("mn"));
+                }
+            }
+        } catch (SQLException ignore) {}
+        return months;
+    }
+
+    /**
+     * Load history records for a given year and month.
+     */
+    public List<DaakiaHistory> loadByDate(String dateString) {
+        List<DaakiaHistory> list = new ArrayList<>();
+        String sql = "SELECT id,display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid FROM history_records WHERE active='Y' AND created_date=? ORDER BY created_date DESC";
+        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dateString);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     DaakiaHistory h = new DaakiaHistory();
@@ -223,9 +240,19 @@ public class HistoryDao {
         });
     }
 
-    public void loadByMonthAsync(String year, String month, Consumer<List<DaakiaHistory>> callback) {
+    public void loadDatesAsync(String year, String month, Consumer<List<String>> callback) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            List<DaakiaHistory> data = loadByMonth(year, month);
+            List<String> data = loadMonthDates(year, month);
+            if (callback != null) {
+                ApplicationManager.getApplication().invokeLater(() -> callback.accept(data));
+            }
+        });
+    }
+
+
+    public void loadByDateAsync(String dateString, Consumer<List<DaakiaHistory>> callback) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<DaakiaHistory> data = loadByDate(dateString);
             if (callback != null) {
                 ApplicationManager.getApplication().invokeLater(() -> callback.accept(data));
             }

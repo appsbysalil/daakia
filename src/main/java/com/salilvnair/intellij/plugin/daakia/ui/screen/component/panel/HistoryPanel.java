@@ -87,13 +87,17 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
 
     public void loadData() {
         if (loaded) return;
+        forceLoadData();
+        loaded = true;
+    }
+
+    public void forceLoadData() {
         daakiaService(DaakiaType.APP).execute(AppDaakiaType.INIT_HISTORY, dataContext);
         DefaultMutableTreeNode root = dataContext.sideNavContext().historyRootNode();
         DefaultTreeModel model = new DefaultTreeModel(root);
         historyTree.setModel(model);
         sideNavContext().setHistoryTree(historyTree);
         sideNavContext().setHistoryTreeModel(model);
-        loaded = true;
     }
 
     private void setTreeBusy(boolean busy) {
@@ -147,7 +151,28 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
                         placeholder.setUserObject("Loading...");
                         ((DefaultTreeModel) historyTree.getModel()).nodeChanged(placeholder);
                         setTreeBusy(true);
-                        new HistoryDao().loadByMonthAsync(year, monthItem.month, list -> {
+                        new HistoryDao().loadDatesAsync(year, monthItem.month, list -> {
+                            node.removeAllChildren();
+                            if (list != null) {
+                                for (String dateString : list) {
+                                    DefaultMutableTreeNode mn = new DefaultMutableTreeNode(new DateItem(dateString));
+                                    mn.add(new DefaultMutableTreeNode("Loading"));
+                                    node.add(mn);
+                                }
+                            }
+                            DefaultTreeModel model = (DefaultTreeModel) historyTree.getModel();
+                            model.reload(node);
+                            SwingUtilities.invokeLater(() -> historyTree.expandPath(new TreePath(node.getPath())));
+                            setTreeBusy(false);
+                        });
+                    }
+                } else if (node.getLevel() == 3 && obj instanceof DateItem dateItem) {
+                    if (node.getChildCount() == 1 && isPlaceholder(node.getFirstChild())) {
+                        DefaultMutableTreeNode placeholder = (DefaultMutableTreeNode) node.getFirstChild();
+                        placeholder.setUserObject("Loading...");
+                        ((DefaultTreeModel) historyTree.getModel()).nodeChanged(placeholder);
+                        setTreeBusy(true);
+                        new HistoryDao().loadByDateAsync(dateItem.dateString, list -> {
                             node.removeAllChildren();
                             if (list != null) {
                                 for (DaakiaHistory h : list) {
@@ -229,9 +254,9 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
         return false;
     }
 
-    private static class MonthItem {
+    public static class MonthItem {
         final String month;
-        MonthItem(String month) { this.month = month; }
+        public MonthItem(String month) { this.month = month; }
         @Override
         public String toString() {
             try {
@@ -240,6 +265,16 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
             } catch (Exception e) {
                 return month;
             }
+        }
+    }
+
+    public static class DateItem {
+        final String dateString;
+        DateItem(String dateString) { this.dateString = dateString; }
+
+        @Override
+        public String toString() {
+            return dateString;
         }
     }
 }
