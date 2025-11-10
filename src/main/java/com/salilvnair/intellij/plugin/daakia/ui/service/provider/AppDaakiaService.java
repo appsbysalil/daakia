@@ -559,28 +559,64 @@ public class AppDaakiaService extends BaseDaakiaService {
         DefaultTreeModel treeModel = (DefaultTreeModel) historyTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeModel.getRoot();
 
-        DefaultMutableTreeNode yearNode = TreeUtils.findValueNode(root, DateUtils.yearFromDateString(date));
-        if (yearNode != null) {
-            DefaultMutableTreeNode dateNode = TreeUtils.findValueNode(yearNode, date);
-            if (dateNode != null) {
-                dateNode.add(new DefaultMutableTreeNode(daakiaHistory));
-                treeModel.nodesWereInserted(dateNode, new int[]{dateNode.getChildCount() - 1});
-            }
-            else {
-                dateNode = new DefaultMutableTreeNode(date);
-                dateNode.add(new DefaultMutableTreeNode(daakiaHistory));
-                yearNode.add(dateNode);
-                treeModel.nodesWereInserted(yearNode, new int[]{yearNode.getIndex(dateNode)});
-            }
-        }
-        else {
-            yearNode = new DefaultMutableTreeNode(DateUtils.yearFromDateString(date));
-            DefaultMutableTreeNode dateNode = new DefaultMutableTreeNode(date);
-            dateNode.add(new DefaultMutableTreeNode(daakiaHistory));
-            yearNode.add(dateNode);
+        String year = DateUtils.yearFromDateString(date);
+        String month = DateUtils.monthFromDateString(date);
+
+        DefaultMutableTreeNode yearNode = TreeUtils.findValueNode(root, year);
+        if (yearNode == null) {
+            yearNode = new DefaultMutableTreeNode(year);
             root.add(yearNode);
             treeModel.nodesWereInserted(root, new int[]{root.getIndex(yearNode)});
         }
+
+        removePlaceholderChild(yearNode, treeModel);
+
+        DefaultMutableTreeNode monthNode = findMonthNode(yearNode, month);
+        if (monthNode == null) {
+            monthNode = new DefaultMutableTreeNode(new HistoryPanel.MonthItem(month));
+            yearNode.add(monthNode);
+            treeModel.nodesWereInserted(yearNode, new int[]{yearNode.getIndex(monthNode)});
+        }
+
+        removePlaceholderChild(monthNode, treeModel);
+
+        DefaultMutableTreeNode dateNode = TreeUtils.findValueNode(monthNode, date);
+        if (dateNode == null) {
+            dateNode = new DefaultMutableTreeNode(new HistoryPanel.DateItem(date));
+            monthNode.add(dateNode);
+            treeModel.nodesWereInserted(monthNode, new int[]{monthNode.getIndex(dateNode)});
+        }
+
+        removePlaceholderChild(dateNode, treeModel);
+
+        DefaultMutableTreeNode historyNode = new DefaultMutableTreeNode(daakiaHistory);
+        dateNode.add(historyNode);
+        treeModel.nodesWereInserted(dateNode, new int[]{dateNode.getIndex(historyNode)});
+    }
+
+    private void removePlaceholderChild(DefaultMutableTreeNode node, DefaultTreeModel treeModel) {
+        if (node == null || node.getChildCount() != 1) {
+            return;
+        }
+        DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) node.getFirstChild();
+        Object userObject = firstChild.getUserObject();
+        if (userObject instanceof String text && text.startsWith("Loading")) {
+            int index = node.getIndex(firstChild);
+            node.remove(firstChild);
+            treeModel.nodesWereRemoved(node, new int[]{index}, new Object[]{firstChild});
+        }
+    }
+
+    private DefaultMutableTreeNode findMonthNode(DefaultMutableTreeNode yearNode, String month) {
+        Enumeration<?> children = yearNode.children();
+        while (children.hasMoreElements()) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+            Object userObject = child.getUserObject();
+            if (userObject instanceof HistoryPanel.MonthItem monthItem && monthItem.month().equals(month)) {
+                return child;
+            }
+        }
+        return null;
     }
 
     private void createHeader(DataContext dataContext, String headerKey, String headerValue) {
