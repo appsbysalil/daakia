@@ -151,7 +151,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
                         placeholder.setUserObject("Loading...");
                         ((DefaultTreeModel) historyTree.getModel()).nodeChanged(placeholder);
                         setTreeBusy(true);
-                        new HistoryDao().loadDatesAsync(year, monthItem.month, list -> {
+                        new HistoryDao().loadDatesAsync(year, monthItem.month(), list -> {
                             node.removeAllChildren();
                             if (list != null) {
                                 for (String dateString : list) {
@@ -172,7 +172,7 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
                         placeholder.setUserObject("Loading...");
                         ((DefaultTreeModel) historyTree.getModel()).nodeChanged(placeholder);
                         setTreeBusy(true);
-                        new HistoryDao().loadByDateAsync(dateItem.dateString, list -> {
+                        new HistoryDao().loadByDateAsync(dateItem.dateString(), list -> {
                             node.removeAllChildren();
                             if (list != null) {
                                 for (DaakiaHistory h : list) {
@@ -255,8 +255,12 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     }
 
     public static class MonthItem {
-        final String month;
+        private final String month;
         public MonthItem(String month) { this.month = month; }
+
+        public String month() {
+            return month;
+        }
         @Override
         public String toString() {
             try {
@@ -269,8 +273,12 @@ public class HistoryPanel extends BaseDaakiaPanel<HistoryPanel> {
     }
 
     public static class DateItem {
-        final String dateString;
-        DateItem(String dateString) { this.dateString = dateString; }
+        private final String dateString;
+        public DateItem(String dateString) { this.dateString = dateString; }
+
+        public String dateString() {
+            return dateString;
+        }
 
         @Override
         public String toString() {
