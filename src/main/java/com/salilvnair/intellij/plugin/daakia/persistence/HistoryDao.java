@@ -76,9 +76,39 @@ public class HistoryDao {
     public void saveHistory(Map<String, List<DaakiaHistory>> data) {
         List<DaakiaHistory> flat = new ArrayList<>();
         data.values().forEach(flat::addAll);
-        try (Connection conn = DaakiaDatabase.getInstance().getHistoryConnection();
-             Statement stmt = conn.createStatement()) {
-            String insert = "INSERT INTO history_records(display_name,request_type,url,headers,response_headers,request_body,response_body,pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,auth_info,uuid,active) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        if (flat.isEmpty()) {
+            return;
+        }
+
+        Connection conn = null;
+        try {
+            conn = DaakiaDatabase.getInstance().getHistoryConnection();
+            conn.setAutoCommit(false);
+
+            String insert = """
+                INSERT INTO history_records(
+                    display_name,request_type,url,headers,response_headers,request_body,response_body,
+                    pre_request_script,post_request_script,created_date,size_text,time_taken,status_code,
+                    auth_info,uuid,active
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(uuid) DO UPDATE SET
+                    display_name=excluded.display_name,
+                    request_type=excluded.request_type,
+                    url=excluded.url,
+                    headers=excluded.headers,
+                    response_headers=excluded.response_headers,
+                    request_body=excluded.request_body,
+                    response_body=excluded.response_body,
+                    pre_request_script=excluded.pre_request_script,
+                    post_request_script=excluded.post_request_script,
+                    created_date=excluded.created_date,
+                    size_text=excluded.size_text,
+                    time_taken=excluded.time_taken,
+                    status_code=excluded.status_code,
+                    auth_info=excluded.auth_info,
+                    active=excluded.active
+            """;
+
             try (PreparedStatement ps = conn.prepareStatement(insert)) {
                 for (DaakiaHistory h : flat) {
                     ps.setString(1, h.getDisplayName());
@@ -96,11 +126,30 @@ public class HistoryDao {
                     ps.setObject(13, h.getStatusCode());
                     ps.setString(14, h.getAuthInfo());
                     ps.setString(15, h.getUuid());
-                    ps.setString(16, "Y");
-                    ps.executeUpdate();
+                    ps.setString(16, h.isActive() ? "Y" : "N");
+                    ps.addBatch();
                 }
+                ps.executeBatch();
             }
-        } catch (SQLException ignore) {}
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ignore) {}
+            }
+            System.err.println("Error saving history: " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException ignore) {}
+                try {
+                    conn.close();
+                } catch (SQLException ignore) {}
+            }
+        }
     }
 
     public void markActive(int id, boolean active) {

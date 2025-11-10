@@ -20,59 +20,59 @@
 
     <change-notes>
         <![CDATA[
-          <h2>v3.0.0 - Major UI & Panel Management Enhancements</h2>
-          <ul>
-            <li>Double-click divider to dynamically resize panels (maximize left, reset, maximize right)</li>
-            <li>Improved panel visibility toggling and divider thresholds</li>
-            <li>Refactored request/response panel handling: hide response content when collapsed, smooth state restoration</li>
-            <li>Enhanced trash panel: restore and permanent delete actions, ancestor/parent folder restoration</li>
-            <li>Improved collection management: new DbTreeStoreService, fixed empty folder save, improved import/export</li>
-            <li>UI refinements: built-in editor for user input, adaptive layouts, async request progress bar, removed unused buttons</li>
-          </ul>
 
-          <h2>v2.0.4</h2>
-          <ul>
-            <li>Persistent debug mode and script log settings via DaakiaSettings</li>
-            <li>About dialog now remembers Script/GraalVM checkbox state</li>
-            <li>Debug tab created on EDT, shows logs instantly</li>
-            <li>Tabs for History, Collection, and Environment always created on the Swing thread</li>
-            <li>Improved stability and UI responsiveness with ApplicationManager.invokeLater</li>
-          </ul>
+        v3.0.9 — SideNav history bug fixes
+        —Fixed issue with a history panel not updating correctly in sidenav mode
+        —Improved UI responsiveness when toggling sidenav mode
 
-          <h2>v2.0.3</h2>
-          <ul>
-            <li>Scripts Tab: Added pre-request and post-request script editors (JavaScript)</li>
-            <li>Environment Variable Scripting: Support for modifying environment variables via <code>daakia.setGlobalEnvVar</code></li>
-            <li>Authorization Enhancements: Auth headers resolve environment variable placeholders (e.g., <code>{{token}}</code>)</li>
-            <li>GraalVM Migration: Replaced Nashorn with GraalVM for JavaScript execution</li>
-            <li>Postman Compatibility: Import/export includes auth headers and script events</li>
-            <li>Persistence: Script content saved with history and collection records</li>
-          </ul>
+        <br>
+          v3.0.0 - Major UI & Panel Management Enhancements
+            — Double-click divider to dynamically resize panels (maximize left, reset, maximize right)
+            — Improved panel visibility toggling and divider thresholds
+            — Refactored request/response panel handling: hide response content when collapsed, smooth state restoration
+            — Enhanced trash panel: restore and permanent delete actions, ancestor/parent folder restoration
+            — Improved collection management: new DbTreeStoreService, fixed empty folder save, improved import/export
+            — UI refinements: built—in editor for user input, adaptive layouts, async request progress bar, removed unused buttons
+          <br>
+          v2.0.4
+            — Persistent debug mode and script log settings via DaakiaSettings
+            — About dialog now remembers Script/GraalVM checkbox state
+            — Debug tab created on EDT, shows logs instantly
+            — Tabs for History, Collection, and Environment always created on the Swing thread
+            — Improved stability and UI responsiveness with ApplicationManager.invokeLater
+          <br>
 
-          <h2>v2.0.2</h2>
-          <ul>
-            <li>Added SQLite persistence layer and DAO classes</li>
-            <li>Created Postman import/export utilities for collections</li>
-            <li>Implemented environment and variable data models with management UI</li>
-            <li>Enhanced plugin with GraphQL request support</li>
-            <li>Refined environment panel layout and text box alignment</li>
-            <li>Added dynamic row management for environment variables</li>
-            <li>Introduced placeholder-enabled PasswordInputField and updated authorization panel layout</li>
-            <li>Bug fixes and enhancements</li>
-          </ul>
+          v2.0.3
+            — Scripts Tab: Added pre—request and post—request script editors (JavaScript)
+            — Environment Variable Scripting: Support for modifying environment variables via <code>daakia.setGlobalEnvVar</code>
+            — Authorization Enhancements: Auth headers resolve environment variable placeholders (e.g., <code>{{token}}</code>)
+            — GraalVM Migration: Replaced Nashorn with GraalVM for JavaScript execution
+            — Postman Compatibility: Import/export includes auth headers and script events
+            — Persistence: Script content saved with history and collection records
+          <br>
 
-          <h2>v1.0.x</h2>
-          <ul>
-            <li>v1.0.8: Search text functionality in collection and history panel</li>
-            <li>v1.0.7: Multipart-form data support</li>
-            <li>v1.0.6: Minor bug fixes and UI polish</li>
-            <li>v1.0.5: Progress view on send, default request headers</li>
-            <li>v1.0.4: Context menu on tabs (Close other/all tabs), minor improvements</li>
-            <li>v1.0.3: Pool thread for API invocation, 503 error handling</li>
-            <li>v1.0.2: JSON linter and formatter for request/response bodies</li>
-            <li>v1.0.1: Bug fix for 401 on POST</li>
-            <li>v1.0.0: Initial release</li>
-          </ul>
+          v2.0.2
+            — Added SQLite persistence layer and DAO classes
+            — Created Postman import/export utilities for collections
+            — Implemented environment and variable data models with management UI
+            — Enhanced plugin with GraphQL request support
+            — Refined environment panel layout and text box alignment
+            — Added dynamic row management for environment variables
+            — Introduced placeholder—enabled PasswordInputField and updated authorization panel layout
+            — Bug fixes and enhancements
+         <br>
+          v1.0.x
+          
+            — v1.0.8: Search text functionality in collection and history panel
+            — v1.0.7: Multipart—form data support
+            — v1.0.6: Minor bug fixes and UI polish
+            — v1.0.5: Progress view on send, default request headers
+            — v1.0.4: Context menu on tabs (Close other/all tabs), minor improvements
+            — v1.0.3: Pool thread for API invocation, 503 error handling
+            — v1.0.2: JSON linter and formatter for request/response bodies
+            — v1.0.1: Bug fix for 401 on POST
+            — v1.0.0: Initial release
+          
         ]]>
     </change-notes>
 
