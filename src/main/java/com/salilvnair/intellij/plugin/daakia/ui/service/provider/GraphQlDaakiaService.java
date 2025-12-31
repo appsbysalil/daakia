@@ -1,6 +1,7 @@
 package com.salilvnair.intellij.plugin.daakia.ui.service.provider;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.salilvnair.intellij.plugin.daakia.script.main.DaakiaScriptExecutor;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.ResponseMetadata;
 import com.salilvnair.intellij.plugin.daakia.ui.core.model.AuthInfo;
 import com.salilvnair.intellij.plugin.daakia.ui.core.rest.exception.RestResponseErrorHandler;
@@ -12,7 +13,6 @@ import com.salilvnair.intellij.plugin.daakia.ui.service.type.DaakiaTypeBase;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.GraphQlDaakiaType;
 import com.salilvnair.intellij.plugin.daakia.ui.service.type.AuthorizationType;
 import com.salilvnair.intellij.plugin.daakia.ui.utils.PostmanEnvironmentUtils;
-import com.salilvnair.intellij.plugin.daakia.ui.utils.DaakiaScriptExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.*;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
@@ -162,12 +162,16 @@ public class GraphQlDaakiaService extends BaseDaakiaService {
     private void executePreRequestScript(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
         String script = dataContext.uiContext().preRequestScriptArea() != null ? dataContext.uiContext().preRequestScriptArea().getText() : null;
-        DaakiaScriptExecutor.execute(script, env);
+        try (DaakiaScriptExecutor executor = DaakiaScriptExecutor.init(dataContext)) {
+            executor.executeScript(script);
+        }
     }
 
     private void executePostRequestScript(DataContext dataContext) {
         Environment env = dataContext.globalContext().selectedEnvironment();
         String script = dataContext.uiContext().postRequestScriptArea() != null ? dataContext.uiContext().postRequestScriptArea().getText() : null;
-        DaakiaScriptExecutor.execute(script, env);
+        try (DaakiaScriptExecutor executor = DaakiaScriptExecutor.init(dataContext)) {
+            executor.executeScript(script);
+        }
     }
 }

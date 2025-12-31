@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
-    id("org.jetbrains.intellij.platform") version "2.6.0"
+    id("org.jetbrains.intellij.platform") version "2.10.4"
 }
 
 sourceSets {
@@ -13,7 +13,7 @@ sourceSets {
 }
 
 group = "com.salilvnair.jb.plugin"
-version = "3.0.9"
+version = "4.0.0"
 
 repositories {
     mavenCentral()
@@ -28,21 +28,17 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        create("IC", "2025.1.1")
-        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
-
+        intellijIdea("2025.3")
         // Add necessary plugin dependencies for compilation here, example:
-        // bundledPlugin("com.intellij.java")
+        bundledPlugin("com.intellij.java")
         bundledPlugin("com.intellij.modules.json")
     }
     implementation("org.springframework:spring-web:6.2.8")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1") {
         exclude("org.slf4j", "slf4j-api")
     }
-    implementation("com.fifesoft:rsyntaxtextarea:3.4.0")
     implementation("org.json:json:20240303")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
-    implementation("org.openjdk.nashorn:nashorn-core:15.4")
     implementation("org.graalvm.sdk:graal-sdk:24.2.2")
     implementation("org.graalvm.js:js:24.2.2")
     compileOnly("org.projectlombok:lombok:0.11.0")

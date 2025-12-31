@@ -140,7 +140,7 @@ public class DaakiaUtils {
     public static void showAboutDaakia(Component component) {
         String message = """
                 <html>
-                <font size="5"><b>Daakia 2.0.2 (Build DK-2.0.2)</b></font><br><br>
+                <font size="5"><b>Daakia 4.0.0 (Build DK-4.0.0)</b></font><br><br>
                 Website: <a href="www.salilvnair.com">www.salilvnair.com</a><br>
                 Support: <a href="mailto:support@salilvnair.com">support@salilvnair.com</a><br>
                 Powered by open source software<br>

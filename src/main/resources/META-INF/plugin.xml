@@ -21,6 +21,8 @@
     <change-notes>
         <![CDATA[
 
+        v4.0.0 - Support for Intellij Unified Distribution Added
+
         v3.0.9 — SideNav history bug fixes
         —Fixed issue with a history panel not updating correctly in sidenav mode
         —Improved UI responsiveness when toggling sidenav mode
